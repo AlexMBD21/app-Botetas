@@ -11,6 +11,8 @@ const pricePerTicket = 2000;
 const timeoutMs = 60 * 60 * 1000; // 1 hora
 const numberStatus = {}; // Estado por número
 
+
+
 // Crear botón del número
 function createButton(number) {
   const btn = document.createElement('button');
@@ -109,9 +111,18 @@ form.addEventListener('submit', (e) => {
     expiraEn,
     estado: 'pending'
   };
-  guardarRegistroLocal(registro);
+ 
+  guardarRegistroFirebase(registro);
+// Al cargar: leer registros de Firebase y renderizarlos
+window.addEventListener('DOMContentLoaded', () => {
+  obtenerRegistrosFirebase(renderRegistro);
+  // O si quieres en tiempo real:
+  // escucharRegistrosRealtime(registros => {
+  //   registrosList.innerHTML = '';
+  //   registros.forEach(renderRegistro);
+  // });
+});
 
-  renderRegistro(registro);
 
   // Marcar números como pendientes
   numbers.forEach(num => {
@@ -139,63 +150,86 @@ function renderRegistro(registro) {
     <span>💰 Total: $${numbers.length * pricePerTicket}</span>
   `;
 
-  const confirmarBtn = document.createElement('button');
-  confirmarBtn.className = 'btn-verificar';
-  confirmarBtn.textContent = 'Confirmar Pago';
-
   let temporizadorControl = null;
 
-  confirmarBtn.addEventListener('click', () => {
-    numbers.forEach(num => {
-      const btn = document.querySelector(`button[data-number='${num}']`);
-      if (btn) btn.className = 'number-btn unavailable';
-      numberStatus[num] = 'confirmed';
-    });
+  if (registro.estado === 'confirmed') {
+    // Mostrar chulito verde si está confirmado
+    const checkIcon = document.createElement('span');
+    checkIcon.innerHTML = '✅ <span style="color:green;font-weight:bold;">Pago confirmado</span>';
+    checkIcon.style.display = 'inline-block';
+    checkIcon.style.margin = '8px 0';
+    item.appendChild(checkIcon);
+  } else {
+    // Mostrar botón para confirmar pago si no está confirmado
+    const confirmarBtn = document.createElement('button');
+    confirmarBtn.className = 'btn-verificar';
+    confirmarBtn.textContent = 'Confirmar Pago';
 
-    confirmarBtn.remove();
-    if (temporizadorControl) {
-      clearInterval(temporizadorControl.interval);
-      temporizadorControl.temporizador.textContent = '✅ Pago confirmado';
-    }
-
-    const eliminarBtn = document.createElement('button');
-    eliminarBtn.textContent = '🗑️ Eliminar Registro';
-    eliminarBtn.className = 'btn-verificar';
-    eliminarBtn.style.backgroundColor = '#dc3545';
-    eliminarBtn.style.color = 'white';
-
-    eliminarBtn.addEventListener('click', () => {
-      const confirmar = confirm("¿Estás seguro de eliminar este registro? Esta acción liberará los números.");
-      if (!confirmar) return;
-
+    confirmarBtn.addEventListener('click', () => {
       numbers.forEach(num => {
-        numberStatus[num] = 'available';
         const btn = document.querySelector(`button[data-number='${num}']`);
-        if (btn) btn.className = 'number-btn available';
+        if (btn) btn.className = 'number-btn unavailable';
+        numberStatus[num] = 'confirmed';
       });
 
-      registrosList.removeChild(item);
-      eliminarRegistroLocal(timestamp);
-    });
-
-    item.appendChild(eliminarBtn);
-  });
-
-  item.appendChild(confirmarBtn);
-
-  temporizadorControl = crearTemporizadorVisual(expiraEn, () => {
-    let expirado = false;
-    numbers.forEach(num => {
-      if (numberStatus[num] === 'pending') {
-        numberStatus[num] = 'available';
-        const btn = document.querySelector(`button[data-number='${num}']`);
-        if (btn) btn.className = 'number-btn available';
-        expirado = true;
+      // Actualiza el estado del registro en Firebase a 'confirmed'
+      if (registro.id) {
+        db.ref('registros/' + registro.id).update({ estado: 'confirmed' });
       }
+
+      confirmarBtn.remove();
+      if (temporizadorControl) {
+        clearInterval(temporizadorControl.interval);
+        temporizadorControl.temporizador.textContent = '✅ Pago confirmado';
+      }
+
+      const eliminarBtn = document.createElement('button');
+      eliminarBtn.textContent = '🗑️ Eliminar Registro';
+      eliminarBtn.className = 'btn-verificar';
+      eliminarBtn.style.backgroundColor = '#dc3545';
+      eliminarBtn.style.color = 'white';
+
+      eliminarBtn.addEventListener('click', () => {
+        const confirmar = confirm("¿Estás seguro de eliminar este registro? Esta acción liberará los números.");
+        if (!confirmar) return;
+
+        numbers.forEach(num => {
+          numberStatus[num] = 'available';
+          const btn = document.querySelector(`button[data-number='${num}']`);
+          if (btn) btn.className = 'number-btn available';
+        });
+
+        registrosList.removeChild(item);
+        // Elimina el registro de Firebase al eliminar manualmente
+        if (registro.id) {
+            eliminarRegistroFirebase(registro.id);
+        }
+      });
+
+      item.appendChild(eliminarBtn);
     });
-    if (expirado) registrosList.removeChild(item);
-    eliminarRegistroLocal(timestamp);
-  }, item);
+
+    item.appendChild(confirmarBtn);
+  }
+
+  if (registro.estado !== 'confirmed') {
+    temporizadorControl = crearTemporizadorVisual(expiraEn, () => {
+      let expirado = false;
+      numbers.forEach(num => {
+        if (numberStatus[num] === 'pending') {
+          numberStatus[num] = 'available';
+          const btn = document.querySelector(`button[data-number='${num}']`);
+          if (btn) btn.className = 'number-btn available';
+          expirado = true;
+        }
+      });
+      if (expirado) registrosList.removeChild(item);
+      // Elimina el registro de Firebase si expiró
+      if (registro.id) {
+          eliminarRegistroFirebase(registro.id);
+      }
+    }, item);
+  }
 
   registrosList.appendChild(item);
 }
@@ -228,6 +262,31 @@ clearSearchBtn.addEventListener('click', () => {
 
 // Al cargar: leer registros de localStorage y renderizarlos
 window.addEventListener('DOMContentLoaded', () => {
-  const registros = obtenerRegistrosLocal();
-  registros.forEach(renderRegistro);
+  const loadingSpinner = document.getElementById('loadingSpinner');
+  if (loadingSpinner) loadingSpinner.style.display = 'block';
+
+  escucharRegistrosRealtime(registros => {
+    registrosList.innerHTML = '';
+    // Primero, liberar todos los números
+    Object.keys(numberStatus).forEach(num => {
+      numberStatus[num] = 'available';
+      const btn = document.querySelector(`button[data-number='${num}']`);
+      if (btn) btn.className = 'number-btn available';
+    });
+
+    // Marcar ocupados y renderizar registros
+    registros.forEach(registro => {
+      if (Array.isArray(registro.numbers)) {
+        registro.numbers.forEach(num => {
+          numberStatus[num] = registro.estado === 'confirmed' ? 'confirmed' : 'pending';
+          const btn = document.querySelector(`button[data-number='${num}']`);
+          if (btn) {
+            btn.className = registro.estado === 'confirmed' ? 'number-btn unavailable' : 'number-btn selected';
+          }
+        });
+      }
+      renderRegistro(registro);
+    });
+    if (loadingSpinner) loadingSpinner.style.display = 'none';
+  });
 });
