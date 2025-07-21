@@ -109,9 +109,20 @@ form.addEventListener('submit', (e) => {
     expiraEn,
     estado: 'pending'
   };
-  guardarRegistroLocal(registro);
+ 
+  guardarRegistroFirebase(registro);
 
   renderRegistro(registro);
+// Al cargar: leer registros de Firebase y renderizarlos
+window.addEventListener('DOMContentLoaded', () => {
+  obtenerRegistrosFirebase(renderRegistro);
+  // O si quieres en tiempo real:
+  // escucharRegistrosRealtime(registros => {
+  //   registrosList.innerHTML = '';
+  //   registros.forEach(renderRegistro);
+  // });
+});
+
 
   // Marcar números como pendientes
   numbers.forEach(num => {
@@ -143,7 +154,7 @@ function renderRegistro(registro) {
   confirmarBtn.className = 'btn-verificar';
   confirmarBtn.textContent = 'Confirmar Pago';
 
-  let temporizadorControl = null;
+        let temporizadorControl = null;
 
   confirmarBtn.addEventListener('click', () => {
     numbers.forEach(num => {
@@ -151,6 +162,11 @@ function renderRegistro(registro) {
       if (btn) btn.className = 'number-btn unavailable';
       numberStatus[num] = 'confirmed';
     });
+
+    // Actualiza el estado del registro en Firebase a 'confirmed'
+    if (registro.id) {
+      db.ref('registros/' + registro.id).update({ estado: 'confirmed' });
+    }
 
     confirmarBtn.remove();
     if (temporizadorControl) {
@@ -175,7 +191,10 @@ function renderRegistro(registro) {
       });
 
       registrosList.removeChild(item);
-      eliminarRegistroLocal(timestamp);
+      // Elimina el registro de Firebase al eliminar manualmente
+      if (registro.id) {
+          eliminarRegistroFirebase(registro.id);
+      }
     });
 
     item.appendChild(eliminarBtn);
@@ -194,7 +213,10 @@ function renderRegistro(registro) {
       }
     });
     if (expirado) registrosList.removeChild(item);
-    eliminarRegistroLocal(timestamp);
+    // Elimina el registro de Firebase si expiró
+    if (registro.id) {
+        eliminarRegistroFirebase(registro.id);
+    }
   }, item);
 
   registrosList.appendChild(item);
@@ -228,6 +250,27 @@ clearSearchBtn.addEventListener('click', () => {
 
 // Al cargar: leer registros de localStorage y renderizarlos
 window.addEventListener('DOMContentLoaded', () => {
-  const registros = obtenerRegistrosLocal();
-  registros.forEach(renderRegistro);
+  escucharRegistrosRealtime(registros => {
+    registrosList.innerHTML = '';
+    // Primero, liberar todos los números
+    Object.keys(numberStatus).forEach(num => {
+      numberStatus[num] = 'available';
+      const btn = document.querySelector(`button[data-number='${num}']`);
+      if (btn) btn.className = 'number-btn available';
+    });
+
+    // Marcar ocupados y renderizar registros
+    registros.forEach(registro => {
+      if (Array.isArray(registro.numbers)) {
+        registro.numbers.forEach(num => {
+          numberStatus[num] = registro.estado === 'confirmed' ? 'confirmed' : 'pending';
+          const btn = document.querySelector(`button[data-number='${num}']`);
+          if (btn) {
+            btn.className = registro.estado === 'confirmed' ? 'number-btn unavailable' : 'number-btn selected';
+          }
+        });
+      }
+      renderRegistro(registro);
+    });
+  });
 });

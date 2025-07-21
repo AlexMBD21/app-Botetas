@@ -1,23 +1,40 @@
-// ========== FUNCIONES DE LOCALSTORAGE ========== 
 
-// Guardar un registro en localStorage
-function guardarRegistroLocal(registro) {
-  const registros = JSON.parse(localStorage.getItem('registros')) || [];
-  registros.push(registro);
-  localStorage.setItem('registros', JSON.stringify(registros));
+// ========== FUNCIONES DE FIREBASE ==========
+
+// Guardar un registro en Firebase
+function guardarRegistroFirebase(registro) {
+  const newRef = db.ref('registros').push();
+  registro.id = newRef.key;
+  newRef.set(registro);
 }
 
-// Obtener todos los registros del localStorage
-function obtenerRegistrosLocal() {
-  return JSON.parse(localStorage.getItem('registros')) || [];
+// Obtener todos los registros de Firebase
+function obtenerRegistrosFirebase(callback) {
+  db.ref('registros').once('value', snapshot => {
+    const data = snapshot.val() || {};
+    const registros = Object.values(data);
+    if (typeof callback === 'function') {
+      registros.forEach(callback);
+    }
+  });
 }
 
-// Eliminar un registro del localStorage por timestamp (ID único)
-function eliminarRegistroLocal(timestamp) {
-  let registros = obtenerRegistrosLocal();
-  registros = registros.filter(reg => reg.timestamp !== timestamp);
-  localStorage.setItem('registros', JSON.stringify(registros));
+// Eliminar un registro de Firebase por id
+function eliminarRegistroFirebase(id) {
+  db.ref('registros/' + id).remove();
 }
+
+
+function escucharRegistrosRealtime(callback) {
+  db.ref('registros').on('value', snapshot => {
+    const data = snapshot.val() || {};
+    const registros = Object.values(data);
+    if (typeof callback === 'function') {
+      callback(registros);
+    }
+  });
+}
+
 
 // Cargar registros guardados en el DOM al iniciar (llamado desde script.js)
 function cargarRegistrosAlIniciar(callback) {
