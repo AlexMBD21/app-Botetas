@@ -46,11 +46,16 @@
 
     <section class="registro-guardado glass">
       <h3>Registros Realizados</h3>
+      <div id="loadingSpinner" style="display:none;text-align:center;padding:10px;">
+        <span style="font-size:2em;">⏳</span> <span>Cargando registros...</span>
+      </div>
       <div class="registro-list" id="registro-list"></div>
     </section>
   </main>
-
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-database-compat.js"></script>
+  <script src="firebaseConfig.js"></script>
+  <script src="realTime.js"></script>
   <script src="script.js"></script>
-  <script src="localStorage.js"></script>
 </body>
 </html>
