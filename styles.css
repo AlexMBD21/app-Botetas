@@ -1,0 +1,299 @@
+/* =============== RESET GLOBAL =============== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* =============== BASE =============== */
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #0e0e0e;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+header {
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  width: 100%;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+
+/* =============== CONTENEDOR GENERAL =============== */
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: 90%;
+  max-width: 800px;
+  padding: 2rem 1rem;
+}
+
+/* =============== FORMULARIO VIDRIO =============== */
+.glass {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(15px);
+  padding: 1rem;
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* =============== FORMULARIO DE REGISTRO =============== */
+.form-section {
+  max-width: 500px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.form-section form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  width: 100%;
+  max-width: 100%;
+}
+
+.form-section label {
+  font-weight: bold;
+  margin-top: 0.5rem;
+}
+
+.form-section input[type="text"],
+.form-section input[type="tel"] {
+  padding: 0.6rem;
+  width: 100%;
+  max-width: 100%;
+  border-radius: 10px;
+  border: none;
+  background-color: #ffffff;
+  color: black;
+}
+
+/* Botón de envío */
+button[type="submit"] {
+  width: 100%;
+  background: #17a2b8;
+  color: white;
+  border: none;
+  padding: 0.8rem;
+  border-radius: 10px;
+  font-size: 1rem;
+  margin-top: 1rem;
+  cursor: pointer;
+}
+
+/* Total a pagar */
+#totalDisplay {
+  margin-top: 1rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #ffc107;
+}
+
+/* =============== SECCIÓN DE NÚMEROS =============== */
+.number-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.numbers-section h2 {
+  margin-bottom: 1.5rem; /* o prueba con 1.5rem si quieres más espacio */
+}
+
+.selected-count-text {
+    margin-top: 1rem;
+    color: #ffc107;
+}
+
+/* Scroll de números */
+.scroll-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-height: 250px;
+  overflow-y: auto;
+  gap: 0.5rem;
+  padding: 1rem;
+  border-radius: 12px;
+}
+
+.scroll-grid::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scroll-grid::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+
+/* Búsqueda */
+.search-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+#searchInput {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  width: 220px;
+  outline: none;
+  background-color: #1e1e1e;
+  color: #fff;
+}
+
+#searchInput:focus {
+  border-color: #007bff;
+}
+
+#clearSearch {
+  background: #e74c3c;
+  border: none;
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#clearSearch:hover {
+  background: #c0392b;
+}
+
+/* Botones de número */
+.number-btn {
+  width: 60px;
+  height: 60px;
+  font-weight: bold;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.available {
+  background-color: #28a745;
+  color: white;
+}
+
+.selected {
+  background-color: #007bff;
+  color: white;
+}
+
+.unavailable {
+  background-color: #dc3545;
+  color: white;
+  cursor: not-allowed;
+}
+
+/* Etiquetas seleccionadas */
+.selected-number {
+  display: inline-block;
+  background: #007bff;
+  color: white;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  margin: 0.2rem;
+  position: relative;
+  font-size: 0.9rem;
+}
+
+.selected-number button {
+  background: none;
+  border: none;
+  color: white;
+  margin-left: 0.5rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* Lista de registros guardados */
+.registro-list {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.registro-item {
+  padding: 0.8rem;
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.registro-item .btn-verificar {
+  margin-top: 0.5rem;
+  padding: 0.4rem;
+  border: none;
+  background: #ffc107;
+  color: black;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+
+.temporizador {
+  display: inline-block;
+  margin-left: 10px;
+  padding: 3px 8px;
+  background-color: #ffffff;
+  color: #333;
+  border-radius: 8px;
+  font-weight: bold;
+  font-family: monospace;
+  width: 200px;
+  text-align: center;
+}
+
+.verificado .temporizador {
+  color: green;
+}
+
+
+
+/* =============== MEDIA QUERIES =============== */
+@media (min-width: 768px) {
+  .container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    max-width: 1200px;
+  }
+
+  .numbers-section {
+    grid-column: span 1;
+  }
+
+  .registro-guardado {
+    grid-column: 1 / -1;
+  }
+
+  .form-section,
+  .registro-guardado {
+    height: fit-content;
+  }
+}

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rifa por Influencer</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <header>
+    <h1>El Compa Herna 🎁</h1>
+  </header>
+
+  <main class="container">
+   <section class="numbers-section glass">
+  <h2>Selecciona tus números</h2>
+
+  <div class="search-wrapper">
+    <input type="text" id="searchInput" placeholder="Buscar número..." maxlength="4" />
+    <button id="clearSearch" title="Limpiar búsqueda">Limpiar</button>
+  </div>
+
+  <div id="numberGrid" class="scroll-grid"></div>
+
+  <!-- Aquí mostramos cuántos números están seleccionados -->
+  <p id="selectedCount" class="selected-count-text">Has seleccionado 0 números.</p>
+</section>
+
+
+    <section class="form-section glass">
+      <h2>Registro</h2>
+      <form id="registrationForm">
+        <label for="name">Nombre</label>
+        <input type="text" id="name" placeholder="Tu nombre" required />
+
+        <label for="phone">Teléfono</label>
+        <input type="tel" id="phone" placeholder="Número de teléfono" required />
+
+        <div id="selectedNumbers"></div>
+        <p id="totalDisplay">Total a pagar: $0</p>
+        <button type="submit">Registrar</button>
+      </form>
+      <div id="confirmation"></div>
+    </section>
+
+    <section class="registro-guardado glass">
+      <h3>Registros Realizados</h3>
+      <div class="registro-list" id="registro-list"></div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+  <script src="localStorage.js"></script>
+</body>
+</html>
