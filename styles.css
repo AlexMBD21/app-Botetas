@@ -1,3 +1,4 @@
+
 /* =============== RESET GLOBAL =============== */
 *,
 *::before,
@@ -10,8 +11,8 @@
 /* =============== BASE =============== */
 body {
   font-family: 'Segoe UI', sans-serif;
-  background: #0e0e0e;
-  color: #fff;
+  background: #1a296a;
+  color: #ffffff;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -22,6 +23,7 @@ header {
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
   width: 100%;
+  color: #fff;
   text-align: center;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -77,6 +79,11 @@ header {
   color: black;
 }
 
+.form-section h2 {
+  text-align: center;
+   margin-bottom: 1.5rem; /* o prueba con 1.5rem si quieres más espacio */
+}
+
 /* Botón de envío */
 button[type="submit"] {
   width: 100%;
@@ -88,7 +95,13 @@ button[type="submit"] {
   font-size: 1rem;
   margin-top: 1rem;
   cursor: pointer;
+   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
+
+button[type="submit"]:hover {
+  background: #138496;
+}
+
 
 /* Total a pagar */
 #totalDisplay {
@@ -97,6 +110,7 @@ button[type="submit"] {
   font-weight: bold;
   color: #ffc107;
 }
+
 
 /* =============== SECCIÓN DE NÚMEROS =============== */
 .number-section {
@@ -108,13 +122,17 @@ button[type="submit"] {
 }
 
 .numbers-section h2 {
+  text-align: center;
   margin-bottom: 1.5rem; /* o prueba con 1.5rem si quieres más espacio */
 }
 
 .selected-count-text {
+  text-align: center;
     margin-top: 1rem;
     color: #ffc107;
 }
+
+
 
 /* Scroll de números */
 .scroll-grid {
@@ -137,7 +155,9 @@ button[type="submit"] {
   border-radius: 10px;
 }
 
-/* Búsqueda */
+
+
+/* Búsqueda numero */
 .search-wrapper {
   display: flex;
   align-items: center;
@@ -148,20 +168,28 @@ button[type="submit"] {
 }
 
 #searchInput {
-  padding: 0.5rem 1rem;
+ 
   font-size: 1rem;
-  border-radius: 8px;
-  border: 1px solid #ccc;
   width: 220px;
   outline: none;
-  background-color: #1e1e1e;
-  color: #fff;
+  font-size: 1.1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  background-color: #ffffff;
+  color: #000000;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+ 
 }
 
 #searchInput:focus {
-  border-color: #007bff;
+  border-color: #000000;
 }
 
+
+
+
+/* boton limpiar selecion de numero*/
 #clearSearch {
   background: #e74c3c;
   border: none;
@@ -177,7 +205,10 @@ button[type="submit"] {
   background: #c0392b;
 }
 
-/* Botones de número */
+
+
+
+/* Botones de número  y colores*/
 .number-btn {
   width: 60px;
   height: 60px;
@@ -204,6 +235,8 @@ button[type="submit"] {
   cursor: not-allowed;
 }
 
+
+
 /* Etiquetas seleccionadas */
 .selected-number {
   display: inline-block;
@@ -225,7 +258,64 @@ button[type="submit"] {
   cursor: pointer;
 }
 
+
+
 /* Lista de registros guardados */
+
+
+.registro-guardado h2 {
+  text-align: center;
+  margin-bottom: 1.8rem; /* o prueba con 1.5rem si quieres más espacio */
+}
+
+
+/* Buscador de registros guardados */
+.registro-search-wrapper {
+  margin-bottom: 1.2rem;
+  justify-content: center;
+  width: 100%;
+  
+}
+
+
+
+#registroSearchBar {
+  width: 200px;
+  font-size: 1.1rem;
+   padding: 0.5rem 1rem;
+  border-radius: 12px;
+  background-color: #ffffff;
+  color: #000000;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  margin-right:9px ;
+}
+
+
+
+
+#registroSearchBar:focus {
+  border-color: #030910;
+}
+
+#registroSearchBtn {
+  border: none;
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
+  width: 80px;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s;
+  background: #17a2b8;
+ 
+   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+#registroSearchBtn:hover {
+  background: #138496;
+}
+
 .registro-list {
   margin-top: 1rem;
   display: flex;
@@ -234,6 +324,7 @@ button[type="submit"] {
   max-height: 300px;
   overflow-y: auto;
 }
+
 
 .registro-item {
   padding: 0.8rem;
@@ -290,10 +381,20 @@ button[type="submit"] {
 
   .registro-guardado {
     grid-column: 1 / -1;
+    width: 90%;
+    max-width: 1200px;
+    min-height: 550px;
+    margin: 0 auto;
+    padding: 3rem 2.5rem;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
   }
 
-  .form-section,
-  .registro-guardado {
-    height: fit-content;
+.form-section,
+.registro-guardado {
+  height: fit-content;
   }
 }

@@ -17,7 +17,7 @@
   <h2>Selecciona tus números</h2>
 
   <div class="search-wrapper">
-    <input type="text" id="searchInput" placeholder="Buscar número..." maxlength="4" />
+    <input type="text" id="searchInput" placeholder="Busca tu número" maxlength="4" />
     <button id="clearSearch" title="Limpiar búsqueda">Limpiar</button>
   </div>
 
@@ -29,7 +29,7 @@
 
 
     <section class="form-section glass">
-      <h2>Registro</h2>
+      <h2>Registra tus numeros</h2>
       <form id="registrationForm">
         <label for="name">Nombre</label>
         <input type="text" id="name" placeholder="Tu nombre" required />
@@ -43,9 +43,14 @@
       </form>
       <div id="confirmation"></div>
     </section>
+  
 
     <section class="registro-guardado glass">
-      <h3>Registros Realizados</h3>
+      <h2>Registros Realizados</h2>
+      <div class="registro-search-wrapper">
+        <input type="text" id="registroSearchBar" placeholder="Buscar boleta" />
+        <button id="registroSearchBtn" type="button">Buscar</button>
+      </div>
       <div id="loadingSpinner" style="display:none;text-align:center;padding:10px;">
         <span style="font-size:2em;">⏳</span> <span>Cargando registros...</span>
       </div>
@@ -53,6 +58,9 @@
     </section>
 
 
+
+
+  <!---  ocultamineto de registros realizado --->
     <script>
       // Oculta la sección por defecto
       document.addEventListener('DOMContentLoaded', function() {
