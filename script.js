@@ -115,9 +115,123 @@ form.addEventListener('submit', (e) => {
   guardarRegistroFirebase(registro);
 // Al cargar: leer registros de Firebase y renderizarlos
 window.addEventListener('DOMContentLoaded', () => {
-  obtenerRegistrosFirebase(renderRegistro);
-  // O si quieres en tiempo real:
-  // escucharRegistrosRealtime(registros => {
+  // Verificar conexión a Firebase y mostrar mensaje si falla
+  db.ref('.info/connected').on('value', function(snapshot) {
+    if (snapshot.val() === false) {
+      const errorDiv = document.createElement('div');
+      errorDiv.style.background = '#dc3545';
+      errorDiv.style.color = 'white';
+      errorDiv.style.padding = '1rem';
+      errorDiv.style.textAlign = 'center';
+      errorDiv.style.marginBottom = '1rem';
+      errorDiv.textContent = 'Error: No se pudo conectar a Firebase. Revisa tu configuración y conexión a internet.';
+      document.body.insertBefore(errorDiv, document.body.firstChild);
+    }
+  });
+  // Usar barra de búsqueda fija en el HTML
+  let registroSearchBar = document.getElementById('registroSearchBar');
+  let registroSearchBtn = document.getElementById('registroSearchBtn');
+  let registrosGlobal = [];
+let numeroBuscado = '';
+  function buscarYMostrarRegistros() {
+    const query = registroSearchBar.value.trim();
+    registrosList.innerHTML = '';
+    numeroBuscado = '';
+    // Modal elementos
+    const registroModal = document.getElementById('registroModal');
+    const modalRegistro = document.getElementById('modalRegistro');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    if (!query || query.length !== 4 || isNaN(query)) {
+      // Si no hay búsqueda válida, muestra todos sin resaltar
+      if (registroModal) registroModal.style.display = 'none';
+      registrosGlobal.forEach(registro => renderRegistro(registro, ''));
+      return;
+    }
+    numeroBuscado = query;
+    // Buscar directamente en Firebase
+    db.ref('registros').orderByChild('estado').equalTo('confirmed').once('value', snapshot => {
+      const data = snapshot.val() || {};
+      const registros = Object.values(data);
+      // Filtrar por número buscado y mostrar solo el primero
+      const encontrado = registros.find(registro => {
+        if (!Array.isArray(registro.numbers)) return false;
+        return registro.numbers.some(num => {
+          let numStr = String(num).replace(/\s+/g, '').padStart(4, '0');
+          return numStr === query;
+        });
+      });
+      // Mostrar en modal
+      if (registroModal && modalRegistro) {
+        modalRegistro.innerHTML = '';
+        if (!encontrado) {
+          modalRegistro.innerHTML = `<div class='registro-item'>No se encontró registro confirmado con el número ${query}</div>`;
+        } else {
+          // Renderizar registro usando la función original pero en el modal
+          const item = document.createElement('div');
+          // Copia la lógica de renderRegistro pero no lo agrega a registrosList
+          const { name, phone, numbers, timestamp, expiraEn } = encontrado;
+          let highlightNum = numeroBuscado;
+          const numerosHTML = numbers.map(n => {
+            let numStr = typeof n === 'number' ? n.toString().padStart(4, '0') : n;
+            numStr = numStr.padStart(4, '0');
+            if (highlightNum && numStr === highlightNum) {
+              return `<span style=\"background:#ffc107;color:#222;padding:2px 6px;border-radius:8px;font-weight:bold;\">${numStr}</span>`;
+            }
+            return numStr;
+          }).join(', ');
+          item.innerHTML = `
+            <strong>${name}</strong>
+            <span>📞 ${phone}</span>
+            <span>🎟️ Números: ${numerosHTML}</span>
+            <span>💰 Total: $${numbers.length * pricePerTicket}</span>
+          `;
+          modalRegistro.appendChild(item);
+        }
+        setTimeout(() => {
+          registroModal.style.display = 'flex';
+        }, 10);
+        if (closeModalBtn) {
+          closeModalBtn.onclick = () => {
+            registroModal.style.display = 'none';
+          };
+        }
+      }
+    });
+  }
+  if (registroSearchBar && registroSearchBtn) {
+    registroSearchBtn.onclick = buscarYMostrarRegistros;
+    registroSearchBar.onkeyup = function(e) {
+      if (e.key === 'Enter') buscarYMostrarRegistros();
+    };
+  }
+
+  // Renderizado en tiempo real y búsqueda funcional
+  escucharRegistrosRealtime(registros => {
+    registrosGlobal = registros;
+    // Si hay búsqueda activa, NO actualizar la lista ni llamar buscarYMostrarRegistros
+    if (registroSearchBar && registroSearchBar.value.trim()) {
+      // Solo actualiza la memoria, no toca el DOM
+      return;
+    } else {
+      registrosList.innerHTML = '';
+      registros.forEach(registro => renderRegistro(registro, ''));
+    }
+  });
+  // Registro de prueba automático para verificar despliegue
+  setTimeout(() => {
+    db.ref('registros').once('value', snapshot => {
+      if (!snapshot.exists()) {
+        guardarRegistroFirebase({
+          name: 'Prueba',
+          phone: '123456789',
+          numbers: [1, 2, 3],
+          timestamp: Date.now(),
+          expiraEn: Date.now() + 3600000,
+          estado: 'pending'
+        });
+      }
+    });
+  }, 1000);
   //   registrosList.innerHTML = '';
   //   registros.forEach(renderRegistro);
   // });
@@ -139,81 +253,99 @@ window.addEventListener('DOMContentLoaded', () => {
 
 function renderRegistro(registro) {
   const { name, phone, numbers, timestamp, expiraEn } = registro;
-
+  let highlightNum = '';
+  if (arguments.length > 1 && typeof arguments[1] === 'string') {
+    highlightNum = arguments[1];
+  }
   const item = document.createElement('div');
   item.className = 'registro-item';
   item.dataset.timestamp = timestamp;
+  item.style.position = 'relative';
+  const numerosHTML = numbers.map(n => {
+    let numStr = typeof n === 'number' ? n.toString().padStart(4, '0') : n;
+    numStr = numStr.padStart(4, '0');
+    if (highlightNum && numStr === highlightNum) {
+      return `<span style=\"background:#ffc107;color:#222;padding:2px 6px;border-radius:8px;font-weight:bold;\">${numStr}</span>`;
+    }
+    return numStr;
+  }).join(', ');
   item.innerHTML = `
     <strong>${name}</strong>
     <span>📞 ${phone}</span>
-    <span>🎟️ Números: ${numbers.map(n => n.toString().padStart(4, '0')).join(', ')}</span>
+    <span>🎟️ Números: ${numerosHTML}</span>
     <span>💰 Total: $${numbers.length * pricePerTicket}</span>
   `;
 
-  let temporizadorControl = null;
+  // Botón eliminar en la esquina superior derecha (icono 'X' en rojo)
+  const eliminarBtnTop = document.createElement('button');
+  eliminarBtnTop.textContent = '✖';
+  eliminarBtnTop.title = 'Eliminar registro';
+  eliminarBtnTop.style.position = 'absolute';
+  eliminarBtnTop.style.top = '8px';
+  eliminarBtnTop.style.right = '8px';
+  eliminarBtnTop.style.background = '#dc3545';
+  eliminarBtnTop.style.color = 'white';
+  eliminarBtnTop.style.border = 'none';
+  eliminarBtnTop.style.borderRadius = '50%';
+  eliminarBtnTop.style.width = '32px';
+  eliminarBtnTop.style.height = '32px';
+  eliminarBtnTop.style.cursor = 'pointer';
+  eliminarBtnTop.style.fontSize = '1.2em';
+  eliminarBtnTop.style.zIndex = '2';
+  eliminarBtnTop.addEventListener('click', function(e) {
+    e.stopPropagation();
+    const confirmar = confirm('¿Seguro que deseas eliminar este registro?');
+    if (!confirmar) return;
+    if (registro.id) {
+      eliminarRegistroFirebase(registro.id);
+    }
+    if (item.parentNode) item.parentNode.removeChild(item);
+  });
+  item.appendChild(eliminarBtnTop);
 
-  if (registro.estado === 'confirmed') {
-    // Mostrar chulito verde si está confirmado
-    const checkIcon = document.createElement('span');
-    checkIcon.innerHTML = '✅ <span style="color:green;font-weight:bold;">Pago confirmado</span>';
-    checkIcon.style.display = 'inline-block';
-    checkIcon.style.margin = '8px 0';
-    item.appendChild(checkIcon);
-  } else {
-    // Mostrar botón para confirmar pago si no está confirmado
+  // Botón confirmar pago y temporizador
+  if (registro.estado !== 'confirmed') {
     const confirmarBtn = document.createElement('button');
-    confirmarBtn.className = 'btn-verificar';
     confirmarBtn.textContent = 'Confirmar Pago';
-
+    confirmarBtn.className = 'btn-verificar';
+    confirmarBtn.style.backgroundColor = '#ffc107';
+    confirmarBtn.style.color = 'black';
     confirmarBtn.addEventListener('click', () => {
       numbers.forEach(num => {
         const btn = document.querySelector(`button[data-number='${num}']`);
         if (btn) btn.className = 'number-btn unavailable';
         numberStatus[num] = 'confirmed';
       });
-
-      // Actualiza el estado del registro en Firebase a 'confirmed'
       if (registro.id) {
         db.ref('registros/' + registro.id).update({ estado: 'confirmed' });
       }
-
       confirmarBtn.remove();
       if (temporizadorControl) {
         clearInterval(temporizadorControl.interval);
         temporizadorControl.temporizador.textContent = '✅ Pago confirmado';
       }
-
       const eliminarBtn = document.createElement('button');
       eliminarBtn.textContent = '🗑️ Eliminar Registro';
       eliminarBtn.className = 'btn-verificar';
       eliminarBtn.style.backgroundColor = '#dc3545';
       eliminarBtn.style.color = 'white';
-
       eliminarBtn.addEventListener('click', () => {
         const confirmar = confirm("¿Estás seguro de eliminar este registro? Esta acción liberará los números.");
         if (!confirmar) return;
-
         numbers.forEach(num => {
           numberStatus[num] = 'available';
           const btn = document.querySelector(`button[data-number='${num}']`);
           if (btn) btn.className = 'number-btn available';
         });
-
         registrosList.removeChild(item);
-        // Elimina el registro de Firebase al eliminar manualmente
         if (registro.id) {
-            eliminarRegistroFirebase(registro.id);
+          eliminarRegistroFirebase(registro.id);
         }
       });
-
       item.appendChild(eliminarBtn);
     });
-
     item.appendChild(confirmarBtn);
-  }
-
-  if (registro.estado !== 'confirmed') {
-    temporizadorControl = crearTemporizadorVisual(expiraEn, () => {
+    var temporizadorControl = crearTemporizadorVisual(expiraEn, () => {
       let expirado = false;
       numbers.forEach(num => {
         if (numberStatus[num] === 'pending') {
@@ -224,15 +356,14 @@ function renderRegistro(registro) {
         }
       });
       if (expirado) registrosList.removeChild(item);
-      // Elimina el registro de Firebase si expiró
       if (registro.id) {
-          eliminarRegistroFirebase(registro.id);
+        eliminarRegistroFirebase(registro.id);
       }
     }, item);
   }
-
   registrosList.appendChild(item);
 }
+
 
 // Crear botones del 0000 al 9999
 for (let i = 0; i <= 9999; i++) {
@@ -247,9 +378,16 @@ const clearSearchBtn = document.getElementById('clearSearch');
 searchInput.addEventListener('input', () => {
   const query = searchInput.value.trim();
   const buttons = document.querySelectorAll('.number-btn');
+  if (!query) {
+    buttons.forEach(btn => {
+      btn.style.display = 'inline-block';
+    });
+    return;
+  }
   buttons.forEach(btn => {
-    const text = btn.textContent;
-    btn.style.display = text.includes(query) ? 'inline-block' : 'none';
+    // Buscar por coincidencia exacta o parcial en el número
+    const num = btn.textContent.replace(/^0+/, ''); // Elimina ceros a la izquierda
+    btn.style.display = (btn.textContent.includes(query) || num.includes(query)) ? 'inline-block' : 'none';
   });
 });
 
@@ -275,18 +413,20 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 
     // Marcar ocupados y renderizar registros
-    registros.forEach(registro => {
-      if (Array.isArray(registro.numbers)) {
-        registro.numbers.forEach(num => {
-          numberStatus[num] = registro.estado === 'confirmed' ? 'confirmed' : 'pending';
-          const btn = document.querySelector(`button[data-number='${num}']`);
-          if (btn) {
-            btn.className = registro.estado === 'confirmed' ? 'number-btn unavailable' : 'number-btn selected';
-          }
-        });
-      }
-      renderRegistro(registro);
-    });
+    if (Array.isArray(registros)) {
+      registros.forEach(registro => {
+        if (Array.isArray(registro.numbers)) {
+          registro.numbers.forEach(num => {
+            numberStatus[num] = registro.estado === 'confirmed' ? 'confirmed' : 'pending';
+            const btn = document.querySelector(`button[data-number='${num}']`);
+            if (btn) {
+              btn.className = registro.estado === 'confirmed' ? 'number-btn unavailable' : 'number-btn selected';
+            }
+          });
+        }
+        renderRegistro(registro);
+      });
+    }
     if (loadingSpinner) loadingSpinner.style.display = 'none';
   });
 });
