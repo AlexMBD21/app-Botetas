@@ -119,6 +119,7 @@ header {
   max-width: 800px;
   padding: 2rem 1rem;
   box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 /* =============== FORMULARIO VIDRIO =============== */
@@ -195,6 +196,26 @@ button[type="submit"]:hover {
   color: #ffc107;
 }
 
+/* Mensaje de confirmación */
+#confirmation {
+  margin-top: 1rem;
+}
+
+#confirmation div {
+  animation: slideInFromTop 0.5s ease-out;
+}
+
+@keyframes slideInFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* =============== SECCIÓN DE NÚMEROS =============== */
 .number-section {
   display: flex;
@@ -221,6 +242,88 @@ button[type="submit"]:hover {
   text-align: center;
   margin-top: 1rem;
   color: #ffc107;
+}
+
+/* =============== LOADING DE NÚMEROS =============== */
+.numbers-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  padding: 2rem;
+}
+
+.loading-spinner-container {
+  text-align: center;
+  color: #fff;
+}
+
+.loading-spinner {
+  width: 60px;
+  height: 60px;
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  border-top: 4px solid #ffc107;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem auto;
+}
+
+.numbers-loading p {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0.5rem 0;
+  color: #ffc107;
+}
+
+.loading-subtext {
+  font-size: 0.9rem !important;
+  font-weight: 400 !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+  margin-top: 0.5rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* =============== LOADING DE REGISTROS =============== */
+.registros-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 250px;
+  padding: 2rem;
+  margin: 1rem 0;
+}
+
+.registros-loading .loading-spinner-container {
+  text-align: center;
+  color: #fff;
+}
+
+.registros-loading .loading-spinner {
+  width: 55px;
+  height: 55px;
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  border-top: 4px solid #ffc107;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem auto;
+}
+
+.registros-loading p {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0.5rem 0;
+  color: #ffc107;
+}
+
+.registros-loading .loading-subtext {
+  font-size: 0.9rem !important;
+  font-weight: 400 !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+  margin-top: 0.5rem;
 }
 
 /* Scroll de números */
@@ -432,21 +535,28 @@ button[type="submit"]:hover {
   .container {
     display: grid;
     grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto;
     gap: 2rem;
     max-width: 1200px;
   }
 
   .numbers-section {
     grid-column: span 1;
+    grid-row: 1;
+  }
+
+  .form-section {
+    grid-column: span 1;
+    grid-row: 1;
+    height: fit-content;
   }
 
   .registro-guardado {
-    grid-column: 1 / -1;
-    width: 90%;
-    max-width: 1200px;
+    grid-column: span 1;
+    grid-row: 2;
+    width: 100%;
     min-height: 550px;
-    margin: 0 auto;
-    padding: 3rem 2.5rem;
+    padding: 2rem 1.5rem;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -454,9 +564,34 @@ button[type="submit"]:hover {
     justify-content: flex-start;
   }
 
-  .form-section,
-  .registro-guardado {
-    height: fit-content;
+  .busqueda-numeros {
+    grid-column: span 1;
+    grid-row: 2;
+    width: 100%;
+    padding: 2rem 1.5rem;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    margin-top: 0;
+  }
+
+  .registro-guardado h2,
+  .busqueda-numeros h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+
+  .registro-list {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  #resultadoBusqueda {
+    max-height: 400px;
+    overflow-y: auto;
   }
 }
 
@@ -511,14 +646,76 @@ button[type="submit"]:hover {
   }
 
   .scroll-grid {
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(45px, 1fr));
+    gap: 0.5rem;
+    padding: 0.75rem;
     max-width: 100%;
+    box-sizing: border-box;
   }
 
   .number-btn {
-    width: 48px;
-    height: 48px;
-    font-size: 14px;
+    width: 100%;
+    height: 45px;
+    font-size: 13px;
+    min-width: 45px;
+    max-width: 55px;
+    margin: 0 auto;
+  }
+
+  /* Loading responsive para móviles */
+  .numbers-loading {
+    min-height: 200px;
+    padding: 1rem;
+  }
+
+  .loading-spinner {
+    width: 50px;
+    height: 50px;
+  }
+
+  .numbers-loading p {
+    font-size: 1rem;
+  }
+
+  .loading-subtext {
+    font-size: 0.8rem !important;
+  }
+}
+
+/* =============== MEDIA QUERY PARA MÓVILES MUY PEQUEÑOS =============== */
+@media (max-width: 480px) {
+  .container {
+    padding: 1rem 0.5rem;
+    gap: 1.5rem;
+  }
+
+  .numbers-section {
+    padding: 1rem 0.5rem;
+  }
+
+  .scroll-grid {
+    grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+    gap: 0.4rem;
+    padding: 0.5rem;
+    max-width: calc(100vw - 2rem);
+    margin: 0 auto;
+  }
+
+  .number-btn {
+    width: 100%;
+    height: 40px;
+    font-size: 12px;
+    min-width: 40px;
+    max-width: 50px;
+  }
+
+  .search-wrapper {
+    padding: 0 0.5rem;
+  }
+
+  #searchInput {
+    width: 180px;
+    font-size: 16px;
   }
 }
 
@@ -616,6 +813,12 @@ button[type="submit"]:hover {
 /* =============== SECCIÓN DE BÚSQUEDA DE NÚMEROS =============== */
 .busqueda-numeros {
   margin-top: 2rem;
+}
+
+@media (min-width: 768px) {
+  .busqueda-numeros {
+    margin-top: 0;
+  }
 }
 
 .busqueda-numeros h2 {

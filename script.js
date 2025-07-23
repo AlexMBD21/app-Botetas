@@ -381,33 +381,31 @@ function buscarNumeroEnRegistros() {
             coincidenciaExacta = { registro, numeroEncontrado: numStr };
             tieneCoincidenciaExacta = true;
           }
-          // Coincidencia con primeros 2 dígitos (solo si no es exacta)
+          // Coincidencia con primeros 2 dígitos (siempre agregar, no importa si tiene exacta)
           else if (numStr.substring(0, 2) === primerosDos) {
             numerosCoincidentesPrimeros.push(numStr);
           }
-          // Coincidencia con últimos 2 dígitos (solo si no es exacta)
+          // Coincidencia con últimos 2 dígitos (siempre agregar, no importa si tiene exacta)
           else if (numStr.substring(2, 4) === ultimosDos) {
             numerosCoincidentesUltimos.push(numStr);
           }
         });
         
-        // Solo agregar a mapas si no tiene coincidencia exacta
-        if (!tieneCoincidenciaExacta) {
-          if (numerosCoincidentesPrimeros.length > 0) {
-            const userId = `${registro.name}_${registro.phone}`;
-            registrosPrimerosDos.set(userId, {
-              registro: registro,
-              numerosCoincidentes: numerosCoincidentesPrimeros
-            });
-          }
-          
-          if (numerosCoincidentesUltimos.length > 0) {
-            const userId = `${registro.name}_${registro.phone}`;
-            registrosUltimosDos.set(userId, {
-              registro: registro,
-              numerosCoincidentes: numerosCoincidentesUltimos
-            });
-          }
+        // Siempre agregar a mapas si hay coincidencias parciales
+        if (numerosCoincidentesPrimeros.length > 0) {
+          const userId = `${registro.name}_${registro.phone}`;
+          registrosPrimerosDos.set(userId, {
+            registro: registro,
+            numerosCoincidentes: numerosCoincidentesPrimeros
+          });
+        }
+        
+        if (numerosCoincidentesUltimos.length > 0) {
+          const userId = `${registro.name}_${registro.phone}`;
+          registrosUltimosDos.set(userId, {
+            registro: registro,
+            numerosCoincidentes: numerosCoincidentesUltimos
+          });
         }
       });
 
@@ -437,9 +435,9 @@ function buscarNumeroEnRegistros() {
         resultadoHTML += `
           <div style="border: 2px solid #dc3545; border-radius: 8px; padding: 1.5rem; background: #fff5f5; margin-bottom: 1rem;">
             <div style="text-align: center; margin-bottom: 1rem;">
-              <div style="font-size: 2.5em; color: #dc3545; margin-bottom: 0.5rem;">�</div>
-              <h3 style="margin: 0; color: #dc3545;">Número Pagado - Protegido</h3>
-              <p style="margin: 0.5rem 0 0 0; color: #721c24;">Este número ya ha sido pagado y confirmado</p>
+              <div style="font-size: 2.5em; color: #dc3545; margin-bottom: 0.5rem;">🏆</div>
+              <h3 style="margin: 0; color: #dc3545;">Ganador</h3>
+              <p style="margin: 0.5rem 0 0 0; color: #721c24;">Este número ya ha sido confirmado</p>
             </div>
             
             <div style="background: white; padding: 1rem; border-radius: 6px; border: 1px solid #f5c6cb;">
@@ -460,7 +458,7 @@ function buscarNumeroEnRegistros() {
                 <span style="color: #6c757d; font-size: 0.9em;">${fechaRegistro}</span>
                 
                 <strong style="color: #495057;">🔒 Estado:</strong>
-                <span style="background: #28a745; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.9em;">PAGADO</span>
+                <span style="background: #28a745; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.9em;">CONFIRMADO</span>
               </div>
             </div>
           </div>
@@ -472,12 +470,15 @@ function buscarNumeroEnRegistros() {
             <div style="font-size: 3em; margin-bottom: 1rem;">🎯</div>
             <h3 style="margin: 0 0 0.5rem 0; color: #28a745;">¡Número Exacto Disponible!</h3>
             <p style="margin: 0; font-size: 1.1em; color: #155724;">El número <strong style="background: #28a745; color: white; padding: 4px 8px; border-radius: 4px;">${query}</strong> está disponible para ser seleccionado.</p>
+            <p style="margin: 0.5rem 0 0 0; font-size: 0.9em; color: #155724;">¡Puedes seleccionarlo sin problemas!</p>
           </div>
         `;
       }
 
-      // 2. Coincidencias con primeros 2 dígitos
-      if (registrosPrimerosDos.size > 0) {
+      // Mostrar coincidencias parciales SOLO si hay coincidencia exacta
+      if (coincidenciaExacta) {
+        // 2. Coincidencias con primeros 2 dígitos
+        if (registrosPrimerosDos.size > 0) {
         const registrosArray = Array.from(registrosPrimerosDos.values());
         resultadoHTML += `
           <div style="border: 1px solid #ffc107; border-radius: 8px; padding: 1rem; background: #fff8e1; margin-bottom: 1rem;">
@@ -524,7 +525,7 @@ function buscarNumeroEnRegistros() {
                 <span style="color: #6c757d; font-size: 0.9em;">${fechaRegistro}</span>
                 
                 <strong style="color: #495057;">🔒 Estado:</strong>
-                <span style="background: #28a745; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.9em;">PAGADO</span>
+                <span style="background: #28a745; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.9em;">CONFIRMADO</span>
                 
                 <strong style="color: #495057;">🎯 Coincidencias:</strong>
                 <span style="color: #856404; font-weight: bold;">${numerosCoincidentes.length} número(s) con patrón ${primerosDos}**</span>
@@ -588,7 +589,7 @@ function buscarNumeroEnRegistros() {
                 <span style="color: #6c757d; font-size: 0.9em;">${fechaRegistro}</span>
                 
                 <strong style="color: #495057;">🔒 Estado:</strong>
-                <span style="background: #28a745; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.9em;">PAGADO</span>
+                <span style="background: #28a745; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.9em;">CONFIRMADO</span>
                 
                 <strong style="color: #495057;">🎯 Coincidencias:</strong>
                 <span style="color: #0c5460; font-weight: bold;">${numerosCoincidentes.length} número(s) con patrón **${ultimosDos}</span>
@@ -603,19 +604,6 @@ function buscarNumeroEnRegistros() {
         
         resultadoHTML += `</div>`;
       }
-
-      // Si no hay coincidencias parciales, mostrar mensaje
-      if (!coincidenciaExacta && registrosPrimerosDos.size === 0 && registrosUltimosDos.size === 0) {
-        resultadoHTML += `
-          <div style="text-align: center; padding: 1.5rem; background: #d4edda; border: 2px solid #28a745; border-radius: 8px;">
-            <div style="font-size: 3em; margin-bottom: 1rem;">🎯</div>
-            <h3 style="margin: 0 0 0.5rem 0; color: #28a745;">¡Número Completamente Disponible!</h3>
-            <p style="margin: 0; font-size: 1.1em; color: #155724;">
-              No se encontraron coincidencias exactas ni parciales para <strong style="background: #28a745; color: white; padding: 4px 8px; border-radius: 4px;">${query}</strong>
-            </p>
-            <p style="margin: 0.5rem 0 0 0; font-size: 0.9em; color: #155724;">Este número y sus patrones están completamente disponibles.</p>
-          </div>
-        `;
       }
 
       resultadoBusqueda.innerHTML = resultadoHTML;
@@ -653,75 +641,80 @@ function cargarRegistrosYEventos() {
     return;
   }
 
+  // Mostrar loading de registros
+  const registrosLoadingSpinner = document.getElementById('registrosLoadingSpinner');
+  const registrosList = document.getElementById('registro-list');
+  
+  if (registrosLoadingSpinner) {
+    registrosLoadingSpinner.style.display = 'flex';
+  }
+  
+  // Ocultar la lista mientras carga
+  if (registrosList) {
+    registrosList.style.display = 'none';
+  }
+
   console.log('Configurando escucha en tiempo real...');
   escucharRegistrosRealtime(registros => {
     console.log('Registros recibidos:', registros.length);
     registrosGlobal = registros;
     
-    // Mostrar indicador de que la app está funcionando
-    const existingIndicator = document.getElementById('connectionStatus');
-    if (!existingIndicator) {
-      const statusDiv = document.createElement('div');
-      statusDiv.id = 'connectionStatus';
-      statusDiv.style.background = '#28a745';
-      statusDiv.style.color = 'white';
-      statusDiv.style.padding = '0.5rem';
-      statusDiv.style.textAlign = 'center';
-      statusDiv.style.fontSize = '0.9rem';
-      statusDiv.textContent = `✓ Conectado - ${registros.length} registro(s) encontrado(s)`;
-      document.body.insertBefore(statusDiv, document.body.firstChild);
-      
-      // Ocultar después de 3 segundos
-      setTimeout(() => {
-        if (statusDiv.parentNode) {
-          statusDiv.remove();
+    // Simular un pequeño delay para mostrar el loading
+    setTimeout(() => {
+      // Limpiar estado de botones
+      Object.keys(numberStatus).forEach(num => {
+        numberStatus[num] = 'available';
+        const btn = document.querySelector(`button[data-number='${num}']`);
+        if (btn) {
+          btn.className = 'number-btn available';
+          btn.disabled = false;
         }
-      }, 3000);
-    }
-    
-    // Limpiar estado de botones
-    Object.keys(numberStatus).forEach(num => {
-      numberStatus[num] = 'available';
-      const btn = document.querySelector(`button[data-number='${num}']`);
-      if (btn) {
-        btn.className = 'number-btn available';
-        btn.disabled = false;
-      }
-    });
+      });
 
-    let confirmados = 0;
-    let pendientes = 0;
+      let confirmados = 0;
+      let pendientes = 0;
 
-    registros.forEach(registro => {
-      if (Array.isArray(registro.numbers)) {
-        registro.numbers.forEach(num => {
-          numberStatus[num] = registro.estado;
-          const btn = document.querySelector(`button[data-number='${num}']`);
-          if (btn) {
-            if (registro.estado === 'confirmed') {
-              btn.className = 'number-btn unavailable';
-              btn.disabled = true;
-            } else if (registro.estado === 'pending') {
-              btn.className = 'number-btn pending';
-              btn.disabled = true;
+      registros.forEach(registro => {
+        if (Array.isArray(registro.numbers)) {
+          registro.numbers.forEach(num => {
+            numberStatus[num] = registro.estado;
+            const btn = document.querySelector(`button[data-number='${num}']`);
+            if (btn) {
+              if (registro.estado === 'confirmed') {
+                btn.className = 'number-btn unavailable';
+                btn.disabled = true;
+              } else if (registro.estado === 'pending') {
+                btn.className = 'number-btn pending';
+                btn.disabled = true;
+              }
             }
-          }
-        });
+          });
+        }
+
+        if (registro.estado === 'confirmed') confirmados++;
+        else if (registro.estado === 'pending') pendientes++;
+      });
+
+      // Actualizar contadores
+      const confirmadosElement = document.getElementById('confirmadosCount');
+      const pendientesElement = document.getElementById('pendientesCount');
+      if (confirmadosElement) confirmadosElement.textContent = confirmados;
+      if (pendientesElement) pendientesElement.textContent = pendientes;
+
+      // Mostrar todos los registros (sin filtro de búsqueda)
+      if (registrosList) {
+        registrosList.innerHTML = '';
+        registros.forEach(registro => renderRegistro(registro, ''));
       }
-
-      if (registro.estado === 'confirmed') confirmados++;
-      else if (registro.estado === 'pending') pendientes++;
-    });
-
-    // Actualizar contadores
-    const confirmadosElement = document.getElementById('confirmadosCount');
-    const pendientesElement = document.getElementById('pendientesCount');
-    if (confirmadosElement) confirmadosElement.textContent = confirmados;
-    if (pendientesElement) pendientesElement.textContent = pendientes;
-
-    // Mostrar todos los registros (sin filtro de búsqueda)
-    registrosList.innerHTML = '';
-    registros.forEach(registro => renderRegistro(registro, ''));
+      
+      // Ocultar loading y mostrar lista
+      if (registrosLoadingSpinner) {
+        registrosLoadingSpinner.style.display = 'none';
+      }
+      if (registrosList) {
+        registrosList.style.display = 'flex';
+      }
+    }, 800); // Loading visible por 0.8 segundos
   });
 
   // Registro de prueba automático para verificar despliegue
@@ -795,6 +788,47 @@ form.addEventListener('submit', (e) => {
     estado: 'pending'
   };
 
+  // Mostrar mensaje de confirmación inmediato
+  const confirmationDiv = document.getElementById('confirmation');
+  if (confirmationDiv) {
+    confirmationDiv.innerHTML = `
+      <div style="background: #28a745; color: white; padding: 1rem; border-radius: 8px; margin-top: 1rem; text-align: center;">
+        <strong>✅ Registro exitoso!</strong><br>
+        <span style="font-size: 0.9rem;">Tu registro se ha guardado correctamente</span>
+      </div>
+    `;
+    
+    // Ocultar mensaje después de 6 segundos
+    setTimeout(() => {
+      confirmationDiv.innerHTML = '';
+    }, 6000);
+  }
+
+  // Marcar números como pendientes inmediatamente en la UI
+  numbers.forEach(num => {
+    numberStatus[num] = 'pending';
+    const btn = document.querySelector(`button[data-number='${num}']`);
+    if (btn) {
+      btn.className = 'number-btn pending';
+      btn.disabled = true;
+    }
+  });
+
+  // Agregar inmediatamente el registro a la lista visual (si está visible)
+  const registrosList = document.getElementById('registro-list');
+  if (registrosList && registrosList.offsetParent !== null) {
+    // Solo agregar si la sección de registros es visible
+    renderRegistro(registro, '');
+    
+    // Actualizar contadores
+    const pendientesElement = document.getElementById('pendientesCount');
+    if (pendientesElement) {
+      const currentCount = parseInt(pendientesElement.textContent) || 0;
+      pendientesElement.textContent = currentCount + 1;
+    }
+  }
+
+  // Guardar en Firebase
   if (typeof guardarRegistroFirebase !== 'undefined') {
     console.log('Guardando registro:', registro);
     guardarRegistroFirebase(registro);
@@ -802,13 +836,7 @@ form.addEventListener('submit', (e) => {
     console.error('La función guardarRegistroFirebase no está definida');
   }
 
-  // Marcar números como pendientes
-  numbers.forEach(num => {
-    numberStatus[num] = 'pending';
-    const btn = document.querySelector(`button[data-number='${num}']`);
-    if (btn) btn.className = 'number-btn selected';
-  });
-
+  // Limpiar formulario y selección
   selectedNumbers.clear();
   renderSelectedNumbers();
   updateTotal();
@@ -817,11 +845,63 @@ form.addEventListener('submit', (e) => {
 
 // Crear botones del 0000 al 9999
 console.log('Creando botones numéricos...');
-for (let i = 0; i <= 9999; i++) {
-  numberStatus[i] = 'available';
-  grid.appendChild(createButton(i));
+
+// Mostrar loading y ocultar grid
+const numbersLoadingSpinner = document.getElementById('numbersLoadingSpinner');
+const numberGrid = document.getElementById('numberGrid');
+
+if (numbersLoadingSpinner) {
+  numbersLoadingSpinner.style.display = 'flex';
 }
-console.log('✓ 10,000 botones numéricos creados');
+if (numberGrid) {
+  numberGrid.style.display = 'none';
+}
+
+// Función para crear los números con delay para mejor UX
+function createNumbersWithProgress() {
+  const batchSize = 1000; // Crear números en lotes de 1000
+  let currentIndex = 0;
+  
+  function createBatch() {
+    const endIndex = Math.min(currentIndex + batchSize, 10000);
+    
+    for (let i = currentIndex; i < endIndex; i++) {
+      numberStatus[i] = 'available';
+      grid.appendChild(createButton(i));
+    }
+    
+    currentIndex = endIndex;
+    
+    // Actualizar texto de progreso
+    if (numbersLoadingSpinner) {
+      const progressText = numbersLoadingSpinner.querySelector('.loading-subtext');
+      if (progressText) {
+        progressText.textContent = `Generando números... ${currentIndex}/10,000`;
+      }
+    }
+    
+    // Si no hemos terminado, continuar con el siguiente lote
+    if (currentIndex < 10000) {
+      setTimeout(createBatch, 10); // Pequeño delay entre lotes
+    } else {
+      // Números completados, ocultar loading y mostrar grid
+      console.log('✓ 10,000 botones numéricos creados');
+      
+      if (numbersLoadingSpinner) {
+        numbersLoadingSpinner.style.display = 'none';
+      }
+      if (numberGrid) {
+        numberGrid.style.display = 'grid';
+      }
+    }
+  }
+  
+  // Iniciar la creación de números
+  createBatch();
+}
+
+// Iniciar la creación de números
+createNumbersWithProgress();
 
 // Buscador de números
 const searchInput = document.getElementById('searchInput');
