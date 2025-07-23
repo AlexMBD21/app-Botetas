@@ -79,10 +79,14 @@
 
   <!---  ocultamineto de registros realizado --->
     <script>
-      // Oculta la sección por defecto
+      // Oculta las secciones por defecto
       document.addEventListener('DOMContentLoaded', function() {
         var regSection = document.querySelector('.registro-guardado');
+        var busquedaSection = document.querySelector('.busqueda-numeros');
+        
         if (regSection) regSection.style.display = 'none';
+        if (busquedaSection) busquedaSection.style.display = 'none';
+        
         // Verifica el parámetro token en la URL
         var params = new URLSearchParams(window.location.search);
         var token = params.get('token');
@@ -90,14 +94,17 @@
           // Busca el usuario en la base de datos
           window.firebase.database().ref('usuarios/' + token).once('value').then(function(snapshot) {
             if (snapshot.exists()) {
-              regSection.style.display = '';
+              if (regSection) regSection.style.display = '';
+              if (busquedaSection) busquedaSection.style.display = '';
             } else {
-              regSection.style.display = 'none';
+              if (regSection) regSection.style.display = 'none';
+              if (busquedaSection) busquedaSection.style.display = 'none';
               alert('ID de usuario no válido. No tienes acceso a los registros.');
             }
           });
         } else {
-          regSection.style.display = 'none';
+          if (regSection) regSection.style.display = 'none';
+          if (busquedaSection) busquedaSection.style.display = 'none';
         }
       });
     </script>
