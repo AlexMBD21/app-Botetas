@@ -41,8 +41,14 @@
       <div id="confirmation"></div>
     </section>
 
-    <section class="registro-guardado glass">
+    <section class="registro-guardado glass" style="margin-top: 2rem;">
       <h2>Registros Realizados</h2>
+     <div id="registroCounts" style="text-align:right; font-weight:bold; margin-bottom: 1rem;">
+     <span style="color: rgb(170, 170, 180);">Confirmados: <span id="confirmadosCount">0 </span></span> |
+     <span style="color: rgb(170, 170, 180);">Pendientes: <span id="pendientesCount">0 </span></span>
+     </div>
+
+
       <div class="registro-search-wrapper">
         <input type="text" id="registroSearchBar" placeholder="Boleta" maxlength="4" />
         <button id="registroSearchBtn" type="button">Buscar</button>
@@ -52,10 +58,6 @@
       </div>
       <div class="registro-list" id="registro-list"></div>
     </section>
-
-
-
-
   <!---  ocultamineto de registros realizado --->
     <script>
       // Oculta la sección por defecto
@@ -85,13 +87,23 @@
     </section>
   </main>
 
-  <!-- Modal para mostrar registro (opcional, lo puedes usar si quieres) -->
-  <div id="registroModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); align-items:center; justify-content:center; z-index:1000;">
-    <div style="background:white; padding:1.5rem; border-radius:10px; max-width:90%; width:400px; position: relative;">
-      <button id="closeModalBtn" style="position:absolute; top:10px; right:10px; background:none; border:none; font-size:1.5rem; cursor:pointer;">❌</button>
-      <div id="modalRegistro"></div>
-    </div>
-  </div>
+ <!-- Burbuja informativa de colores -->
+<div class="color-info-bubble" id="colorInfoBubble">
+  <button class="close-bubble" onclick="closeColorInfo()">✖</button>
+  <h4>Significado de colores:</h4>
+  <ul>
+    <li><span class="circle green"></span> Disponible</li>
+    <li><span class="circle red"></span> No disponible</li>
+    <li><span class="circle blue"></span> Pendiente de pago</li>
+  </ul>
+</div>
+
+<script>
+  function closeColorInfo() {
+    const bubble = document.getElementById('colorInfoBubble');
+    if (bubble) bubble.style.display = 'none';
+  }
+</script>
 
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-database-compat.js"></script>

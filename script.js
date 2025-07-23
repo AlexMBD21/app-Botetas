@@ -429,6 +429,10 @@ escucharRegistrosRealtime(registros => {
 
   // Aquí es donde debes reemplazar la lógica de marcado de números con el código que te pasé:
   if (Array.isArray(registros)) {
+     let confirmados = 0;
+  let pendientes = 0;
+
+  if (Array.isArray(registros)) {
     registros.forEach(registro => {
       if (Array.isArray(registro.numbers)) {
         registro.numbers.forEach(num => {
@@ -445,8 +449,18 @@ escucharRegistrosRealtime(registros => {
           }
         });
       }
+
+      if (registro.estado === 'confirmed') confirmados++;
+      else if (registro.estado === 'pending') pendientes++;
+
       renderRegistro(registro);
     });
+  }
+
+  // Actualizar el conteo visual
+  document.getElementById('confirmadosCount').textContent = confirmados;
+  document.getElementById('pendientesCount').textContent = pendientes;
+
   }
 
   if (loadingSpinner) loadingSpinner.style.display = 'none';
