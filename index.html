@@ -1,35 +1,32 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Rifa por Influencer</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-
   <header>
     <h1>El Compa Herna 🎁</h1>
   </header>
 
   <main class="container">
-   <section class="numbers-section glass">
-  <h2>Selecciona tus números</h2>
+    <section class="numbers-section glass">
+      <h2>Selecciona tus números</h2>
 
-  <div class="search-wrapper">
-    <input type="text" id="searchInput" placeholder="Busca tu número" maxlength="4" />
-    <button id="clearSearch" title="Limpiar búsqueda">Limpiar</button>
-  </div>
+      <div class="search-wrapper">
+        <input type="text" id="searchInput" placeholder="Busca tu número" maxlength="4" />
+        <button id="clearSearch" title="Limpiar búsqueda">Limpiar</button>
+      </div>
 
-  <div id="numberGrid" class="scroll-grid"></div>
+      <div id="numberGrid" class="scroll-grid"></div>
 
-  <!-- Aquí mostramos cuántos números están seleccionados -->
-  <p id="selectedCount" class="selected-count-text">Has seleccionado 0 números.</p>
-</section>
-
+      <p id="selectedCount" class="selected-count-text">Has seleccionado 0 números.</p>
+    </section>
 
     <section class="form-section glass">
-      <h2>Registra tus numeros</h2>
+      <h2>Registra tus números</h2>
       <form id="registrationForm">
         <label for="name">Nombre</label>
         <input type="text" id="name" placeholder="Tu nombre" required />
@@ -43,15 +40,14 @@
       </form>
       <div id="confirmation"></div>
     </section>
-  
 
     <section class="registro-guardado glass">
       <h2>Registros Realizados</h2>
       <div class="registro-search-wrapper">
-        <input type="text" id="registroSearchBar" placeholder="Boleta" />
+        <input type="text" id="registroSearchBar" placeholder="Boleta" maxlength="4" />
         <button id="registroSearchBtn" type="button">Buscar</button>
       </div>
-      <div id="loadingSpinner" style="display:none;text-align:center;padding:10px;">
+      <div id="loadingSpinner" style="display:none; text-align:center; padding:10px;">
         <span style="font-size:2em;">⏳</span> <span>Cargando registros...</span>
       </div>
       <div class="registro-list" id="registro-list"></div>
@@ -88,6 +84,15 @@
     
     </section>
   </main>
+
+  <!-- Modal para mostrar registro (opcional, lo puedes usar si quieres) -->
+  <div id="registroModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); align-items:center; justify-content:center; z-index:1000;">
+    <div style="background:white; padding:1.5rem; border-radius:10px; max-width:90%; width:400px; position: relative;">
+      <button id="closeModalBtn" style="position:absolute; top:10px; right:10px; background:none; border:none; font-size:1.5rem; cursor:pointer;">❌</button>
+      <div id="modalRegistro"></div>
+    </div>
+  </div>
+
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-database-compat.js"></script>
   <script src="firebaseConfig.js"></script>
