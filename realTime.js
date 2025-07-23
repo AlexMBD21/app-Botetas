@@ -36,13 +36,16 @@ function escucharRegistrosRealtime(callback) {
 }
 
 
-// Cargar registros guardados en el DOM al iniciar (llamado desde script.js)
 function cargarRegistrosAlIniciar(callback) {
-  const registros = obtenerRegistrosLocal();
-  if (typeof callback === 'function') {
-    registros.forEach(callback);
-  }
+  db.ref('registros').once('value', snapshot => {
+    const data = snapshot.val() || {};
+    const registros = Object.values(data);
+    if (typeof callback === 'function') {
+      callback(registros);
+    }
+  });
 }
+
 
 // Asegurarse de restaurar el estado de los botones y lista de registros al recargar
 function restaurarEstado(grid, registrosList, crearElementoCallback) {

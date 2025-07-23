@@ -7,8 +7,8 @@ const form = document.getElementById('registrationForm');
 const registrosList = document.getElementById('registro-list');
 
 // Configuración
-const pricePerTicket = 2000;
-const timeoutMs = 60 * 60 * 1000; // 1 hora
+const pricePerTicket = 4000;
+const timeoutMs = 30 * 60 * 1000; // 30 minutos
 const numberStatus = {}; // Estado por número
 
 
@@ -17,12 +17,25 @@ const numberStatus = {}; // Estado por número
 function createButton(number) {
   const btn = document.createElement('button');
   btn.textContent = number.toString().padStart(4, '0');
-  btn.className = 'number-btn available';
   btn.dataset.number = number;
 
+  const estado = numberStatus[number];
+
+  // Asigna clase y bloqueo según estado
+  if (estado === 'confirmed') {
+    btn.className = 'number-btn unavailable';
+    btn.disabled = true;
+  } else if (estado === 'pending') {
+    btn.className = 'number-btn pending';
+    btn.disabled = true;
+  } else {
+    btn.className = 'number-btn available';
+  }
+
+  // Interacción de usuario solo si está disponible
   btn.addEventListener('click', () => {
-    const estado = numberStatus[number];
-    if (estado === 'confirmed') return;
+    const estadoActual = numberStatus[number];
+    if (estadoActual === 'pending' || estadoActual === 'confirmed') return;
 
     if (selectedNumbers.has(number)) {
       selectedNumbers.delete(number);
@@ -38,6 +51,7 @@ function createButton(number) {
 
   return btn;
 }
+
 
 // Renderizar selección
 function renderSelectedNumbers() {
@@ -403,30 +417,42 @@ window.addEventListener('DOMContentLoaded', () => {
   const loadingSpinner = document.getElementById('loadingSpinner');
   if (loadingSpinner) loadingSpinner.style.display = 'block';
 
-  escucharRegistrosRealtime(registros => {
-    registrosList.innerHTML = '';
-    // Primero, liberar todos los números
-    Object.keys(numberStatus).forEach(num => {
-      numberStatus[num] = 'available';
-      const btn = document.querySelector(`button[data-number='${num}']`);
-      if (btn) btn.className = 'number-btn available';
-    });
-
-    // Marcar ocupados y renderizar registros
-    if (Array.isArray(registros)) {
-      registros.forEach(registro => {
-        if (Array.isArray(registro.numbers)) {
-          registro.numbers.forEach(num => {
-            numberStatus[num] = registro.estado === 'confirmed' ? 'confirmed' : 'pending';
-            const btn = document.querySelector(`button[data-number='${num}']`);
-            if (btn) {
-              btn.className = registro.estado === 'confirmed' ? 'number-btn unavailable' : 'number-btn selected';
-            }
-          });
-        }
-        renderRegistro(registro);
-      });
-    }
-    if (loadingSpinner) loadingSpinner.style.display = 'none';
+  
+escucharRegistrosRealtime(registros => {
+  registrosList.innerHTML = '';
+  // Primero, liberar todos los números
+  Object.keys(numberStatus).forEach(num => {
+    numberStatus[num] = 'available';
+    const btn = document.querySelector(`button[data-number='${num}']`);
+    if (btn) btn.className = 'number-btn available';
   });
+
+  // Aquí es donde debes reemplazar la lógica de marcado de números con el código que te pasé:
+  if (Array.isArray(registros)) {
+    registros.forEach(registro => {
+      if (Array.isArray(registro.numbers)) {
+        registro.numbers.forEach(num => {
+          numberStatus[num] = registro.estado === 'confirmed' ? 'confirmed' : 'pending';
+          const btn = document.querySelector(`button[data-number='${num}']`);
+          if (btn) {
+            if (registro.estado === 'confirmed') {
+              btn.className = 'number-btn unavailable';
+              btn.disabled = true;
+            } else {
+              btn.className = 'number-btn pending';
+              btn.disabled = true;
+            }
+          }
+        });
+      }
+      renderRegistro(registro);
+    });
+  }
+
+  if (loadingSpinner) loadingSpinner.style.display = 'none';
 });
+
+
+
+});
+
