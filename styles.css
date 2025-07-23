@@ -27,6 +27,87 @@ header {
   color: #fff;
   text-align: center;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* =============== INDICADOR DE CONEXIÓN =============== */
+.connection-indicator {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.connection-light {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.connection-light.connecting {
+  background: #ffc107;
+  animation: pulse 1.5s infinite;
+}
+
+.connection-light.connected {
+  background: #28a745;
+  box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+}
+
+.connection-light.disconnected {
+  background: #dc3545;
+  box-shadow: 0 0 10px rgba(220, 53, 69, 0.5);
+}
+
+.connection-text {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #fff;
+  white-space: nowrap;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+  header {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem 0.5rem;
+  }
+  
+  .connection-indicator {
+    position: static;
+    align-self: flex-end;
+    padding: 0.3rem 0.8rem;
+    font-size: 0.7rem;
+  }
+  
+  .connection-light {
+    width: 10px;
+    height: 10px;
+  }
 }
 
 /* =============== CONTENEDOR GENERAL =============== */
@@ -529,5 +610,160 @@ button[type="submit"]:hover {
     font-size: 0.95rem;
     top: 5px;
     right: 6px;
+  }
+}
+
+/* =============== SECCIÓN DE BÚSQUEDA DE NÚMEROS =============== */
+.busqueda-numeros {
+  margin-top: 2rem;
+}
+
+.busqueda-numeros h2 {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.busqueda-numeros .registro-search-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+}
+
+.busqueda-numeros .input-container {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+  max-width: 300px;
+}
+
+.busqueda-numeros #busquedaNumeroInput {
+  width: 100%;
+  padding: 12px 40px 12px 12px;
+  font-size: 16px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.busqueda-numeros #clearBusquedaBtn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  display: none;
+  font-size: 16px;
+  width: 24px;
+  height: 24px;
+  align-items: center;
+  justify-content: center;
+}
+
+.busqueda-numeros #clearBusquedaBtn:hover {
+  background-color: #f8f9fa;
+  color: #dc3545;
+}
+
+.busqueda-numeros #busquedaNumeroBtn {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0,123,255,0.3);
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.busqueda-numeros #resultadoBusqueda {
+  margin-top: 1rem;
+  min-height: 100px;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  overflow-x: auto;
+}
+
+/* Mostrar botón de limpiar cuando hay texto */
+.busqueda-numeros #busquedaNumeroInput:not(:placeholder-shown) ~ #clearBusquedaBtn {
+  display: flex !important;
+}
+
+/* =============== MEDIA QUERIES PARA BÚSQUEDA =============== */
+@media (max-width: 768px) {
+  .busqueda-numeros .registro-search-wrapper {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .busqueda-numeros .input-container {
+    min-width: unset;
+    max-width: unset;
+    width: 100%;
+    margin-bottom: 8px;
+  }
+  
+  .busqueda-numeros .registro-search-wrapper button {
+    width: 100%;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .busqueda-numeros {
+    padding: 1rem 0.75rem;
+  }
+  
+  .busqueda-numeros #busquedaNumeroInput {
+    font-size: 16px;
+    padding: 14px 40px 14px 12px;
+  }
+  
+  .busqueda-numeros #busquedaNumeroBtn {
+    padding: 14px 20px;
+    font-size: 16px;
+  }
+  
+  /* Hacer que los resultados sean más legibles en móvil */
+  .busqueda-numeros #resultadoBusqueda {
+    padding: 0.75rem;
+    font-size: 14px;
+  }
+  
+  /* Ajustar el grid de información en móvil */
+  .busqueda-numeros #resultadoBusqueda .grid-info {
+    display: block;
+    gap: 0.25rem;
+  }
+  
+  .busqueda-numeros #resultadoBusqueda .grid-info > * {
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+  
+  .busqueda-numeros #resultadoBusqueda .grid-info > strong {
+    margin-bottom: 0.25rem;
+    font-size: 0.9em;
+  }
+}
+
+/* Hover effects para desktop */
+@media (min-width: 769px) {
+  .busqueda-numeros #busquedaNumeroBtn:hover {
+    background: linear-gradient(135deg, #0056b3, #004085);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,123,255,0.4);
   }
 }
