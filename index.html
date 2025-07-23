@@ -24,7 +24,16 @@
         <button id="clearSearch" title="Limpiar búsqueda">Limpiar</button>
       </div>
 
-      <div id="numberGrid" class="scroll-grid"></div>
+      <!-- Loading indicator para los números -->
+      <div id="numbersLoadingSpinner" class="numbers-loading">
+        <div class="loading-spinner-container">
+          <div class="loading-spinner"></div>
+          <p>Cargando números...</p>
+          <p class="loading-subtext">Generando 10,000 números disponibles</p>
+        </div>
+      </div>
+
+      <div id="numberGrid" class="scroll-grid" style="display: none;"></div>
 
       <p id="selectedCount" class="selected-count-text">Has seleccionado 0 números.</p>
     </section>
@@ -52,6 +61,15 @@
      <span style="color: rgb(170, 170, 180);">Pendientes: <span id="pendientesCount">0 </span></span>
      </div>
 
+      <!-- Loading indicator para la lista de registros -->
+      <div id="registrosLoadingSpinner" class="registros-loading" style="display: none;">
+        <div class="loading-spinner-container">
+          <div class="loading-spinner"></div>
+          <p>Cargando registros...</p>
+          <p class="loading-subtext">Obteniendo información actualizada</p>
+        </div>
+      </div>
+
       <div id="loadingSpinner" style="display:none; text-align:center; padding:10px;">
         <span style="font-size:2em;">⏳</span> <span>Cargando registros...</span>
       </div>
@@ -66,7 +84,7 @@
           <input type="text" id="busquedaNumeroInput" placeholder="Ingresa número (ej: 1234)" maxlength="4" />
           <button id="clearBusquedaBtn" type="button" title="Limpiar búsqueda">✖</button>
         </div>
-        <button id="busquedaNumeroBtn" type="button">🔍 Buscar</button>
+        <button id="busquedaNumeroBtn" type="button">Buscar</button>
       </div>
       
       <div id="resultadoBusqueda">
