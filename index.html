@@ -9,6 +9,10 @@
 <body>
   <header>
     <h1>El Compa Herna 🎁</h1>
+    <div class="connection-indicator" id="connectionIndicator">
+      <div class="connection-light" id="connectionLight"></div>
+      <span class="connection-text" id="connectionText">Conectando...</span>
+    </div>
   </header>
 
   <main class="container">
@@ -48,16 +52,31 @@
      <span style="color: rgb(170, 170, 180);">Pendientes: <span id="pendientesCount">0 </span></span>
      </div>
 
-
-      <div class="registro-search-wrapper">
-        <input type="text" id="registroSearchBar" placeholder="Boleta" maxlength="4" />
-        <button id="registroSearchBtn" type="button">Buscar</button>
-      </div>
       <div id="loadingSpinner" style="display:none; text-align:center; padding:10px;">
         <span style="font-size:2em;">⏳</span> <span>Cargando registros...</span>
       </div>
       <div class="registro-list" id="registro-list"></div>
     </section>
+
+    <!-- Contenedor separado para búsqueda de números -->
+    <section class="busqueda-numeros glass" style="margin-top: 2rem;">
+      <h2>Buscar Número en Registros</h2>
+      <div class="registro-search-wrapper">
+        <div class="input-container">
+          <input type="text" id="busquedaNumeroInput" placeholder="Ingresa número (ej: 1234)" maxlength="4" />
+          <button id="clearBusquedaBtn" type="button" title="Limpiar búsqueda">✖</button>
+        </div>
+        <button id="busquedaNumeroBtn" type="button">🔍 Buscar</button>
+      </div>
+      
+      <div id="resultadoBusqueda">
+        <p style="color: #6c757d; text-align: center; margin: 0;">Ingresa un número para comenzar la búsqueda</p>
+      </div>
+    </section>
+
+
+
+
   <!---  ocultamineto de registros realizado --->
     <script>
       // Oculta la sección por defecto
@@ -97,6 +116,7 @@
     <li><span class="circle blue"></span> Pendiente de pago</li>
   </ul>
 </div>
+
 
 <script>
   function closeColorInfo() {
