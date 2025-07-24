@@ -24,6 +24,41 @@ function eliminarRegistroFirebase(id) {
   db.ref('registros/' + id).remove();
 }
 
+// Eliminar todos los registros de Firebase
+function eliminarTodosLosRegistrosFirebase() {
+  return db.ref('registros').remove();
+}
+
+// Guardar configuración de sorteo en Firebase
+function guardarConfiguracionSorteoFirebase(config) {
+  return db.ref('configuracion').set(config);
+}
+
+// Obtener configuración de sorteo desde Firebase
+function obtenerConfiguracionSorteo(callback) {
+  db.ref('configuracion').once('value', snapshot => {
+    const config = snapshot.val();
+    if (typeof callback === 'function') {
+      callback(config);
+    }
+  });
+}
+
+// Bloquear registros en Firebase (para sincronización entre clientes)
+function establecerBloqueoRegistros(bloqueado) {
+  return db.ref('configuracion/registrosBloqueados').set(bloqueado);
+}
+
+// Escuchar cambios en el estado de bloqueo
+function escucharBloqueoRegistros(callback) {
+  db.ref('configuracion/registrosBloqueados').on('value', snapshot => {
+    const bloqueado = snapshot.val();
+    if (typeof callback === 'function') {
+      callback(bloqueado);
+    }
+  });
+}
+
 
 function escucharRegistrosRealtime(callback) {
   db.ref('registros').on('value', snapshot => {
