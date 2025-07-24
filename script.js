@@ -165,6 +165,8 @@ function mostrarNotificacionFormulario(mensaje, tipo = 'success', duracion = nul
     border: 1px solid rgba(255,255,255,0.2);
     backdrop-filter: blur(10px);
     min-width: 400px;
+    max-width: 100%;
+    box-sizing: border-box;
   `;
   
   // Estilos para el contenido
@@ -626,7 +628,7 @@ function crearTemporizadorVisual(timestampLimite, onExpire, contenedor, registro
 }
 
 // Función para renderizar registro (parte corregida del temporizador)
-function renderRegistro(registro, highlightNum = '') {
+function renderRegistro(registro, highlightNum = '', esRecargaCompleta = false) {
   if (!registro || !registro.name) return;
 
   console.log('Renderizando registro:', {
@@ -634,7 +636,8 @@ function renderRegistro(registro, highlightNum = '') {
     estado: registro.estado,
     expiraEn: registro.expiraEn,
     tiempoRestante: registro.expiraEn ? registro.expiraEn - Date.now() : 'N/A',
-    id: registro.id
+    id: registro.id,
+    esRecargaCompleta: esRecargaCompleta
   });
 
   const { name, phone, numbers, timestamp, expiraEn, estado, id } = registro;
@@ -805,7 +808,16 @@ function renderRegistro(registro, highlightNum = '') {
     }
   }
 
-  registrosList.appendChild(item);
+  // Agregar el elemento a la lista
+  // Si es una recarga completa, usar appendChild porque los registros ya vienen ordenados
+  // Si es un registro individual nuevo, usar prepend para ponerlo al principio
+  if (esRecargaCompleta) {
+    console.log('Agregando registro al final (recarga completa):', name);
+    registrosList.appendChild(item);
+  } else {
+    console.log('Agregando registro al principio (nuevo registro):', name);
+    registrosList.prepend(item);
+  }
 }
 
 // Función de búsqueda - Números de rifa, teléfonos y sistema de doble ganador
@@ -870,6 +882,13 @@ function buscarNumeroEnRegistros() {
         });
 
         if (registrosEncontrados.length > 0) {
+          // Ordenar registros por timestamp descendente (más nuevos primero)
+          const registrosOrdenados = registrosEncontrados.sort((a, b) => {
+            const timestampA = a.timestamp || 0;
+            const timestampB = b.timestamp || 0;
+            return timestampB - timestampA; // Descendente
+          });
+          
           let resultadoHTML = `
             <div style="border: 2px solid #007bff; border-radius: 12px; padding: 1.5rem; background: linear-gradient(135deg, #f0f8ff, #e6f3ff); margin-bottom: 1rem;">
               <div style="text-align: center; margin-bottom: 1rem;">
@@ -881,7 +900,7 @@ function buscarNumeroEnRegistros() {
               </div>
           `;
 
-          registrosEncontrados.forEach((registro, index) => {
+          registrosOrdenados.forEach((registro, index) => {
             const { name, phone, numbers, timestamp, estado, id } = registro;
             
             // Crear HTML de números
@@ -1662,6 +1681,8 @@ window.addEventListener('DOMContentLoaded', () => {
         estado: 'pending'
       };
 
+      console.log('Creando registro con timestamp:', timestamp, 'Fecha:', new Date(timestamp).toLocaleString());
+
       // Preparar datos para el registro
       const numerosTexto = numbers.map(n => n.toString().padStart(4, '0')).join(', ');
       const total = numbers.length * pricePerTicket;
@@ -1775,18 +1796,58 @@ window.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    let registrosAnteriores = [];
+
     escucharRegistrosRealtime(registros => {
       console.log('Registros recibidos desde Firebase:', registros.length);
       registrosGlobal = registros;
+      
+      // Detectar si hay registros nuevos comparando con la lista anterior
+      const registrosNuevos = registros.filter(registro => 
+        !registrosAnteriores.find(anterior => anterior.id === registro.id)
+      );
+      
+      console.log('Registros nuevos detectados:', registrosNuevos.length, registrosNuevos.map(r => r.name));
       
       // Si hay búsqueda activa, NO actualizar la lista visual
       if (busquedaNumeroInput && busquedaNumeroInput.value.trim()) {
         console.log('Búsqueda activa, solo actualizando estado de números');
       } else {
-        // Actualizar lista visual de registros
-        registrosList.innerHTML = '';
-        registros.forEach(registro => renderRegistro(registro, ''));
+        // Si solo hay registros nuevos (1 o pocos), agregarlos al principio
+        if (registrosNuevos.length > 0 && registrosNuevos.length <= 3 && registrosAnteriores.length > 0) {
+          console.log('Agregando solo registros nuevos al principio');
+          // Ordenar los nuevos por timestamp descendente y agregarlos al principio
+          const nuevosOrdenados = registrosNuevos.sort((a, b) => {
+            const timestampA = a.timestamp || 0;
+            const timestampB = b.timestamp || 0;
+            return timestampB - timestampA;
+          });
+          nuevosOrdenados.forEach(registro => renderRegistro(registro, '', false)); // false = no es recarga completa
+        } else {
+          // Recarga completa - limpiar y recargar todo
+          console.log('Recarga completa de la lista');
+          registrosList.innerHTML = '';
+          
+          // Ordenar registros por timestamp descendente (más nuevos primero)
+          const registrosParaOrdenar = [...registros];
+          const registrosOrdenados = registrosParaOrdenar.sort((a, b) => {
+            const timestampA = a.timestamp || 0;
+            const timestampB = b.timestamp || 0;
+            return timestampB - timestampA; // Descendente (más nuevos primero)
+          });
+          
+          console.log('Registros ordenados por timestamp:', registrosOrdenados.map(r => ({ 
+            name: r.name, 
+            timestamp: r.timestamp, 
+            fecha: new Date(r.timestamp).toLocaleString() 
+          })));
+          
+          registrosOrdenados.forEach(registro => renderRegistro(registro, '', true)); // true = es recarga completa
+        }
       }
+      
+      // Actualizar la lista de registros anteriores para la próxima comparación
+      registrosAnteriores = [...registros];
       
       // ACTUALIZAR ESTADO DE TODOS LOS NÚMEROS
       console.log('Actualizando estado de números...');
