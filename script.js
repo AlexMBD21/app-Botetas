@@ -1192,17 +1192,64 @@ function confirmarPagoDesdeResultado(registroId, nombrePersona) {
     db.ref('registros/' + registroId).update({ estado: 'confirmed' })
       .then(() => {
         console.log('Pago confirmado exitosamente para:', nombrePersona);
-        alert(`✅ ¡Pago confirmado!\n\nEl registro de ${nombrePersona} ha sido marcado como confirmado.`);
+        
+        // Buscar el registro en la lista principal y actualizarlo
+        const registroEnLista = document.querySelector(`[data-registro-id="${registroId}"]`);
+        if (registroEnLista) {
+          console.log('Actualizando registro en lista principal:', registroId);
+          
+          // Buscar y remover el botón "Confirmar Pago" del registro en la lista
+          const confirmarBtnEnLista = registroEnLista.querySelector('.btn-verificar');
+          if (confirmarBtnEnLista) {
+            confirmarBtnEnLista.remove();
+          }
+          
+          // Buscar y eliminar el temporizador ya que está confirmado
+          const temporizadorEnLista = registroEnLista.querySelector('.temporizador');
+          if (temporizadorEnLista) {
+            temporizadorEnLista.remove();
+          }
+          
+          // Actualizar números a estado confirmado en la interfaz
+          db.ref('registros/' + registroId).once('value').then(snapshot => {
+            const registro = snapshot.val();
+            if (registro && Array.isArray(registro.numbers)) {
+              registro.numbers.forEach(num => {
+                const btn = document.querySelector(`button[data-number='${num}']`);
+                if (btn) {
+                  btn.className = 'number-btn unavailable';
+                  btn.disabled = true;
+                }
+                numberStatus[num] = 'confirmed';
+              });
+            }
+          });
+          
+          // Actualizar contadores
+          const pendientesElement = document.getElementById('pendientesCount');
+          const confirmadosElement = document.getElementById('confirmadosCount');
+          if (pendientesElement) {
+            const currentPendientes = parseInt(pendientesElement.textContent) || 0;
+            pendientesElement.textContent = Math.max(0, currentPendientes - 1);
+          }
+          if (confirmadosElement) {
+            const currentConfirmados = parseInt(confirmadosElement.textContent) || 0;
+            confirmadosElement.textContent = currentConfirmados + 1;
+          }
+        }
+        
+        // Mostrar notificación de éxito
+        mostrarNotificacion(`✅ ¡Pago confirmado!\n\nEl registro de ${nombrePersona} ha sido marcado como confirmado.`, 'success');
         
         // Volver a ejecutar la búsqueda para actualizar los resultados
         buscarNumeroEnRegistros();
       })
       .catch(error => {
         console.error('Error al confirmar pago:', error);
-        alert('❌ Error al confirmar el pago. Inténtalo de nuevo.');
+        mostrarNotificacion('❌ Error al confirmar el pago. Inténtalo de nuevo.', 'error');
       });
   } else {
-    alert('❌ Error: No hay conexión con la base de datos.');
+    mostrarNotificacion('❌ Error: No hay conexión con la base de datos.', 'error');
   }
 }
 
@@ -1534,30 +1581,47 @@ window.addEventListener('DOMContentLoaded', () => {
   // Configurar buscador de números
   const searchInput = document.getElementById('searchInput');
   const clearSearchBtn = document.getElementById('clearSearch');
+  const searchBtn = document.getElementById('searchBtn');
 
-  if (searchInput && clearSearchBtn) {
-    searchInput.addEventListener('input', () => {
-      const query = searchInput.value.trim();
-      const buttons = document.querySelectorAll('.number-btn');
-      if (!query) {
-        buttons.forEach(btn => {
-          btn.style.display = 'inline-block';
-        });
-        return;
-      }
+  function buscarNumeros() {
+    const query = searchInput.value.trim();
+    const buttons = document.querySelectorAll('.number-btn');
+    if (!query) {
       buttons.forEach(btn => {
-        // Buscar por coincidencia exacta o parcial en el número
-        const num = btn.textContent.replace(/^0+/, ''); // Elimina ceros a la izquierda
-        btn.style.display = (btn.textContent.includes(query) || num.includes(query)) ? 'inline-block' : 'none';
-      });
-    });
-
-    clearSearchBtn.addEventListener('click', () => {
-      searchInput.value = '';
-      document.querySelectorAll('.number-btn').forEach(btn => {
         btn.style.display = 'inline-block';
       });
+      return;
+    }
+    buttons.forEach(btn => {
+      // Buscar por coincidencia exacta o parcial en el número
+      const num = btn.textContent.replace(/^0+/, ''); // Elimina ceros a la izquierda
+      btn.style.display = (btn.textContent.includes(query) || num.includes(query)) ? 'inline-block' : 'none';
     });
+  }
+
+  function limpiarBusqueda() {
+    searchInput.value = '';
+    document.querySelectorAll('.number-btn').forEach(btn => {
+      btn.style.display = 'inline-block';
+    });
+  }
+
+  if (searchInput && clearSearchBtn && searchBtn) {
+    // Buscar mientras escribe
+    searchInput.addEventListener('input', buscarNumeros);
+    
+    // Buscar al hacer Enter
+    searchInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        buscarNumeros();
+      }
+    });
+
+    // Botón buscar
+    searchBtn.addEventListener('click', buscarNumeros);
+
+    // Botón limpiar (X)
+    clearSearchBtn.addEventListener('click', limpiarBusqueda);
   }
   
   // Configurar event listener del formulario

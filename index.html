@@ -20,8 +20,11 @@
       <h2>Selecciona tus números</h2>
 
       <div class="search-wrapper">
-        <input type="text" id="searchInput" placeholder="Busca tu número" maxlength="4" />
-        <button id="clearSearch" title="Limpiar búsqueda">Limpiar</button>
+        <div class="input-container">
+          <input type="text" id="searchInput" placeholder="Busca tu número" maxlength="4" />
+          <button id="clearSearch" type="button" title="Limpiar búsqueda">✖</button>
+        </div>
+        <button id="searchBtn" type="button">Buscar</button>
       </div>
 
       <!-- Loading indicator para los números -->
@@ -72,23 +75,23 @@
       </div>
 
       <!-- Panel de configuración del sorteo (oculto por defecto) -->
-      <div id="panelConfiguracion" style="display: none; background: rgba(255, 193, 7, 0.1); border: 2px solid #ffc107; border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem;">
-        <h3 style="color: #ffc107; margin-bottom: 1rem; text-align: center;">⚙️ Configuración del Sorteo</h3>
+      <div id="panelConfiguracion" style="display: none;">
+        <h3>⚙️ Configuración del Sorteo</h3>
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+        <div class="grid-inputs">
           <div>
-            <label style="display: block; margin-bottom: 0.5rem; font-weight: bold; color: #ffc107;">Fecha del Sorteo:</label>
-            <input type="date" id="fechaSorteoInput" style="width: 100%; padding: 0.5rem; border-radius: 8px; border: 1px solid #ccc;">
+            <label for="fechaSorteoInput">Fecha del Sorteo:</label>
+            <input type="date" id="fechaSorteoInput">
           </div>
           <div>
-            <label style="display: block; margin-bottom: 0.5rem; font-weight: bold; color: #ffc107;">Hora del Sorteo:</label>
-            <input type="time" id="horaSorteoInput" style="width: 100%; padding: 0.5rem; border-radius: 8px; border: 1px solid #ccc;">
+            <label for="horaSorteoInput">Hora del Sorteo:</label>
+            <input type="time" id="horaSorteoInput">
           </div>
         </div>
         
         <div style="margin-bottom: 1rem;">
-          <label style="display: block; margin-bottom: 0.5rem; font-weight: bold; color: #ffc107;">Horas antes del sorteo para cerrar registros:</label>
-          <select id="horasAntesBloqueo" style="width: 100%; padding: 0.5rem; border-radius: 8px; border: 1px solid #ccc;">
+          <label for="horasAntesBloqueo">Horas antes del sorteo para cerrar registros:</label>
+          <select id="horasAntesBloqueo">
             <option value="1">1 hora antes</option>
             <option value="2" selected>2 horas antes</option>
             <option value="3">3 horas antes</option>
@@ -98,17 +101,17 @@
           </select>
         </div>
         
-        <div style="text-align: center;">
-          <button id="guardarConfigBtn" style="background: #28a745; color: white; border: none; padding: 0.8rem 2rem; border-radius: 8px; font-weight: bold; cursor: pointer; margin-right: 0.5rem;">
+        <div class="botones-panel">
+          <button id="guardarConfigBtn">
             💾 Guardar Configuración
           </button>
-          <button id="cancelarConfigBtn" style="background: #6c757d; color: white; border: none; padding: 0.8rem 2rem; border-radius: 8px; font-weight: bold; cursor: pointer;">
+          <button id="cancelarConfigBtn">
             ❌ Cancelar
           </button>
         </div>
         
-        <div id="estadoBloqueo" style="margin-top: 1rem; padding: 1rem; background: rgba(255, 255, 255, 0.1); border-radius: 8px; text-align: center;">
-          <p style="margin: 0; font-weight: bold;">Estado actual: <span id="estadoRegistros">Calculando...</span></p>
+        <div id="estadoBloqueo">
+          <p>Estado actual: <span id="estadoRegistros">Calculando...</span></p>
         </div>
       </div>
 
@@ -132,7 +135,7 @@
       <h2>Buscar Número en Registros</h2>
       <div class="registro-search-wrapper">
         <div class="input-container">
-          <input type="text" id="busquedaNumeroInput" placeholder="Ingresa número (ej: 1234)" maxlength="4" />
+          <input type="text" id="busquedaNumeroInput" placeholder="Número de rifa (ej: 1234) o teléfono (ej: 3201234567)" maxlength="15" />
           <button id="clearBusquedaBtn" type="button" title="Limpiar búsqueda">✖</button>
         </div>
         <button id="busquedaNumeroBtn" type="button">Buscar</button>
