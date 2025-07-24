@@ -188,6 +188,16 @@ button[type="submit"]:hover {
   background: #138496;
 }
 
+/* Botón limpiar todos los registros */
+#limpiarTodosBtn:hover {
+  background: #c82333 !important;
+  transform: scale(1.02);
+}
+
+#limpiarTodosBtn:active {
+  transform: scale(0.98);
+}
+
 /* Total a pagar */
 #totalDisplay {
   margin-top: 1rem;

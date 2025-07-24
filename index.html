@@ -61,6 +61,57 @@
      <span style="color: rgb(170, 170, 180);">Pendientes: <span id="pendientesCount">0 </span></span>
      </div>
 
+      <!-- Botón para limpiar todos los registros -->
+      <div style="text-align: center; margin-bottom: 1rem;">
+        <button id="limpiarTodosBtn" style="background: #dc3545; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: background 0.2s; margin-right: 0.5rem;">
+          🗑️ Limpiar Registros
+        </button>
+        <button id="configurarSorteoBtn" style="background: #ffc107; color: black; border: none; padding: 0.8rem 1.5rem; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: background 0.2s;">
+          ⚙️ Configurar Sorteo
+        </button>
+      </div>
+
+      <!-- Panel de configuración del sorteo (oculto por defecto) -->
+      <div id="panelConfiguracion" style="display: none; background: rgba(255, 193, 7, 0.1); border: 2px solid #ffc107; border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem;">
+        <h3 style="color: #ffc107; margin-bottom: 1rem; text-align: center;">⚙️ Configuración del Sorteo</h3>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <div>
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: bold; color: #ffc107;">Fecha del Sorteo:</label>
+            <input type="date" id="fechaSorteoInput" style="width: 100%; padding: 0.5rem; border-radius: 8px; border: 1px solid #ccc;">
+          </div>
+          <div>
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: bold; color: #ffc107;">Hora del Sorteo:</label>
+            <input type="time" id="horaSorteoInput" style="width: 100%; padding: 0.5rem; border-radius: 8px; border: 1px solid #ccc;">
+          </div>
+        </div>
+        
+        <div style="margin-bottom: 1rem;">
+          <label style="display: block; margin-bottom: 0.5rem; font-weight: bold; color: #ffc107;">Horas antes del sorteo para cerrar registros:</label>
+          <select id="horasAntesBloqueo" style="width: 100%; padding: 0.5rem; border-radius: 8px; border: 1px solid #ccc;">
+            <option value="1">1 hora antes</option>
+            <option value="2" selected>2 horas antes</option>
+            <option value="3">3 horas antes</option>
+            <option value="6">6 horas antes</option>
+            <option value="12">12 horas antes</option>
+            <option value="24">24 horas antes</option>
+          </select>
+        </div>
+        
+        <div style="text-align: center;">
+          <button id="guardarConfigBtn" style="background: #28a745; color: white; border: none; padding: 0.8rem 2rem; border-radius: 8px; font-weight: bold; cursor: pointer; margin-right: 0.5rem;">
+            💾 Guardar Configuración
+          </button>
+          <button id="cancelarConfigBtn" style="background: #6c757d; color: white; border: none; padding: 0.8rem 2rem; border-radius: 8px; font-weight: bold; cursor: pointer;">
+            ❌ Cancelar
+          </button>
+        </div>
+        
+        <div id="estadoBloqueo" style="margin-top: 1rem; padding: 1rem; background: rgba(255, 255, 255, 0.1); border-radius: 8px; text-align: center;">
+          <p style="margin: 0; font-weight: bold;">Estado actual: <span id="estadoRegistros">Calculando...</span></p>
+        </div>
+      </div>
+
       <!-- Loading indicator para la lista de registros -->
       <div id="registrosLoadingSpinner" class="registros-loading" style="display: none;">
         <div class="loading-spinner-container">
