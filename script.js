@@ -1425,7 +1425,7 @@ function eliminarRegistroDesdeResultado(registroId, nombrePersona) {
           registrosGlobal.splice(index, 1);
         }
         
-        mostrarNotificacion(`✅ Registro de ${nombrePersona} eliminado exitosamente`, 'success');
+        mostrarNotificacion(`Registro de ${nombrePersona} eliminado exitosamente`, 'success');
         
         // Limpiar resultados de búsqueda para mostrar que se eliminó
         setTimeout(() => {
@@ -1917,6 +1917,37 @@ window.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
+      // Validación de nombre: solo letras y espacios
+      const namePattern = /^[A-Za-zÀ-ÿ\u00f1\u00d1\s]+$/;
+      if (!namePattern.test(name)) {
+        mostrarNotificacionFormulario('❌ El nombre solo puede contener letras y espacios', 'error', 4000);
+        return;
+      }
+
+      // Validación de longitud del nombre
+      if (name.length < 2) {
+        mostrarNotificacionFormulario('❌ El nombre debe tener al menos 2 caracteres', 'error', 4000);
+        return;
+      }
+
+      if (name.length > 50) {
+        mostrarNotificacionFormulario('❌ El nombre no puede tener más de 50 caracteres', 'error', 4000);
+        return;
+      }
+
+      // Validación de teléfono: solo números y exactamente 10 dígitos
+      const phonePattern = /^[0-9]{10}$/;
+      if (!phonePattern.test(phone)) {
+        mostrarNotificacionFormulario('❌ El teléfono debe tener exactamente 10 dígitos (solo números)', 'error', 4000);
+        return;
+      }
+
+      // Validación adicional: no permitir números repetidos
+      if (/^(\d)\1{9}$/.test(phone)) {
+        mostrarNotificacionFormulario('❌ El número de teléfono no puede tener todos los dígitos iguales', 'error', 4000);
+        return;
+      }
+
       const numbers = Array.from(selectedNumbers);
       const timestamp = Date.now();
       const expiraEn = timestamp + timeoutMs;
@@ -2166,6 +2197,68 @@ window.addEventListener('DOMContentLoaded', () => {
     
     // Registro de prueba automático deshabilitado para evitar registros no deseados
     // La base de datos puede iniciar vacía sin problemas
+  }
+
+  // Validaciones en tiempo real para campos de entrada
+  const nameInput = document.getElementById('name');
+  const phoneInput = document.getElementById('phone');
+
+  if (nameInput) {
+    nameInput.addEventListener('input', function(e) {
+      let value = e.target.value;
+      
+      // Eliminar caracteres no válidos (solo mantener letras, espacios y acentos)
+      value = value.replace(/[^A-Za-zÀ-ÿ\u00f1\u00d1\s]/g, '');
+      
+      // Limitar a 50 caracteres
+      if (value.length > 50) {
+        value = value.substring(0, 50);
+      }
+      
+      // Actualizar el valor si hubo cambios
+      if (value !== e.target.value) {
+        e.target.value = value;
+      }
+    });
+
+    nameInput.addEventListener('blur', function(e) {
+      const value = e.target.value.trim();
+      if (value.length > 0 && value.length < 2) {
+        e.target.setCustomValidity('El nombre debe tener al menos 2 caracteres');
+      } else {
+        e.target.setCustomValidity('');
+      }
+    });
+  }
+
+  if (phoneInput) {
+    phoneInput.addEventListener('input', function(e) {
+      let value = e.target.value;
+      
+      // Eliminar todo lo que no sean números
+      value = value.replace(/[^0-9]/g, '');
+      
+      // Limitar a 10 dígitos
+      if (value.length > 10) {
+        value = value.substring(0, 10);
+      }
+      
+      // Actualizar el valor si hubo cambios
+      if (value !== e.target.value) {
+        e.target.value = value;
+      }
+    });
+
+    phoneInput.addEventListener('blur', function(e) {
+      const value = e.target.value;
+      if (value.length > 0 && value.length !== 10) {
+        e.target.setCustomValidity('El teléfono debe tener exactamente 10 dígitos');
+      } else if (/^(\d)\1{9}$/.test(value)) {
+        e.target.setCustomValidity('El número no puede tener todos los dígitos iguales');
+      } else {
+        e.target.setCustomValidity('');
+      }
+    });
   }
 
   // Llamar a la función de inicialización

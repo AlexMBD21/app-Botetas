@@ -45,10 +45,20 @@
       <h2>Registra tus números</h2>
       <form id="registrationForm">
         <label for="name">Nombre</label>
-        <input type="text" id="name" placeholder="Tu nombre" required />
+        <input type="text" id="name" placeholder="Tu nombre completo" 
+               pattern="[A-Za-zÀ-ÿ\u00f1\u00d1\s]+" 
+               title="Solo se permiten letras y espacios" 
+               minlength="2" 
+               maxlength="50" 
+               required />
 
         <label for="phone">Teléfono</label>
-        <input type="tel" id="phone" placeholder="Número de teléfono" required />
+        <input type="tel" id="phone" placeholder="Ej: 3001234567" 
+               pattern="[0-9]{10}" 
+               title="Debe tener exactamente 10 dígitos (solo números)" 
+               minlength="10" 
+               maxlength="10" 
+               required />
 
         <div id="selectedNumbers"></div>
         <p id="totalDisplay">Total a pagar: $0</p>

@@ -160,9 +160,45 @@ header {
   width: 100%;
   max-width: 100%;
   border-radius: 10px;
-  border: none;
+  border: 2px solid transparent;
   background-color: #ffffff;
   color: black;
+  transition: border-color 0.3s ease;
+}
+
+/* Validation states */
+.form-section input:valid {
+  border-color: #28a745;
+}
+
+.form-section input:invalid {
+  border-color: #dc3545;
+}
+
+.form-section input:focus {
+  outline: none;
+  border-color: #17a2b8;
+}
+
+.form-section input:focus:valid {
+  border-color: #28a745;
+}
+
+.form-section input:focus:invalid {
+  border-color: #dc3545;
+}
+
+/* Validation messages */
+.validation-message {
+  display: block;
+  color: #6c757d;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  font-weight: 500;
+}
+
+.validation-message.valid {
+  color: #6c757d;
 }
 
 .form-section h2 {
