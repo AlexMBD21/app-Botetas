@@ -1765,3 +1765,81 @@ button[type="submit"]:hover {
     word-break: break-all !important;
   }
 }
+
+/* =============== ESTILOS ADICIONALES PARA RESULTADOS DE BÚSQUEDA COMPACTOS =============== */
+
+/* Asegurar que los números se muestren correctamente en móvil */
+#resultadoBusqueda [style*="display: flex"][style*="flex-wrap: wrap"] {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+/* Mejorar botones en móvil */
+#resultadoBusqueda button {
+  min-height: 44px; /* Área mínima táctil */
+  white-space: nowrap;
+}
+
+/* Asegurar que el texto largo se corte correctamente */
+#resultadoBusqueda [style*="word-break: break-word"],
+#resultadoBusqueda [style*="word-break: break-all"] {
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  hyphens: auto;
+}
+
+/* Mejorar grids responsive */
+#resultadoBusqueda [style*="grid-template-columns: repeat(auto-fit"] {
+  width: 100%;
+}
+
+/* Asegurar que los contenedores con overflow hidden funcionen bien */
+#resultadoBusqueda [style*="overflow: hidden"] {
+  max-width: 100vw;
+  box-sizing: border-box;
+}
+
+/* Mejorar scroll en contenedores de números */
+#resultadoBusqueda [style*="overflow-y: auto"] {
+  scrollbar-width: thin;
+  scrollbar-color: #ccc #f9f9f9;
+}
+
+#resultadoBusqueda [style*="overflow-y: auto"]::-webkit-scrollbar {
+  height: 4px;
+  width: 4px;
+}
+
+#resultadoBusqueda [style*="overflow-y: auto"]::-webkit-scrollbar-track {
+  background: #f9f9f9;
+  border-radius: 2px;
+}
+
+#resultadoBusqueda [style*="overflow-y: auto"]::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 2px;
+}
+
+/* Responsive para pantallas muy pequeñas */
+@media (max-width: 320px) {
+  #resultadoBusqueda {
+    padding: 0.5rem;
+  }
+  
+  #resultadoBusqueda [style*="padding: 1rem"] {
+    padding: 0.75rem !important;
+  }
+  
+  #resultadoBusqueda [style*="font-size: 0.9em"] {
+    font-size: 0.8em !important;
+  }
+  
+  #resultadoBusqueda [style*="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr))"] {
+    grid-template-columns: 1fr !important;
+  }
+  
+  #resultadoBusqueda [style*="grid-template-columns: repeat(auto-fit, minmax(120px, 1fr))"] {
+    grid-template-columns: 1fr !important;
+  }
+}

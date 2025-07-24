@@ -112,6 +112,19 @@
           </select>
         </div>
         
+        <div style="margin-bottom: 1rem;">
+          <label for="tiempoTemporizadorInput">⏰ Tiempo del temporizador para confirmar pago (minutos):</label>
+          <select id="tiempoTemporizadorInput">
+            <option value="15">15 minutos</option>
+            <option value="20">20 minutos</option>
+            <option value="30" selected>30 minutos</option>
+            <option value="45">45 minutos</option>
+            <option value="60">1 hora</option>
+            <option value="90">1.5 horas</option>
+            <option value="120">2 horas</option>
+          </select>
+        </div>
+        
         <div class="botones-panel">
           <button id="guardarConfigBtn">
             💾 Guardar Configuración
@@ -146,7 +159,7 @@
       <h2>Buscar Número en Registros</h2>
       <div class="registro-search-wrapper">
         <div class="input-container">
-          <input type="text" id="busquedaNumeroInput" placeholder="Número de rifa (ej: 1234) o teléfono (ej: 3201234567)" maxlength="15" />
+          <input type="text" id="busquedaNumeroInput" placeholder="Número de rifa o teléfono" maxlength="15" />
           <button id="clearBusquedaBtn" type="button" title="Limpiar búsqueda">✖</button>
         </div>
         <button id="busquedaNumeroBtn" type="button">Buscar</button>
