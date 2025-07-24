@@ -80,11 +80,22 @@
         
         <div class="grid-inputs">
           <div>
-            <label for="fechaSorteoInput">Fecha del Sorteo:</label>
+            <label for="valorBoletaInput">💰 Valor de la Boleta (COP):</label>
+            <input type="number" id="valorBoletaInput" min="1000" step="500" placeholder="4000" value="4000">
+          </div>
+          <div>
+            <label for="fechaInicioEventoInput">📅 Fecha de Inicio del Evento:</label>
+            <input type="date" id="fechaInicioEventoInput">
+          </div>
+        </div>
+        
+        <div class="grid-inputs">
+          <div>
+            <label for="fechaSorteoInput">🎯 Fecha del Sorteo:</label>
             <input type="date" id="fechaSorteoInput">
           </div>
           <div>
-            <label for="horaSorteoInput">Hora del Sorteo:</label>
+            <label for="horaSorteoInput">🕐 Hora del Sorteo:</label>
             <input type="time" id="horaSorteoInput">
           </div>
         </div>

@@ -7,7 +7,7 @@ let form;
 let registrosList;
 
 // Configuración
-const pricePerTicket = 4000;
+let pricePerTicket = 4000; // Ahora es variable para poder cambiar desde configuración
 const timeoutMs = 30 * 60 * 1000; // 30 minutos
 const numberStatus = {}; // Estado por número
 
@@ -453,8 +453,30 @@ function iniciarContadorRegresivo() {
     
     if (tiempoRestante <= 0) {
       if (!registrosBloquados) {
+        console.log('⏰ TIEMPO AGOTADO - Bloqueando registros automáticamente');
         registrosBloquados = true;
+        
+        // Establecer bloqueo en Firebase también
+        if (typeof establecerBloqueoRegistros !== 'undefined') {
+          establecerBloqueoRegistros(true).then(() => {
+            console.log('✅ Bloqueo establecido en Firebase');
+          }).catch(error => {
+            console.error('❌ Error al establecer bloqueo en Firebase:', error);
+          });
+        }
+        
         mostrarMensajeBloqueo();
+        
+        // Actualizar estado en el panel de configuración
+        actualizarEstadoRegistros();
+        
+        // Mostrar mensaje en el header
+        const contadorExistente = document.getElementById('contadorRegistros');
+        if (contadorExistente) {
+          contadorExistente.textContent = '🚫 REGISTROS CERRADOS';
+          contadorExistente.style.background = '#dc3545';
+          contadorExistente.style.color = 'white';
+        }
       }
       return;
     }
@@ -465,9 +487,9 @@ function iniciarContadorRegresivo() {
     }
   };
   
-  // Actualizar inmediatamente y luego cada minuto
+  // Actualizar inmediatamente y luego cada 30 segundos para mayor precisión
   actualizarContador();
-  setInterval(actualizarContador, 60000); // Cada minuto
+  setInterval(actualizarContador, 30000); // Cada 30 segundos
 }
 
 // Mostrar contador regresivo en el header
@@ -943,16 +965,30 @@ function buscarNumeroEnRegistros() {
                 </div>
                 
                 ${estado !== 'confirmed' ? `
-                  <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #dee2e6;">
+                  <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #dee2e6; display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
                     <button onclick="confirmarPagoDesdeResultado('${id}', '${name}')" 
                             style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold;">
                       ✅ Confirmar Pago
                     </button>
-                    <small style="color: #6c757d; margin-left: 1rem;">
-                      💡 Úsalo después de verificar el pago por Nequi
+                    <button onclick="eliminarRegistroDesdeResultado('${id}', '${name}')" 
+                            style="background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                      🗑️ Eliminar Registro
+                    </button>
+                    <small style="color: #6c757d; flex: 1; min-width: 200px;">
+                      💡 Confirma pago después de verificar por Nequi
                     </small>
                   </div>
-                ` : ''}
+                ` : `
+                  <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #dee2e6;">
+                    <button onclick="eliminarRegistroDesdeResultado('${id}', '${name}')" 
+                            style="background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                      🗑️ Eliminar Registro
+                    </button>
+                    <small style="color: #6c757d; margin-left: 1rem;">
+                      ⚠️ Este registro ya está confirmado
+                    </small>
+                  </div>
+                `}
               </div>
             `;
           });
@@ -1272,6 +1308,93 @@ function confirmarPagoDesdeResultado(registroId, nombrePersona) {
   }
 }
 
+// Función para eliminar registro desde el resultado de búsqueda
+function eliminarRegistroDesdeResultado(registroId, nombrePersona) {
+  console.log('Eliminando registro desde resultado de búsqueda:', nombrePersona, 'ID:', registroId);
+  
+  const confirmar = confirm(`🗑️ ELIMINAR REGISTRO\n\n¿Estás seguro de que quieres eliminar el registro de ${nombrePersona}?\n\nEsta acción NO se puede deshacer.`);
+  
+  if (!confirmar) {
+    return;
+  }
+  
+  // Primero obtener los datos del registro antes de eliminarlo para actualizar la interfaz
+  if (typeof db !== 'undefined') {
+    db.ref('registros/' + registroId).once('value').then(snapshot => {
+      const registro = snapshot.val();
+      
+      if (registro) {
+        // Eliminar de Firebase
+        eliminarRegistroFirebase(registroId);
+        
+        // Actualizar inmediatamente la interfaz local
+        // 1. Eliminar el registro de la lista de registros guardados
+        const registroEnLista = document.querySelector(`[data-registro-id="${registroId}"]`);
+        if (registroEnLista) {
+          console.log('Eliminando registro de la lista principal:', registroId);
+          registroEnLista.remove();
+        }
+        
+        // 2. Liberar los números en la interfaz (marcarlos como disponibles)
+        if (Array.isArray(registro.numbers)) {
+          registro.numbers.forEach(num => {
+            const btn = document.querySelector(`button[data-number='${num}']`);
+            if (btn) {
+              btn.className = 'number-btn available';
+              btn.disabled = false;
+            }
+            // Actualizar el estado global
+            delete numberStatus[num];
+          });
+        }
+        
+        // 3. Actualizar contadores inmediatamente
+        const pendientesElement = document.getElementById('pendientesCount');
+        const confirmadosElement = document.getElementById('confirmadosCount');
+        
+        if (registro.estado === 'pending' && pendientesElement) {
+          const currentPendientes = parseInt(pendientesElement.textContent) || 0;
+          pendientesElement.textContent = Math.max(0, currentPendientes - 1);
+        } else if (registro.estado === 'confirmed' && confirmadosElement) {
+          const currentConfirmados = parseInt(confirmadosElement.textContent) || 0;
+          confirmadosElement.textContent = Math.max(0, currentConfirmados - 1);
+        }
+        
+        // 4. Actualizar el array global de registros
+        const index = registrosGlobal.findIndex(r => r.id === registroId);
+        if (index !== -1) {
+          registrosGlobal.splice(index, 1);
+        }
+        
+        mostrarNotificacion(`✅ Registro de ${nombrePersona} eliminado exitosamente`, 'success');
+        
+        // Limpiar resultados de búsqueda para mostrar que se eliminó
+        setTimeout(() => {
+          resultadoBusqueda.innerHTML = `
+            <div style="border: 2px solid #28a745; border-radius: 12px; padding: 2rem; background: linear-gradient(135deg, #f8fff8, #e6ffe6); text-align: center;">
+              <div style="font-size: 2.5em; margin-bottom: 1rem;">✅</div>
+              <h3 style="margin: 0 0 1rem 0; color: #155724;">Registro eliminado</h3>
+              <p style="margin: 0; color: #155724; font-size: 1.1em;">
+                El registro de <strong>${nombrePersona}</strong> ha sido eliminado exitosamente.
+              </p>
+              <button onclick="limpiarBusquedaNumero()" style="margin-top: 1rem; background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                🔍 Realizar nueva búsqueda
+              </button>
+            </div>
+          `;
+        }, 500);
+      } else {
+        mostrarNotificacion('❌ Error: No se encontró el registro', 'error');
+      }
+    }).catch(error => {
+      console.error('Error al obtener datos del registro:', error);
+      mostrarNotificacion('❌ Error al eliminar el registro', 'error');
+    });
+  } else {
+    mostrarNotificacion('❌ Error: No hay conexión con la base de datos', 'error');
+  }
+}
+
 // Función para limpiar búsqueda
 function limpiarBusquedaNumero() {
   busquedaNumeroInput.value = '';
@@ -1387,10 +1510,17 @@ function cargarConfiguracionActual() {
   // Cargar desde Firebase primero
   if (typeof obtenerConfiguracionSorteo !== 'undefined') {
     obtenerConfiguracionSorteo((config) => {
-      if (config && config.fechaSorteo) {
+      if (config) {
         // Actualizar variables globales
-        FECHA_SORTEO = config.fechaSorteo;
-        HORAS_ANTES_BLOQUEO = config.horasAntesBloqueo || 2;
+        if (config.fechaSorteo) {
+          FECHA_SORTEO = config.fechaSorteo;
+        }
+        if (config.horasAntesBloqueo) {
+          HORAS_ANTES_BLOQUEO = config.horasAntesBloqueo;
+        }
+        if (config.valorBoleta) {
+          pricePerTicket = config.valorBoleta;
+        }
       }
       
       // Actualizar campos del formulario
@@ -1401,6 +1531,18 @@ function cargarConfiguracionActual() {
         
         if (fechaInput) fechaInput.value = fecha;
         if (horaInput) horaInput.value = hora.substring(0, 5); // Quitar los segundos
+      }
+      
+      // Cargar valor de boleta
+      const valorBoletaInput = document.getElementById('valorBoletaInput');
+      if (valorBoletaInput) {
+        valorBoletaInput.value = pricePerTicket;
+      }
+      
+      // Cargar fecha de inicio de evento
+      const fechaInicioInput = document.getElementById('fechaInicioEventoInput');
+      if (fechaInicioInput && config && config.fechaInicioEvento) {
+        fechaInicioInput.value = config.fechaInicioEvento;
       }
       
       const horasAntesSelect = document.getElementById('horasAntesBloqueo');
@@ -1421,6 +1563,12 @@ function cargarConfiguracionActual() {
       if (horaInput) horaInput.value = hora.substring(0, 5);
     }
     
+    // Cargar valor de boleta por defecto
+    const valorBoletaInput = document.getElementById('valorBoletaInput');
+    if (valorBoletaInput) {
+      valorBoletaInput.value = pricePerTicket;
+    }
+    
     const horasAntesSelect = document.getElementById('horasAntesBloqueo');
     if (horasAntesSelect) {
       horasAntesSelect.value = HORAS_ANTES_BLOQUEO.toString();
@@ -1437,14 +1585,18 @@ function guardarConfiguracionSorteo() {
   const fechaInput = document.getElementById('fechaSorteoInput');
   const horaInput = document.getElementById('horaSorteoInput');
   const horasAntesSelect = document.getElementById('horasAntesBloqueo');
+  const valorBoletaInput = document.getElementById('valorBoletaInput');
+  const fechaInicioInput = document.getElementById('fechaInicioEventoInput');
   
   console.log('Elementos encontrados:', {
     fechaInput: !!fechaInput,
     horaInput: !!horaInput,
-    horasAntesSelect: !!horasAntesSelect
+    horasAntesSelect: !!horasAntesSelect,
+    valorBoletaInput: !!valorBoletaInput,
+    fechaInicioInput: !!fechaInicioInput
   });
   
-  if (!fechaInput || !horaInput || !horasAntesSelect) {
+  if (!fechaInput || !horaInput || !horasAntesSelect || !valorBoletaInput) {
     alert('❌ Error: No se encontraron todos los campos de configuración');
     return;
   }
@@ -1452,18 +1604,33 @@ function guardarConfiguracionSorteo() {
   const fecha = fechaInput.value;
   const hora = horaInput.value;
   const horasAntes = parseInt(horasAntesSelect.value);
+  const valorBoleta = parseInt(valorBoletaInput.value);
+  const fechaInicioEvento = fechaInicioInput ? fechaInicioInput.value : '';
   
-  console.log('Valores obtenidos:', { fecha, hora, horasAntes });
+  console.log('Valores obtenidos:', { fecha, hora, horasAntes, valorBoleta, fechaInicioEvento });
   
   if (!fecha || !hora) {
     alert('❌ Por favor, completa todos los campos de fecha y hora');
     return;
   }
   
+  if (!valorBoleta || valorBoleta < 1000) {
+    alert('❌ El valor de la boleta debe ser mayor a $1,000');
+    return;
+  }
+  
   const nuevaFechaSorteo = `${fecha} ${hora}:00`;
   
   // Confirmar cambios
-  const confirmar = confirm(`🔧 CONFIGURAR SORTEO\n\nFecha del sorteo: ${fecha} a las ${hora}\nRegistros se cerrarán: ${horasAntes} hora${horasAntes !== 1 ? 's' : ''} antes\n\n¿Guardar esta configuración?`);
+  const mensajeConfirm = `🔧 CONFIGURAR SORTEO
+
+💰 Valor boleta: $${valorBoleta.toLocaleString()}
+📅 Fecha sorteo: ${fecha} a las ${hora}
+⏰ Cierre registros: ${horasAntes} hora${horasAntes !== 1 ? 's' : ''} antes${fechaInicioEvento ? `\n📆 Inicio evento: ${fechaInicioEvento}` : ''}
+
+¿Guardar esta configuración?`;
+  
+  const confirmar = confirm(mensajeConfirm);
   
   if (!confirmar) {
     console.log('Usuario canceló la configuración');
@@ -1474,6 +1641,8 @@ function guardarConfiguracionSorteo() {
   const configuracion = {
     fechaSorteo: nuevaFechaSorteo,
     horasAntesBloqueo: horasAntes,
+    valorBoleta: valorBoleta,
+    fechaInicioEvento: fechaInicioEvento,
     fechaActualizacion: Date.now()
   };
   
@@ -1483,13 +1652,14 @@ function guardarConfiguracionSorteo() {
     guardarConfiguracionSorteoFirebase(configuracion)
       .then(() => {
         console.log('Configuración guardada exitosamente');
-        alert('✅ Configuración guardada exitosamente');
+        alert('✅ Configuración guardada exitosamente\n\n💰 El valor de la boleta se aplicará inmediatamente');
         
         // Actualizar variables globales
         FECHA_SORTEO = nuevaFechaSorteo;
         HORAS_ANTES_BLOQUEO = horasAntes;
+        pricePerTicket = valorBoleta; // Actualizar valor de boleta inmediatamente
         
-        console.log('Variables actualizadas:', { FECHA_SORTEO, HORAS_ANTES_BLOQUEO });
+        console.log('Variables actualizadas:', { FECHA_SORTEO, HORAS_ANTES_BLOQUEO, pricePerTicket });
         
         // Recalcular fecha límite
         calcularFechaLimiteRegistros();
@@ -1626,9 +1796,6 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   if (searchInput && clearSearchBtn && searchBtn) {
-    // Buscar mientras escribe
-    searchInput.addEventListener('input', buscarNumeros);
-    
     // Buscar al hacer Enter
     searchInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
@@ -1788,6 +1955,19 @@ window.addEventListener('DOMContentLoaded', () => {
       const panel = document.getElementById('panelConfiguracion');
       if (panel) panel.style.display = 'none';
     };
+  }
+
+  // Event listener para actualizar valor de boleta en tiempo real
+  const valorBoletaInput = document.getElementById('valorBoletaInput');
+  if (valorBoletaInput) {
+    valorBoletaInput.addEventListener('input', function() {
+      const nuevoValor = parseInt(this.value);
+      if (nuevoValor && nuevoValor >= 1000) {
+        pricePerTicket = nuevoValor;
+        updateTotal(); // Actualizar total inmediatamente
+        console.log('Valor de boleta actualizado a:', pricePerTicket);
+      }
+    });
   }
 
   function cargarRegistrosYEventos() {
