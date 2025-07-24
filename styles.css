@@ -717,6 +717,118 @@ button[type="submit"]:hover {
     width: 180px;
     font-size: 16px;
   }
+
+  /* Números aún más pequeños en pantallas muy pequeñas */
+  .busqueda-numeros #resultadoBusqueda .grid-info div span {
+    font-size: 0.8rem !important;
+    padding: 2px 5px !important;
+  }
+
+  .busqueda-numeros #resultadoBusqueda span[style*="background:#dc3545"],
+  .busqueda-numeros #resultadoBusqueda span[style*="background:#ffc107"],
+  .busqueda-numeros #resultadoBusqueda span[style*="background:#17a2b8"] {
+    font-size: 0.8rem !important;
+    padding: 2px 5px !important;
+  }
+}
+
+/* =============== PANTALLAS MUY PEQUEÑAS 320px =============== */
+@media (max-width: 320px) {
+  .container {
+    padding: 0.5rem 0.25rem !important;
+    gap: 1rem !important;
+  }
+
+  /* NO aplicar cambios a la sección de números - mantener tamaño original */
+  /* .numbers-section {
+    padding: 0.5rem 0.25rem !important;
+  }
+
+  .scroll-grid {
+    grid-template-columns: repeat(auto-fit, minmax(30px, 1fr)) !important;
+    gap: 0.2rem !important;
+    padding: 0.25rem !important;
+  }
+
+  .number-btn {
+    font-size: 0.6rem !important;
+    padding: 2px !important;
+    min-width: 30px !important;
+    height: 30px !important;
+  } */
+
+  .search-wrapper {
+    padding: 0 0.25rem !important;
+  }
+
+  #searchInput {
+    width: 150px !important;
+    font-size: 14px !important;
+  }
+
+  /* Búsqueda de números extremadamente compacta */
+  .busqueda-numeros {
+    padding: 0.5rem 0.25rem !important;
+  }
+  
+  .busqueda-numeros #busquedaNumeroInput {
+    font-size: 14px !important;
+    padding: 8px 30px 8px 6px !important;
+  }
+  
+  .busqueda-numeros #busquedaNumeroBtn {
+    padding: 8px 12px !important;
+    font-size: 12px !important;
+  }
+  
+  /* Resultados muy compactos */
+  .busqueda-numeros #resultadoBusqueda {
+    padding: 0.5rem !important;
+    font-size: 11px !important;
+  }
+
+  /* Grid info extremadamente compacto */
+  .busqueda-numeros #resultadoBusqueda .grid-info {
+    display: block !important;
+    gap: 0.1rem !important;
+  }
+  
+  .busqueda-numeros #resultadoBusqueda .grid-info > * {
+    margin-bottom: 0.25rem !important;
+    display: block !important;
+  }
+  
+  .busqueda-numeros #resultadoBusqueda .grid-info > strong {
+    margin-bottom: 0.1rem !important;
+    font-size: 0.75em !important;
+  }
+
+  /* Números ultra compactos para 320px */
+  .busqueda-numeros #resultadoBusqueda .grid-info div span {
+    font-size: 0.6rem !important;
+    padding: 1px 2px !important;
+    border-radius: 1px !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    display: inline-block !important;
+    margin: 0.25px !important;
+    line-height: 1.1 !important;
+  }
+
+  .busqueda-numeros #resultadoBusqueda .grid-info div {
+    gap: 0.1rem !important;
+    line-height: 1.1 !important;
+    margin-top: 0.1rem !important;
+  }
+
+  /* Números resaltados también ultra pequeños */
+  .busqueda-numeros #resultadoBusqueda span[style*="background:#dc3545"],
+  .busqueda-numeros #resultadoBusqueda span[style*="background:#ffc107"],
+  .busqueda-numeros #resultadoBusqueda span[style*="background:#17a2b8"] {
+    font-size: 0.6rem !important;
+    padding: 1px 2px !important;
+    font-weight: bold !important;
+  }
 }
 
 
@@ -944,6 +1056,13 @@ button[type="submit"]:hover {
     padding: 0.75rem;
     font-size: 14px;
   }
+
+  /* Estilos generales para todos los números en resultados de búsqueda en móvil */
+  .busqueda-numeros #resultadoBusqueda span {
+    display: inline-block;
+    word-break: keep-all;
+    white-space: nowrap;
+  }
   
   /* Ajustar el grid de información en móvil */
   .busqueda-numeros #resultadoBusqueda .grid-info {
@@ -959,6 +1078,139 @@ button[type="submit"]:hover {
   .busqueda-numeros #resultadoBusqueda .grid-info > strong {
     margin-bottom: 0.25rem;
     font-size: 0.9em;
+  }
+
+  /* Ajustar números en la sección del ganador para móvil */
+  .busqueda-numeros #resultadoBusqueda .grid-info div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-top: 0.25rem;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .busqueda-numeros #resultadoBusqueda .grid-info div span {
+    font-size: 0.85rem !important;
+    padding: 3px 6px !important;
+    border-radius: 4px !important;
+    white-space: nowrap;
+    flex-shrink: 0;
+    min-width: fit-content;
+  }
+
+  /* Reducir gap entre números en pantallas muy pequeñas */
+  .busqueda-numeros #resultadoBusqueda .grid-info div {
+    gap: 0.25rem !important;
+  }
+
+  /* Asegurar que los números resaltados también sean más pequeños */
+  .busqueda-numeros #resultadoBusqueda span[style*="background:#dc3545"],
+  .busqueda-numeros #resultadoBusqueda span[style*="background:#ffc107"],
+  .busqueda-numeros #resultadoBusqueda span[style*="background:#17a2b8"] {
+    font-size: 0.85rem !important;
+    padding: 3px 6px !important;
+    font-weight: bold !important;
+  }
+
+  /* Asegurar que el contenedor principal no se desborde */
+  .busqueda-numeros #resultadoBusqueda .grid-info {
+    max-width: 100%;
+    overflow: hidden;
+    word-wrap: break-word;
+  }
+
+  /* Contenedor del ganador específico */
+  .busqueda-numeros #resultadoBusqueda [style*="border: 2px solid #dc3545"] .grid-info {
+    max-width: 100% !important;
+    overflow: hidden !important;
+  }
+
+  /* Asegurar que los números resaltados se vean bien */
+  .busqueda-numeros #resultadoBusqueda span[style*="background:#dc3545"],
+  .busqueda-numeros #resultadoBusqueda span[style*="background:#ffc107"],
+  .busqueda-numeros #resultadoBusqueda span[style*="background:#17a2b8"] {
+    font-size: 0.85rem !important;
+    padding: 3px 6px !important;
+    font-weight: bold !important;
+  }
+}
+
+/* Responsividad específica para números en resultados de búsqueda */
+@media (max-width: 320px) {
+  .busqueda-numeros #resultadoBusqueda .grid-info div span {
+    font-size: 0.7rem !important;
+    padding: 1px 3px !important;
+    border-radius: 2px !important;
+    margin: 1px !important;
+  }
+
+  .busqueda-numeros #resultadoBusqueda .grid-info div {
+    gap: 0.15rem !important;
+    flex-wrap: wrap !important;
+  }
+
+  .busqueda-numeros #resultadoBusqueda span[style*="background:#dc3545"],
+  .busqueda-numeros #resultadoBusqueda span[style*="background:#ffc107"],
+  .busqueda-numeros #resultadoBusqueda span[style*="background:#17a2b8"] {
+    font-size: 0.7rem !important;
+    padding: 1px 3px !important;
+  }
+}
+
+@media (min-width: 321px) and (max-width: 380px) {
+  .busqueda-numeros #resultadoBusqueda .grid-info div span {
+    font-size: 0.8rem !important;
+    padding: 2px 5px !important;
+  }
+
+  .busqueda-numeros #resultadoBusqueda span[style*="background:#dc3545"],
+  .busqueda-numeros #resultadoBusqueda span[style*="background:#ffc107"],
+  .busqueda-numeros #resultadoBusqueda span[style*="background:#17a2b8"] {
+    font-size: 0.8rem !important;
+    padding: 2px 5px !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .busqueda-numeros #resultadoBusqueda .grid-info div span {
+    font-size: 0.8rem !important;
+    padding: 2px 5px !important;
+  }
+
+  .busqueda-numeros #resultadoBusqueda span[style*="background:#dc3545"],
+  .busqueda-numeros #resultadoBusqueda span[style*="background:#ffc107"],
+  .busqueda-numeros #resultadoBusqueda span[style*="background:#17a2b8"] {
+    font-size: 0.8rem !important;
+    padding: 2px 5px !important;
+  }
+}
+
+@media (min-width: 381px) and (max-width: 480px) {
+  .busqueda-numeros #resultadoBusqueda .grid-info div span {
+    font-size: 0.85rem !important;
+    padding: 3px 6px !important;
+  }
+
+  .busqueda-numeros #resultadoBusqueda span[style*="background:#dc3545"],
+  .busqueda-numeros #resultadoBusqueda span[style*="background:#ffc107"],
+  .busqueda-numeros #resultadoBusqueda span[style*="background:#17a2b8"] {
+    font-size: 0.85rem !important;
+    padding: 3px 6px !important;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .busqueda-numeros #resultadoBusqueda .grid-info div span {
+    font-size: 0.9rem !important;
+    padding: 4px 8px !important;
+  }
+
+  .busqueda-numeros #resultadoBusqueda span[style*="background:#dc3545"],
+  .busqueda-numeros #resultadoBusqueda span[style*="background:#ffc107"],
+  .busqueda-numeros #resultadoBusqueda span[style*="background:#17a2b8"] {
+    font-size: 0.9rem !important;
+    padding: 4px 8px !important;
   }
 }
 
