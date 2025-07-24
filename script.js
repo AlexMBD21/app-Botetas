@@ -8,8 +8,15 @@ let registrosList;
 
 // Configuración
 let pricePerTicket = 4000; // Ahora es variable para poder cambiar desde configuración
-const timeoutMs = 30 * 60 * 1000; // 30 minutos
+let tiempoTemporizadorMinutos = 30; // Tiempo del temporizador en minutos (configurable)
+let timeoutMs = 30 * 60 * 1000; // Se calculará dinámicamente basado en tiempoTemporizadorMinutos
 const numberStatus = {}; // Estado por número
+
+// Función para actualizar el tiempo del temporizador
+function actualizarTiempoTemporizador() {
+  timeoutMs = tiempoTemporizadorMinutos * 60 * 1000;
+  console.log(`Tiempo del temporizador actualizado a: ${tiempoTemporizadorMinutos} minutos (${timeoutMs}ms)`);
+}
 
 // CONFIGURACIÓN DE FECHA LÍMITE PARA REGISTROS
 // Fecha y hora del sorteo (formato: YYYY-MM-DD HH:MM:SS en hora local)
@@ -320,6 +327,15 @@ function cargarConfiguracionDesdeFirebase() {
         console.log('Configuración cargada desde Firebase:', config);
         FECHA_SORTEO = config.fechaSorteo;
         HORAS_ANTES_BLOQUEO = config.horasAntesBloqueo || 2;
+        
+        // Cargar configuraciones adicionales
+        if (config.valorBoleta) {
+          pricePerTicket = config.valorBoleta;
+        }
+        if (config.tiempoTemporizador) {
+          tiempoTemporizadorMinutos = config.tiempoTemporizador;
+          actualizarTiempoTemporizador();
+        }
         
         // Recalcular con la nueva configuración
         calcularFechaLimiteRegistros();
@@ -912,11 +928,11 @@ function buscarNumeroEnRegistros() {
           });
           
           let resultadoHTML = `
-            <div style="border: 2px solid #007bff; border-radius: 12px; padding: 1.5rem; background: linear-gradient(135deg, #f0f8ff, #e6f3ff); margin-bottom: 1rem;">
+            <div style="border: 2px solid #007bff; border-radius: 8px; padding: 1rem; background: linear-gradient(135deg, #f0f8ff, #e6f3ff); margin-bottom: 1rem; overflow: hidden;">
               <div style="text-align: center; margin-bottom: 1rem;">
-                <span style="font-size: 2em;">📞</span>
-                <h3 style="margin: 0.5rem 0; color: #007bff;">Registro${registrosEncontrados.length > 1 ? 's' : ''} encontrado${registrosEncontrados.length > 1 ? 's' : ''}</h3>
-                <div style="background: #007bff; color: white; padding: 0.5rem 1rem; border-radius: 20px; display: inline-block; font-size: 0.9em;">
+                <span style="font-size: 1.5em;">📞</span>
+                <h3 style="margin: 0.5rem 0; color: #007bff; font-size: 1.1em;">Registro${registrosEncontrados.length > 1 ? 's' : ''} encontrado${registrosEncontrados.length > 1 ? 's' : ''}</h3>
+                <div style="background: #007bff; color: white; padding: 0.25rem 0.75rem; border-radius: 15px; display: inline-block; font-size: 0.8em;">
                   ${registrosEncontrados.length} coincidencia${registrosEncontrados.length > 1 ? 's' : ''} para: ${query}
                 </div>
               </div>
@@ -944,49 +960,62 @@ function buscarNumeroEnRegistros() {
               '<span style="background:#ffc107;color:#000;padding:4px 8px;border-radius:15px;font-size:0.85em;font-weight:bold;">⏳ PENDIENTE</span>';
 
             resultadoHTML += `
-              <div style="background: white; padding: 1.5rem; border-radius: 8px; border: 1px solid #007bff; margin-bottom: 1rem; box-shadow: 0 2px 8px rgba(0,123,255,0.1);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                  <h4 style="margin: 0; color: #007bff; font-size: 1.2em;">${name}</h4>
+              <div style="background: white; padding: 1rem; border-radius: 6px; border: 1px solid #007bff; margin-bottom: 0.75rem; box-shadow: 0 1px 4px rgba(0,123,255,0.1); overflow: hidden;">
+                <!-- Header con nombre y estado -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+                  <h4 style="margin: 0; color: #007bff; font-size: 1em; word-break: break-word;">${name}</h4>
                   ${estadoTexto}
                 </div>
                 
-                <div style="display: grid; grid-template-columns: auto 1fr; gap: 0.5rem 1rem; align-items: center; font-size: 1em;">
-                  <strong style="color: #495057;">📞 Teléfono:</strong>
-                  <span style="color: #007bff; font-weight: bold; font-size: 1.1em;">${phone}</span>
+                <!-- Información en layout responsive -->
+                <div style="font-size: 0.9em;">
+                  <!-- Teléfono -->
+                  <div style="margin-bottom: 0.5rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem;">
+                    <strong style="color: #495057; min-width: fit-content;">📞 Teléfono:</strong>
+                    <span style="color: #007bff; font-weight: bold; word-break: break-all; flex: 1;">${phone}</span>
+                  </div>
                   
-                  <strong style="color: #495057;">🎫 Números:</strong>
-                  <div style="margin: 0.3rem 0;">${numerosHTML}</div>
+                  <!-- Números -->
+                  <div style="margin-bottom: 0.5rem;">
+                    <strong style="color: #495057; display: block; margin-bottom: 0.25rem;">🎫 Números:</strong>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.25rem; max-height: 3rem; overflow-y: auto;">${numerosHTML}</div>
+                  </div>
                   
-                  <strong style="color: #495057;">💰 Total:</strong>
-                  <span style="color: #28a745; font-weight: bold;">$${Array.isArray(numbers) ? numbers.length * pricePerTicket : 0}</span>
-                  
-                  <strong style="color: #495057;">📅 Registrado:</strong>
-                  <span style="color: #6c757d;">${fechaRegistro}</span>
+                  <!-- Total y Fecha en grid -->
+                  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.5rem; margin-bottom: 0.75rem; font-size: 0.85em;">
+                    <div>
+                      <strong style="color: #495057;">💰 Total:</strong>
+                      <span style="color: #28a745; font-weight: bold; display: block;">$${Array.isArray(numbers) ? numbers.length * pricePerTicket : 0}</span>
+                    </div>
+                    <div>
+                      <strong style="color: #495057;">📅 Fecha:</strong>
+                      <span style="color: #6c757d; display: block; word-break: break-word;">${fechaRegistro}</span>
+                    </div>
+                  </div>
                 </div>
                 
+                <!-- Botones de acción -->
                 ${estado !== 'confirmed' ? `
-                  <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #dee2e6; display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+                  <div style="border-top: 1px solid #dee2e6; padding-top: 0.75rem; display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
                     <button onclick="confirmarPagoDesdeResultado('${id}', '${name}')" 
-                            style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold;">
-                      ✅ Confirmar Pago
+                            style="background: #28a745; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.85em; flex: 1; min-width: 120px;">
+                      ✅ Confirmar
                     </button>
                     <button onclick="eliminarRegistroDesdeResultado('${id}', '${name}')" 
-                            style="background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold;">
-                      🗑️ Eliminar Registro
+                            style="background: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.85em; flex: 1; min-width: 120px;">
+                      🗑️ Eliminar
                     </button>
-                    <small style="color: #6c757d; flex: 1; min-width: 200px;">
-                      💡 Confirma pago después de verificar por Nequi
-                    </small>
+                  </div>
+                  <div style="margin-top: 0.5rem;">
+                    <small style="color: #6c757d; font-size: 0.8em;">💡 Confirma pago después de verificar por Nequi</small>
                   </div>
                 ` : `
-                  <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #dee2e6;">
+                  <div style="border-top: 1px solid #dee2e6; padding-top: 0.75rem; display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
                     <button onclick="eliminarRegistroDesdeResultado('${id}', '${name}')" 
-                            style="background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold;">
-                      🗑️ Eliminar Registro
+                            style="background: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.85em;">
+                      🗑️ Eliminar
                     </button>
-                    <small style="color: #6c757d; margin-left: 1rem;">
-                      ⚠️ Este registro ya está confirmado
-                    </small>
+                    <small style="color: #6c757d; font-size: 0.8em;">⚠️ Registro confirmado</small>
                   </div>
                 `}
               </div>
@@ -1106,31 +1135,46 @@ function buscarNumeroEnRegistros() {
         });
 
         resultadoHTML += `
-          <div style="border: 3px solid #FFD700; border-radius: 12px; padding: 2rem; background: linear-gradient(135deg, #fffdf0, #fff8dc); margin-bottom: 1rem; box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);">
-            <div style="text-align: center; margin-bottom: 1.5rem;">
-              <div style="font-size: 3em; margin-bottom: 0.5rem;">🥇</div>
-              <h2 style="margin: 0; color: #B8860B; font-size: 1.8em;">¡GANADOR PRINCIPAL!</h2>
-              <div style="background: #FFD700; color: #000; padding: 0.5rem 1rem; border-radius: 25px; display: inline-block; margin-top: 1rem; font-weight: bold; font-size: 1.1em;">
+          <div style="border: 3px solid #FFD700; border-radius: 8px; padding: 1rem; background: linear-gradient(135deg, #fffbf0, #fff9e6); margin-bottom: 1rem; box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2); max-width: 100%; overflow: hidden;">
+            <!-- Header compacto -->
+            <div style="text-align: center; margin-bottom: 1rem;">
+              <div style="font-size: 1.5em; margin-bottom: 0.25rem;">🥇</div>
+              <h3 style="margin: 0; color: #B8860B; font-size: 1.2em; font-weight: bold;">¡GANADOR PRINCIPAL!</h3>
+              <div style="background: #FFD700; color: #000; padding: 0.25rem 0.75rem; border-radius: 15px; display: inline-block; margin-top: 0.5rem; font-weight: bold; font-size: 0.9em;">
                 Número exacto: ${numeroSorteado}
               </div>
             </div>
             
-            <div style="background: white; padding: 1.5rem; border-radius: 8px; border: 2px solid #FFD700; box-shadow: inset 0 2px 4px rgba(255, 215, 0, 0.1);">
-              <div style="display: grid; grid-template-columns: auto 1fr; gap: 1rem 1.5rem; align-items: center; font-size: 1.1em;">
-                <strong style="color: #495057;">🥇 Ganador Principal:</strong>
-                <span style="font-size: 1.3em; color: #B8860B; font-weight: bold;">${name}</span>
-                
-                <strong style="color: #495057;">📞 Teléfono:</strong>
-                <span style="color: #212529;">${phone}</span>
-                
-                <strong style="color: #495057;">🎫 Todos sus números:</strong>
-                <div style="margin: 0.5rem 0;">${numerosHTML}</div>
-                
-                <strong style="color: #495057;">💰 Total pagado:</strong>
-                <span style="color: #28a745; font-weight: bold;">$${numbers.length * pricePerTicket}</span>
-                
-                <strong style="color: #495057;">📅 Fecha de registro:</strong>
-                <span style="color: #6c757d;">${fechaRegistro}</span>
+            <!-- Información compacta y responsive -->
+            <div style="background: white; padding: 1rem; border-radius: 6px; border: 1px solid #FFD700; font-size: 0.9em;">
+              <!-- Nombre -->
+              <div style="margin-bottom: 0.75rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem;">
+                <strong style="color: #495057; min-width: fit-content;">🥇 Ganador:</strong>
+                <span style="color: #B8860B; font-weight: bold; word-break: break-word; flex: 1;">${name}</span>
+              </div>
+              
+              <!-- Teléfono -->
+              <div style="margin-bottom: 0.75rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem;">
+                <strong style="color: #495057; min-width: fit-content;">📞 Teléfono:</strong>
+                <span style="color: #212529; word-break: break-all; flex: 1;">${phone}</span>
+              </div>
+              
+              <!-- Números - diseño responsive -->
+              <div style="margin-bottom: 0.75rem;">
+                <strong style="color: #495057; display: block; margin-bottom: 0.5rem;">🎫 Números:</strong>
+                <div style="display: flex; flex-wrap: wrap; gap: 0.25rem; max-height: 4rem; overflow-y: auto;">${numerosHTML}</div>
+              </div>
+              
+              <!-- Total y Fecha en grid responsive -->
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.5rem; font-size: 0.85em;">
+                <div>
+                  <strong style="color: #495057;">💰 Total:</strong>
+                  <span style="color: #28a745; font-weight: bold; display: block;">$${numbers.length * pricePerTicket}</span>
+                </div>
+                <div>
+                  <strong style="color: #495057;">📅 Fecha:</strong>
+                  <span style="color: #6c757d; display: block; word-break: break-word;">${fechaRegistro}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -1160,31 +1204,46 @@ function buscarNumeroEnRegistros() {
         });
 
         resultadoHTML += `
-          <div style="border: 3px solid #C0C0C0; border-radius: 12px; padding: 2rem; background: linear-gradient(135deg, #f8f8ff, #f0f0f0); margin-bottom: 1rem; box-shadow: 0 4px 12px rgba(192, 192, 192, 0.3);">
-            <div style="text-align: center; margin-bottom: 1.5rem;">
-              <div style="font-size: 3em; margin-bottom: 0.5rem;">🥈</div>
-              <h2 style="margin: 0; color: #696969; font-size: 1.8em;">¡GANADOR SECUNDARIO!</h2>
-              <div style="background: #C0C0C0; color: #000; padding: 0.5rem 1rem; border-radius: 25px; display: inline-block; margin-top: 1rem; font-weight: bold; font-size: 1.1em;">
+          <div style="border: 3px solid #C0C0C0; border-radius: 8px; padding: 1rem; background: linear-gradient(135deg, #f8f8ff, #f0f0f0); margin-bottom: 1rem; box-shadow: 0 2px 8px rgba(192, 192, 192, 0.2); max-width: 100%; overflow: hidden;">
+            <!-- Header compacto -->
+            <div style="text-align: center; margin-bottom: 1rem;">
+              <div style="font-size: 1.5em; margin-bottom: 0.25rem;">🥈</div>
+              <h3 style="margin: 0; color: #696969; font-size: 1.2em; font-weight: bold;">¡GANADOR SECUNDARIO!</h3>
+              <div style="background: #C0C0C0; color: #000; padding: 0.25rem 0.75rem; border-radius: 15px; display: inline-block; margin-top: 0.5rem; font-weight: bold; font-size: 0.9em;">
                 Número invertido: ${numeroSorteado} → ${numeroInvertido}
               </div>
             </div>
             
-            <div style="background: white; padding: 1.5rem; border-radius: 8px; border: 2px solid #C0C0C0; box-shadow: inset 0 2px 4px rgba(192, 192, 192, 0.1);">
-              <div style="display: grid; grid-template-columns: auto 1fr; gap: 1rem 1.5rem; align-items: center; font-size: 1.1em;">
-                <strong style="color: #495057;">🥈 Ganador Secundario:</strong>
-                <span style="font-size: 1.3em; color: #696969; font-weight: bold;">${name}</span>
-                
-                <strong style="color: #495057;">📞 Teléfono:</strong>
-                <span style="color: #212529;">${phone}</span>
-                
-                <strong style="color: #495057;">🎫 Todos sus números:</strong>
-                <div style="margin: 0.5rem 0;">${numerosHTML}</div>
-                
-                <strong style="color: #495057;">💰 Total pagado:</strong>
-                <span style="color: #28a745; font-weight: bold;">$${numbers.length * pricePerTicket}</span>
-                
-                <strong style="color: #495057;">📅 Fecha de registro:</strong>
-                <span style="color: #6c757d;">${fechaRegistro}</span>
+            <!-- Información compacta y responsive -->
+            <div style="background: white; padding: 1rem; border-radius: 6px; border: 1px solid #C0C0C0; font-size: 0.9em;">
+              <!-- Nombre -->
+              <div style="margin-bottom: 0.75rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem;">
+                <strong style="color: #495057; min-width: fit-content;">🥈 Ganador:</strong>
+                <span style="color: #696969; font-weight: bold; word-break: break-word; flex: 1;">${name}</span>
+              </div>
+              
+              <!-- Teléfono -->
+              <div style="margin-bottom: 0.75rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem;">
+                <strong style="color: #495057; min-width: fit-content;">📞 Teléfono:</strong>
+                <span style="color: #212529; word-break: break-all; flex: 1;">${phone}</span>
+              </div>
+              
+              <!-- Números - diseño responsive -->
+              <div style="margin-bottom: 0.75rem;">
+                <strong style="color: #495057; display: block; margin-bottom: 0.5rem;">🎫 Números:</strong>
+                <div style="display: flex; flex-wrap: wrap; gap: 0.25rem; max-height: 4rem; overflow-y: auto;">${numerosHTML}</div>
+              </div>
+              
+              <!-- Total y Fecha en grid responsive -->
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.5rem; font-size: 0.85em;">
+                <div>
+                  <strong style="color: #495057;">💰 Total:</strong>
+                  <span style="color: #28a745; font-weight: bold; display: block;">$${numbers.length * pricePerTicket}</span>
+                </div>
+                <div>
+                  <strong style="color: #495057;">📅 Fecha:</strong>
+                  <span style="color: #6c757d; display: block; word-break: break-word;">${fechaRegistro}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -1521,6 +1580,10 @@ function cargarConfiguracionActual() {
         if (config.valorBoleta) {
           pricePerTicket = config.valorBoleta;
         }
+        if (config.tiempoTemporizador) {
+          tiempoTemporizadorMinutos = config.tiempoTemporizador;
+          actualizarTiempoTemporizador();
+        }
       }
       
       // Actualizar campos del formulario
@@ -1550,6 +1613,12 @@ function cargarConfiguracionActual() {
         horasAntesSelect.value = HORAS_ANTES_BLOQUEO.toString();
       }
       
+      // Cargar tiempo del temporizador
+      const tiempoTemporizadorSelect = document.getElementById('tiempoTemporizadorInput');
+      if (tiempoTemporizadorSelect) {
+        tiempoTemporizadorSelect.value = tiempoTemporizadorMinutos.toString();
+      }
+      
       actualizarEstadoRegistros();
     });
   } else {
@@ -1574,6 +1643,12 @@ function cargarConfiguracionActual() {
       horasAntesSelect.value = HORAS_ANTES_BLOQUEO.toString();
     }
     
+    // Cargar tiempo del temporizador por defecto
+    const tiempoTemporizadorSelect = document.getElementById('tiempoTemporizadorInput');
+    if (tiempoTemporizadorSelect) {
+      tiempoTemporizadorSelect.value = tiempoTemporizadorMinutos.toString();
+    }
+    
     actualizarEstadoRegistros();
   }
 }
@@ -1587,16 +1662,18 @@ function guardarConfiguracionSorteo() {
   const horasAntesSelect = document.getElementById('horasAntesBloqueo');
   const valorBoletaInput = document.getElementById('valorBoletaInput');
   const fechaInicioInput = document.getElementById('fechaInicioEventoInput');
+  const tiempoTemporizadorSelect = document.getElementById('tiempoTemporizadorInput');
   
   console.log('Elementos encontrados:', {
     fechaInput: !!fechaInput,
     horaInput: !!horaInput,
     horasAntesSelect: !!horasAntesSelect,
     valorBoletaInput: !!valorBoletaInput,
-    fechaInicioInput: !!fechaInicioInput
+    fechaInicioInput: !!fechaInicioInput,
+    tiempoTemporizadorSelect: !!tiempoTemporizadorSelect
   });
   
-  if (!fechaInput || !horaInput || !horasAntesSelect || !valorBoletaInput) {
+  if (!fechaInput || !horaInput || !horasAntesSelect || !valorBoletaInput || !tiempoTemporizadorSelect) {
     alert('❌ Error: No se encontraron todos los campos de configuración');
     return;
   }
@@ -1606,8 +1683,9 @@ function guardarConfiguracionSorteo() {
   const horasAntes = parseInt(horasAntesSelect.value);
   const valorBoleta = parseInt(valorBoletaInput.value);
   const fechaInicioEvento = fechaInicioInput ? fechaInicioInput.value : '';
+  const tiempoTemporizador = parseInt(tiempoTemporizadorSelect.value);
   
-  console.log('Valores obtenidos:', { fecha, hora, horasAntes, valorBoleta, fechaInicioEvento });
+  console.log('Valores obtenidos:', { fecha, hora, horasAntes, valorBoleta, fechaInicioEvento, tiempoTemporizador });
   
   if (!fecha || !hora) {
     alert('❌ Por favor, completa todos los campos de fecha y hora');
@@ -1626,7 +1704,8 @@ function guardarConfiguracionSorteo() {
 
 💰 Valor boleta: $${valorBoleta.toLocaleString()}
 📅 Fecha sorteo: ${fecha} a las ${hora}
-⏰ Cierre registros: ${horasAntes} hora${horasAntes !== 1 ? 's' : ''} antes${fechaInicioEvento ? `\n📆 Inicio evento: ${fechaInicioEvento}` : ''}
+⏰ Cierre registros: ${horasAntes} hora${horasAntes !== 1 ? 's' : ''} antes
+⏱️ Temporizador pago: ${tiempoTemporizador} minuto${tiempoTemporizador !== 1 ? 's' : ''}${fechaInicioEvento ? `\n📆 Inicio evento: ${fechaInicioEvento}` : ''}
 
 ¿Guardar esta configuración?`;
   
@@ -1643,6 +1722,7 @@ function guardarConfiguracionSorteo() {
     horasAntesBloqueo: horasAntes,
     valorBoleta: valorBoleta,
     fechaInicioEvento: fechaInicioEvento,
+    tiempoTemporizador: tiempoTemporizador,
     fechaActualizacion: Date.now()
   };
   
@@ -1658,8 +1738,10 @@ function guardarConfiguracionSorteo() {
         FECHA_SORTEO = nuevaFechaSorteo;
         HORAS_ANTES_BLOQUEO = horasAntes;
         pricePerTicket = valorBoleta; // Actualizar valor de boleta inmediatamente
+        tiempoTemporizadorMinutos = tiempoTemporizador; // Actualizar tiempo del temporizador
+        actualizarTiempoTemporizador(); // Recalcular timeoutMs
         
-        console.log('Variables actualizadas:', { FECHA_SORTEO, HORAS_ANTES_BLOQUEO, pricePerTicket });
+        console.log('Variables actualizadas:', { FECHA_SORTEO, HORAS_ANTES_BLOQUEO, pricePerTicket, tiempoTemporizadorMinutos, timeoutMs });
         
         // Recalcular fecha límite
         calcularFechaLimiteRegistros();
