@@ -130,7 +130,7 @@ function mostrarNotificacionFormulario(mensaje, tipo = 'success', duracion = nul
       <span class="notification-icon">❤️</span>
       <div class="notification-text">
         <div class="notification-title">Registro realizado</div>
-        <div class="notification-subtitle">Tienes 30 minutos para realizar el pago, recuerda poner 1 de tus números en el mensaje de pago para encontrate rapidamente. ¡Mucha suerte!✨</div>
+        <div class="notification-subtitle">Tienes 30 minutos para realizar el pago, recuerda poner tu número de celular en el mensaje de pago para encontrarte rápidamente. ¡Mucha suerte!✨</div>
         <div class="payment-info">
           <div class="payment-section">
             <div class="payment-header">💳 Cuenta Bancolombia</div>
@@ -808,7 +808,7 @@ function renderRegistro(registro, highlightNum = '') {
   registrosList.appendChild(item);
 }
 
-// Función de búsqueda de números - Sistema de doble ganador (PRINCIPAL Y SECUNDARIO)
+// Función de búsqueda - Números de rifa, teléfonos y sistema de doble ganador
 function buscarNumeroEnRegistros() {
   const query = busquedaNumeroInput.value.trim();
   numeroBuscado = '';
@@ -817,85 +817,227 @@ function buscarNumeroEnRegistros() {
   resultadoBusqueda.innerHTML = '';
 
   if (!query) {
-    resultadoBusqueda.innerHTML = '<p style="color: #6c757d; text-align: center; margin: 0;">Ingresa un número para comenzar la búsqueda</p>';
+    resultadoBusqueda.innerHTML = '<p style="color: #6c757d; text-align: center; margin: 0;">Ingresa un número de rifa (4 cifras) o teléfono para buscar</p>';
     return;
   }
 
-  if (query.length !== 4 || isNaN(query)) {
-    resultadoBusqueda.innerHTML = '<div style="color: #dc3545; text-align: center; padding: 1rem;"><strong>⚠️ Error:</strong> Debes ingresar exactamente 4 cifras</div>';
+  // Detectar tipo de búsqueda
+  const esNumeroTelefono = query.length >= 7 && /^\d+$/.test(query); // 7+ dígitos solo números
+  const esNumeroRifa = query.length === 4 && /^\d{4}$/.test(query); // Exactamente 4 dígitos
+
+  if (!esNumeroTelefono && !esNumeroRifa) {
+    resultadoBusqueda.innerHTML = `
+      <div style="color: #dc3545; text-align: center; padding: 1rem;">
+        <strong>⚠️ Formato incorrecto:</strong><br>
+        • Para números de rifa: 4 cifras exactas (ej: 1234)<br>
+        • Para teléfonos: mínimo 7 dígitos (ej: 3201234567)
+      </div>
+    `;
     return;
   }
 
   numeroBuscado = query;
   
-  // NÚMERO EXACTO (ganador principal) y NÚMERO INVERTIDO (ganador secundario)
-  const numeroSorteado = query.padStart(4, '0');
-  const numeroInvertido = query.split('').reverse().join('').padStart(4, '0');
-  
-  // Mostrar mensaje de búsqueda
-  resultadoBusqueda.innerHTML = `
-    <div style="text-align: center; color: #007bff; padding: 1rem;">
-      <span style="font-size: 1.5em;">🔍</span> 
-      <div style="margin-top: 0.5rem;">
-        <strong>Buscando ganadores del número sorteado: ${numeroSorteado}</strong>
+  // BÚSQUEDA POR TELÉFONO
+  if (esNumeroTelefono) {
+    resultadoBusqueda.innerHTML = `
+      <div style="text-align: center; color: #007bff; padding: 1rem;">
+        <span style="font-size: 1.5em;">📞</span> 
+        <div style="margin-top: 0.5rem;">
+          <strong>Buscando registro por teléfono: ${query}</strong>
+        </div>
+        <div style="font-size: 0.9em; color: #6c757d; margin-top: 0.5rem;">
+          Para confirmar pagos por Nequi o encontrar registros específicos
+        </div>
       </div>
-      <div style="font-size: 0.9em; color: #6c757d; margin-top: 0.5rem;">
-        🥇 Ganador Principal: ${numeroSorteado} | 🥈 Ganador Secundario: ${numeroInvertido}
-      </div>
-    </div>
-  `;
-  
-  // Buscar directamente en Firebase
-  if (typeof db !== 'undefined') {
-    db.ref('registros').orderByChild('estado').equalTo('confirmed').once('value', snapshot => {
-      const data = snapshot.val() || {};
-      const registros = Object.values(data);
-      
-      // Buscar ganadores principal y secundario
-      let ganadorPrincipal = null;
-      let ganadorSecundario = null;
-      
-      registros.forEach(registro => {
-        if (!Array.isArray(registro.numbers)) return;
+    `;
+    
+    // Buscar en Firebase por teléfono
+    if (typeof db !== 'undefined') {
+      db.ref('registros').once('value', snapshot => {
+        const data = snapshot.val() || {};
+        const registros = Object.values(data);
         
-        registro.numbers.forEach(num => {
-          let numStr = String(num).replace(/\s+/g, '').padStart(4, '0');
+        // Buscar coincidencias de teléfono
+        const registrosEncontrados = registros.filter(registro => {
+          if (!registro.phone) return false;
+          // Limpiar números para comparación (eliminar espacios, guiones, etc.)
+          const telefonoRegistro = registro.phone.replace(/\D/g, '');
+          const telefonoBusqueda = query.replace(/\D/g, '');
           
-          // GANADOR PRINCIPAL: número exacto
-          if (numStr === numeroSorteado) {
-            ganadorPrincipal = { 
-              registro, 
-              numeroGanador: numStr,
-              numeroSorteado: numeroSorteado,
-              tipo: 'principal'
-            };
-          }
-          
-          // GANADOR SECUNDARIO: número invertido
-          if (numStr === numeroInvertido && numeroSorteado !== numeroInvertido) {
-            ganadorSecundario = { 
-              registro, 
-              numeroGanador: numStr,
-              numeroSorteado: numeroSorteado,
-              tipo: 'secundario'
-            };
-          }
+          // Buscar coincidencia exacta o parcial
+          return telefonoRegistro.includes(telefonoBusqueda) || telefonoBusqueda.includes(telefonoRegistro);
         });
+
+        if (registrosEncontrados.length > 0) {
+          let resultadoHTML = `
+            <div style="border: 2px solid #007bff; border-radius: 12px; padding: 1.5rem; background: linear-gradient(135deg, #f0f8ff, #e6f3ff); margin-bottom: 1rem;">
+              <div style="text-align: center; margin-bottom: 1rem;">
+                <span style="font-size: 2em;">📞</span>
+                <h3 style="margin: 0.5rem 0; color: #007bff;">Registro${registrosEncontrados.length > 1 ? 's' : ''} encontrado${registrosEncontrados.length > 1 ? 's' : ''}</h3>
+                <div style="background: #007bff; color: white; padding: 0.5rem 1rem; border-radius: 20px; display: inline-block; font-size: 0.9em;">
+                  ${registrosEncontrados.length} coincidencia${registrosEncontrados.length > 1 ? 's' : ''} para: ${query}
+                </div>
+              </div>
+          `;
+
+          registrosEncontrados.forEach((registro, index) => {
+            const { name, phone, numbers, timestamp, estado, id } = registro;
+            
+            // Crear HTML de números
+            const numerosHTML = Array.isArray(numbers) ? numbers.map(n => {
+              let numStr = typeof n === 'number' ? n.toString().padStart(4, '0') : String(n).padStart(4, '0');
+              return `<span style="background:#e9ecef;padding:3px 7px;border-radius:5px;border:1px solid #dee2e6;margin:2px;display:inline-block;font-family:monospace;">${numStr}</span>`;
+            }).join(' ') : 'Sin números';
+
+            const fechaRegistro = new Date(timestamp).toLocaleString('es-CO', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            });
+
+            const estadoTexto = estado === 'confirmed' ? 
+              '<span style="background:#28a745;color:white;padding:4px 8px;border-radius:15px;font-size:0.85em;font-weight:bold;">✅ CONFIRMADO</span>' : 
+              '<span style="background:#ffc107;color:#000;padding:4px 8px;border-radius:15px;font-size:0.85em;font-weight:bold;">⏳ PENDIENTE</span>';
+
+            resultadoHTML += `
+              <div style="background: white; padding: 1.5rem; border-radius: 8px; border: 1px solid #007bff; margin-bottom: 1rem; box-shadow: 0 2px 8px rgba(0,123,255,0.1);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                  <h4 style="margin: 0; color: #007bff; font-size: 1.2em;">${name}</h4>
+                  ${estadoTexto}
+                </div>
+                
+                <div style="display: grid; grid-template-columns: auto 1fr; gap: 0.5rem 1rem; align-items: center; font-size: 1em;">
+                  <strong style="color: #495057;">📞 Teléfono:</strong>
+                  <span style="color: #007bff; font-weight: bold; font-size: 1.1em;">${phone}</span>
+                  
+                  <strong style="color: #495057;">🎫 Números:</strong>
+                  <div style="margin: 0.3rem 0;">${numerosHTML}</div>
+                  
+                  <strong style="color: #495057;">💰 Total:</strong>
+                  <span style="color: #28a745; font-weight: bold;">$${Array.isArray(numbers) ? numbers.length * pricePerTicket : 0}</span>
+                  
+                  <strong style="color: #495057;">📅 Registrado:</strong>
+                  <span style="color: #6c757d;">${fechaRegistro}</span>
+                </div>
+                
+                ${estado !== 'confirmed' ? `
+                  <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #dee2e6;">
+                    <button onclick="confirmarPagoDesdeResultado('${id}', '${name}')" 
+                            style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                      ✅ Confirmar Pago
+                    </button>
+                    <small style="color: #6c757d; margin-left: 1rem;">
+                      💡 Úsalo después de verificar el pago por Nequi
+                    </small>
+                  </div>
+                ` : ''}
+              </div>
+            `;
+          });
+
+          resultadoHTML += '</div>';
+          resultadoBusqueda.innerHTML = resultadoHTML;
+
+        } else {
+          resultadoBusqueda.innerHTML = `
+            <div style="border: 2px solid #ffc107; border-radius: 12px; padding: 2rem; background: linear-gradient(135deg, #fffdf5, #fff3cd); text-align: center;">
+              <div style="font-size: 2.5em; margin-bottom: 1rem;">📞</div>
+              <h3 style="margin: 0 0 1rem 0; color: #856404;">No se encontró ningún registro</h3>
+              <p style="margin: 0; color: #856404; font-size: 1.1em;">
+                <strong>Teléfono buscado:</strong> ${query}
+              </p>
+              <div style="margin-top: 1rem; padding: 1rem; background: rgba(255, 193, 7, 0.2); border-radius: 8px;">
+                <p style="margin: 0; color: #856404;">
+                  No hay registros con este número de teléfono
+                </p>
+              </div>
+            </div>
+          `;
+        }
+      }).catch(error => {
+        console.error('Error al buscar por teléfono:', error);
+        resultadoBusqueda.innerHTML = `
+          <div style="color: #dc3545; text-align: center; padding: 1rem;">
+            <strong>❌ Error:</strong> No se pudo realizar la búsqueda. 
+            <br><small>Verifica tu conexión a internet.</small>
+          </div>
+        `;
       });
-
-      // Mostrar resultados
-      let resultadoHTML = '';
-
-      // Mostrar ganador principal
-      if (ganadorPrincipal) {
-        const { registro, numeroGanador } = ganadorPrincipal;
-        const { name, phone, numbers, timestamp } = registro;
+    }
+  }
+  
+  // BÚSQUEDA POR NÚMERO DE RIFA (código original)
+  if (esNumeroRifa) {
+    const numeroSorteado = query.padStart(4, '0');
+    const numeroInvertido = query.split('').reverse().join('').padStart(4, '0');
+    
+    // Mostrar mensaje de búsqueda
+    resultadoBusqueda.innerHTML = `
+      <div style="text-align: center; color: #007bff; padding: 1rem;">
+        <span style="font-size: 1.5em;">🔍</span> 
+        <div style="margin-top: 0.5rem;">
+          <strong>Buscando ganadores del número sorteado: ${numeroSorteado}</strong>
+        </div>
+        <div style="font-size: 0.9em; color: #6c757d; margin-top: 0.5rem;">
+          🥇 Ganador Principal: ${numeroSorteado} | 🥈 Ganador Secundario: ${numeroInvertido}
+        </div>
+      </div>
+    `;
+    
+    // Buscar directamente en Firebase
+    if (typeof db !== 'undefined') {
+      db.ref('registros').orderByChild('estado').equalTo('confirmed').once('value', snapshot => {
+        const data = snapshot.val() || {};
+        const registros = Object.values(data);
         
-        // Crear HTML de números resaltando el ganador
-        const numerosHTML = numbers.map(n => {
-          let numStr = typeof n === 'number' ? n.toString().padStart(4, '0') : String(n).padStart(4, '0');
-          if (numStr === numeroGanador) {
-            return `<span style="background:#FFD700;color:#000;padding:4px 8px;border-radius:6px;font-weight:bold;font-size:1.2em;box-shadow: 0 2px 4px rgba(255,215,0,0.4);">🥇 ${numStr}</span>`;
+        // Buscar ganadores principal y secundario
+        let ganadorPrincipal = null;
+        let ganadorSecundario = null;
+        
+        registros.forEach(registro => {
+          if (!Array.isArray(registro.numbers)) return;
+          
+          registro.numbers.forEach(num => {
+            let numStr = String(num).replace(/\s+/g, '').padStart(4, '0');
+            
+            // GANADOR PRINCIPAL: número exacto
+            if (numStr === numeroSorteado) {
+              ganadorPrincipal = { 
+                registro, 
+                numeroGanador: numStr,
+                numeroSorteado: numeroSorteado,
+                tipo: 'principal'
+              };
+            }
+            
+            // GANADOR SECUNDARIO: número invertido
+            if (numStr === numeroInvertido && numeroSorteado !== numeroInvertido) {
+              ganadorSecundario = { 
+                registro, 
+                numeroGanador: numStr,
+                numeroSorteado: numeroSorteado,
+                tipo: 'secundario'
+              };
+            }
+          });
+        });
+
+        // Mostrar resultados
+        let resultadoHTML = '';
+
+        // Mostrar ganador principal
+        if (ganadorPrincipal) {
+          const { registro, numeroGanador } = ganadorPrincipal;
+          const { name, phone, numbers, timestamp } = registro;
+          
+          // Crear HTML de números resaltando el ganador
+          const numerosHTML = numbers.map(n => {
+            let numStr = typeof n === 'number' ? n.toString().padStart(4, '0') : String(n).padStart(4, '0');
+            if (numStr === numeroGanador) {
+              return `<span style="background:#FFD700;color:#000;padding:4px 8px;border-radius:6px;font-weight:bold;font-size:1.2em;box-shadow: 0 2px 4px rgba(255,215,0,0.4);">🥇 ${numStr}</span>`;
           }
           return `<span style="background:#f8f9fa;padding:2px 6px;border-radius:4px;border:1px solid #dee2e6;color:#6c757d;">${numStr}</span>`;
         }).join(' ');
@@ -1016,21 +1158,51 @@ function buscarNumeroEnRegistros() {
 
       resultadoBusqueda.innerHTML = resultadoHTML;
       
-    }).catch(error => {
-      console.error('Error al buscar registros:', error);
+      }).catch(error => {
+        console.error('Error al buscar registros:', error);
+        resultadoBusqueda.innerHTML = `
+          <div style="color: #dc3545; text-align: center; padding: 1rem;">
+            <strong>❌ Error:</strong> No se pudo realizar la búsqueda. 
+            <br><small>Verifica tu conexión a internet.</small>
+          </div>
+        `;
+      });
+    } else {
       resultadoBusqueda.innerHTML = `
         <div style="color: #dc3545; text-align: center; padding: 1rem;">
-          <strong>❌ Error:</strong> No se pudo realizar la búsqueda. 
-          <br><small>Verifica tu conexión a internet.</small>
+          <strong>❌ Error:</strong> No hay conexión con la base de datos.
         </div>
       `;
-    });
+    }
+  }
+}
+
+// Función para confirmar pago desde el resultado de búsqueda
+function confirmarPagoDesdeResultado(registroId, nombrePersona) {
+  console.log('Confirmando pago para:', nombrePersona, 'ID:', registroId);
+  
+  const confirmar = confirm(`🎉 CONFIRMAR PAGO\n\n¿Confirmas que ${nombrePersona} realizó el pago?\n\nEsto marcará el registro como confirmado.`);
+  
+  if (!confirmar) {
+    return;
+  }
+  
+  // Actualizar en Firebase
+  if (typeof db !== 'undefined') {
+    db.ref('registros/' + registroId).update({ estado: 'confirmed' })
+      .then(() => {
+        console.log('Pago confirmado exitosamente para:', nombrePersona);
+        alert(`✅ ¡Pago confirmado!\n\nEl registro de ${nombrePersona} ha sido marcado como confirmado.`);
+        
+        // Volver a ejecutar la búsqueda para actualizar los resultados
+        buscarNumeroEnRegistros();
+      })
+      .catch(error => {
+        console.error('Error al confirmar pago:', error);
+        alert('❌ Error al confirmar el pago. Inténtalo de nuevo.');
+      });
   } else {
-    resultadoBusqueda.innerHTML = `
-      <div style="color: #dc3545; text-align: center; padding: 1rem;">
-        <strong>❌ Error:</strong> No hay conexión con la base de datos.
-      </div>
-    `;
+    alert('❌ Error: No hay conexión con la base de datos.');
   }
 }
 
@@ -1038,7 +1210,7 @@ function buscarNumeroEnRegistros() {
 function limpiarBusquedaNumero() {
   busquedaNumeroInput.value = '';
   numeroBuscado = '';
-  resultadoBusqueda.innerHTML = '<p style="color: #6c757d; text-align: center; margin: 0;">Ingresa un número para comenzar la búsqueda</p>';
+  resultadoBusqueda.innerHTML = '<p style="color: #6c757d; text-align: center; margin: 0;">Ingresa un número de rifa (4 cifras) o teléfono para buscar</p>';
 }
 
 // Función para limpiar todos los registros
