@@ -1940,3 +1940,330 @@ button[type="submit"]:hover {
     grid-template-columns: 1fr !important;
   }
 }
+
+/* =================== SOPORTE TÉCNICO FLOTANTE =================== */
+
+/* Botón flotante de soporte */
+.support-float {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.support-icon {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #ffc107, #ff8c00);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(255, 193, 7, 0.4);
+  animation: float 3s ease-in-out infinite;
+}
+
+.support-icon:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 25px rgba(255, 193, 7, 0.6);
+}
+
+.support-emoji {
+  font-size: 1.5rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.support-pulse {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgba(255, 193, 7, 0.4);
+  animation: pulse 2s infinite;
+}
+
+.support-tooltip {
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 0.5rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.support-float:hover .support-tooltip {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Animaciones */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+
+/* Modal de soporte */
+.support-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 1rem;
+  backdrop-filter: blur(5px);
+}
+
+.support-modal-content {
+  background: linear-gradient(135deg, #1a1d29, #252837);
+  border-radius: 20px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.support-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.support-header h3 {
+  margin: 0;
+  color: #17a2b8;
+  font-size: 1.25rem;
+}
+
+.close-modal {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.close-modal:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: rotate(90deg);
+}
+
+.support-body {
+  padding: 1.5rem;
+}
+
+.support-body p {
+  color: #fff;
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+}
+
+.support-options {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.support-option {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  text-decoration: none;
+  color: #fff;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+}
+
+.support-option:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.support-option.whatsapp:hover {
+  border-color: #25d366;
+  box-shadow: 0 5px 15px rgba(37, 211, 102, 0.3);
+}
+
+.support-option.email:hover {
+  border-color: #17a2b8;
+  box-shadow: 0 5px 15px rgba(23, 162, 184, 0.3);
+}
+
+.support-option.phone:hover {
+  border-color: #ffc107;
+  box-shadow: 0 5px 15px rgba(255, 193, 7, 0.3);
+}
+
+.support-icon-text {
+  font-size: 1.5rem;
+  min-width: 40px;
+  text-align: center;
+}
+
+.support-option div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.support-option strong {
+  font-size: 1rem;
+  color: #17a2b8;
+}
+
+.support-option span {
+  font-size: 0.875rem;
+  color: #aaa;
+}
+
+.support-hours {
+  background: rgba(23, 162, 184, 0.1);
+  padding: 1rem;
+  border-radius: 12px;
+  border-left: 4px solid #17a2b8;
+}
+
+.support-hours p {
+  margin: 0.25rem 0;
+  font-size: 0.875rem;
+  color: #fff;
+}
+
+.support-hours strong {
+  color: #17a2b8;
+}
+
+/* Responsive para móviles */
+@media (max-width: 600px) {
+  .support-float {
+    bottom: 15px; /* Esquina inferior derecha */
+    right: 10px;
+  }
+  
+  .support-icon {
+    width: 45px; /* Más pequeño para ocupar menos espacio */
+    height: 45px;
+    box-shadow: 0 3px 15px rgba(255, 193, 7, 0.5), 0 6px 20px rgba(0, 0, 0, 0.3); /* Sombra doble para mejor contraste */
+  }
+  
+  .support-emoji {
+    font-size: 1.1rem; /* Emoji más pequeño */
+  }
+  
+  .support-tooltip {
+    display: none; /* Ocultar tooltip en móvil para ahorrar espacio */
+  }
+  
+  .support-pulse {
+    background: rgba(255, 193, 7, 0.3); /* Pulse más sutil */
+  }
+  
+  /* Modal más compacto para móviles */
+  .support-modal {
+    padding: 0.5rem; /* Menos padding para aprovechar más espacio */
+  }
+  
+  .support-modal-content {
+    margin: 0;
+    border-radius: 12px;
+    max-width: 95vw; /* Aprovechar casi toda la pantalla */
+    max-height: 85vh; /* Altura más compacta */
+  }
+  
+  .support-header {
+    padding: 0.75rem 1rem; /* Header más compacto */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .support-header h3 {
+    font-size: 1.1rem; /* Título más pequeño */
+    margin: 0;
+  }
+  
+  .close-modal {
+    width: 28px; /* Botón cerrar más pequeño */
+    height: 28px;
+    font-size: 1.2rem;
+  }
+  
+  .support-body {
+    padding: 0.75rem 1rem; /* Menos padding en el body */
+  }
+  
+  .support-body p {
+    font-size: 0.9rem; /* Texto más pequeño */
+    margin-bottom: 1rem;
+  }
+  
+  .support-options {
+    gap: 0.5rem; /* Menos espacio entre opciones */
+  }
+  
+  .support-option {
+    padding: 0.6rem 0.75rem; /* Opciones más compactas */
+    border-radius: 8px; /* Bordes más pequeños */
+  }
+  
+  .support-icon-text {
+    font-size: 1.2rem; /* Iconos más pequeños */
+    min-width: 35px;
+  }
+  
+  .support-option strong {
+    font-size: 0.9rem; /* Texto principal más pequeño */
+  }
+  
+  .support-option span {
+    font-size: 0.8rem; /* Texto secundario más pequeño */
+  }
+  
+  .support-hours {
+    padding: 0.75rem; /* Sección horarios más compacta */
+    margin-top: 1rem;
+    border-radius: 8px;
+  }
+  
+  .support-hours p {
+    font-size: 0.8rem; /* Texto horarios más pequeño */
+    margin: 0.2rem 0;
+  }
+}

@@ -219,7 +219,7 @@
     </section>
   </main>
 
- <!-- Burbuja informativa de colores -->
+ <!-- Burbuja informativa de colores (diseño original) -->
 <div class="color-info-bubble" id="colorInfoBubble">
   <button class="close-bubble" onclick="closeColorInfo()">✖</button>
   <h4>Significado de colores:</h4>
@@ -230,12 +230,107 @@
   </ul>
 </div>
 
+<!-- Botón flotante de soporte técnico -->
+<div class="support-float" id="supportFloat">
+  <div class="support-icon" onclick="openSupportModal()">
+    <span class="support-emoji">🛠️</span>
+    <div class="support-pulse"></div>
+  </div>
+  <div class="support-tooltip">Soporte Técnico</div>
+</div>
+
+<!-- Modal de soporte técnico -->
+<div class="support-modal" id="supportModal">
+  <div class="support-modal-content">
+    <div class="support-header">
+      <h3>🛠️ Soporte Técnico</h3>
+      <button class="close-modal" onclick="closeSupportModal()">✖</button>
+    </div>
+    <div class="support-body">
+      <p>¿Necesitas ayuda? Contáctanos a través de:</p>
+      <div class="support-options">
+        <a href="https://wa.me/573001234567?text=Hola,%20necesito%20ayuda%20con%20la%20aplicación%20de%20rifas" target="_blank" class="support-option whatsapp">
+          <span class="support-icon-text">📱</span>
+          <div>
+            <strong>WhatsApp</strong>
+            <span>Respuesta inmediata</span>
+          </div>
+        </a>
+        <a href="mailto:soporte@elcompaherna.com?subject=Soporte%20Técnico%20-%20App%20Rifas&body=Hola,%20necesito%20ayuda%20con:" class="support-option email">
+          <span class="support-icon-text">📧</span>
+          <div>
+            <strong>Email</strong>
+            <span>soporte@elcompaherna.com</span>
+          </div>
+        </a>
+        <div class="support-option phone" onclick="callSupport()">
+          <span class="support-icon-text">📞</span>
+          <div>
+            <strong>Teléfono</strong>
+            <span>+57 300 123 4567</span>
+          </div>
+        </div>
+      </div>
+      <div class="support-hours">
+        <p><strong>Horarios de atención:</strong></p>
+        <p>Lunes a Viernes: 8:00 AM - 6:00 PM</p>
+        <p>Sábados: 9:00 AM - 2:00 PM</p>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <script>
   function closeColorInfo() {
     const bubble = document.getElementById('colorInfoBubble');
     if (bubble) bubble.style.display = 'none';
   }
+
+  function openSupportModal() {
+    const modal = document.getElementById('supportModal');
+    if (modal) {
+      modal.style.display = 'flex';
+      document.body.style.overflow = 'hidden'; // Prevenir scroll del body
+    }
+  }
+
+  function closeSupportModal() {
+    const modal = document.getElementById('supportModal');
+    if (modal) {
+      modal.style.display = 'none';
+      document.body.style.overflow = 'auto'; // Restaurar scroll del body
+    }
+  }
+
+  function callSupport() {
+    if (window.navigator && window.navigator.userAgent.indexOf('Mobile') > -1) {
+      // En móvil, intentar hacer la llamada
+      window.location.href = 'tel:+573001234567';
+    } else {
+      // En escritorio, copiar número al portapapeles
+      navigator.clipboard.writeText('+57 300 123 4567').then(() => {
+        alert('Número copiado al portapapeles: +57 300 123 4567');
+      }).catch(() => {
+        alert('Número de soporte: +57 300 123 4567');
+      });
+    }
+  }
+
+  // Cerrar modal al hacer clic fuera de él
+  window.addEventListener('click', function(event) {
+    const modal = document.getElementById('supportModal');
+    if (event.target === modal) {
+      closeSupportModal();
+    }
+  });
+
+  // Cerrar modal con tecla Escape
+  document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+      closeSupportModal();
+    }
+  });
 </script>
 
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
