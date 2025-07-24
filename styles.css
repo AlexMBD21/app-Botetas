@@ -367,11 +367,17 @@ button[type="submit"]:hover {
   flex-wrap: wrap;
 }
 
+.input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
 #searchInput {
   font-size: 1rem;
   width: 220px;
   outline: none;
-  padding: 0.6rem 1rem;
+  padding: 0.6rem 2.5rem 0.6rem 1rem;
   border-radius: 12px;
   background-color: #ffffff;
   color: #000000;
@@ -383,10 +389,34 @@ button[type="submit"]:hover {
   border-color: #000000;
 }
 
-/* Botón limpiar selección de número */
-#clearSearch {
-  padding: 0.6rem 1.5rem;
+/* Botón X dentro del input */
+.input-container #clearSearch {
+  position: absolute;
+  right: 8px;
+  padding: 4px 8px;
   background: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.input-container #clearSearch:hover {
+  background: #c0392b;
+}
+
+/* Botón Buscar separado */
+#searchBtn {
+  padding: 0.6rem 1.5rem;
+  background: #007bff;
   color: white;
   border: none;
   border-radius: 12px;
@@ -396,8 +426,8 @@ button[type="submit"]:hover {
   transition: background 0.2s;
 }
 
-#clearSearch:hover {
-  background: #c0392b;
+#searchBtn:hover {
+  background: #0056b3;
 }
 
 /* Botones de número y colores */
@@ -456,38 +486,74 @@ button[type="submit"]:hover {
 
 /* Buscador de registros guardados */
 .registro-search-wrapper {
+  display: flex;
+  gap: 0.5rem;
   margin-bottom: 1.2rem;
   justify-content: center;
-  width: 100%;
+  flex-wrap: wrap;
 }
 
-#registroSearchBar {
-  width: 100px;
-  font-size: 1.1rem;
-  padding: 0.5rem 1rem;
+.registro-search-wrapper .input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+#busquedaNumeroInput {
+  font-size: 1rem;
+  width: 350px;
+  outline: none;
+  padding: 0.6rem 2.5rem 0.6rem 1rem;
   border-radius: 12px;
   background-color: #ffffff;
   color: #000000;
   border: 1px solid #ccc;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  margin-right: 9px;
 }
 
-#registroSearchBar:focus {
-  border-color: #030910;
+#busquedaNumeroInput:focus {
+  border-color: #000000;
 }
 
-#registroSearchBtn {
-  border: none;
-  font-size: 1rem;
-  padding: 0.5rem 1rem;
-  width: 80px;
-  border-radius: 8px;
+/* Botón X dentro del input de búsqueda de registros */
+.registro-search-wrapper .input-container #clearBusquedaBtn {
+  position: absolute;
+  right: 8px;
+  padding: 4px 8px;
+  background: #e74c3c;
   color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: bold;
   cursor: pointer;
   transition: background 0.2s;
-  background: #17a2b8;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.registro-search-wrapper .input-container #clearBusquedaBtn:hover {
+  background: #c0392b;
+}
+
+/* Botón Buscar separado en búsqueda de registros */
+#busquedaNumeroBtn {
+  padding: 0.6rem 1.5rem;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#busquedaNumeroBtn:hover {
+  background: #0056b3;
 }
 
 #registroSearchBtn:hover {
@@ -605,11 +671,205 @@ button[type="submit"]:hover {
   }
 }
 
+/* =============== PANEL DE CONFIGURACIÓN DEL SORTEO =============== */
+#panelConfiguracion {
+  background: rgba(255, 193, 7, 0.1) !important;
+  border: 2px solid #ffc107 !important;
+  border-radius: 12px !important;
+  padding: 1.5rem !important;
+  margin: 0 auto 1rem auto !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+#panelConfiguracion h3 {
+  color: #ffc107 !important;
+  margin-bottom: 1rem !important;
+  text-align: center !important;
+  font-size: 1.3rem !important;
+}
+
+/* Grid de fecha y hora */
+#panelConfiguracion .grid-inputs {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 1rem !important;
+  margin-bottom: 1rem !important;
+}
+
+#panelConfiguracion label {
+  display: block !important;
+  margin-bottom: 0.5rem !important;
+  font-weight: bold !important;
+  color: #ffc107 !important;
+  font-size: 0.9rem !important;
+}
+
+#panelConfiguracion input,
+#panelConfiguracion select {
+  width: 100% !important;
+  padding: 0.5rem !important;
+  border-radius: 8px !important;
+  border: 1px solid #ccc !important;
+  box-sizing: border-box !important;
+  font-size: 1rem !important;
+}
+
+/* Botones del panel */
+#panelConfiguracion .botones-panel {
+  display: flex !important;
+  gap: 0.5rem !important;
+  justify-content: center !important;
+  flex-wrap: wrap !important;
+}
+
+#guardarConfigBtn,
+#cancelarConfigBtn {
+  padding: 0.8rem 2rem !important;
+  border-radius: 8px !important;
+  font-weight: bold !important;
+  cursor: pointer !important;
+  border: none !important;
+  font-size: 1rem !important;
+  min-width: 120px !important;
+}
+
+#guardarConfigBtn {
+  background: #28a745 !important;
+  color: white !important;
+}
+
+#cancelarConfigBtn {
+  background: #6c757d !important;
+  color: white !important;
+}
+
+#estadoBloqueo {
+  margin-top: 1rem !important;
+  padding: 1rem !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-radius: 8px !important;
+  text-align: center !important;
+}
+
+#estadoBloqueo p {
+  margin: 0 !important;
+  font-weight: bold !important;
+  color: #ffc107 !important;
+}
+
+/* =============== PANTALLAS MEDIANAS (TABLETS) 600px =============== */
+@media (max-width: 600px) {
+  /* Panel de configuración responsive */
+  #panelConfiguracion {
+    padding: 1rem !important;
+    margin: 0 auto 1rem auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  #panelConfiguracion .grid-inputs {
+    grid-template-columns: 1fr !important;
+    gap: 0.8rem !important;
+  }
+
+  #panelConfiguracion h3 {
+    font-size: 1.1rem !important;
+  }
+
+  #panelConfiguracion .botones-panel {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 0.8rem !important;
+  }
+
+  #guardarConfigBtn,
+  #cancelarConfigBtn {
+    width: 100% !important;
+    max-width: 250px !important;
+    padding: 1rem 1.5rem !important;
+  }
+
+  .registro-guardado div[style*="text-align: center"] {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 0.8rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  #limpiarTodosBtn,
+  #configurarSorteoBtn {
+    width: 90% !important;
+    max-width: 250px !important;
+    margin: 0 !important;
+    padding: 0.9rem 1.5rem !important;
+    font-size: 1rem !important;
+  }
+}
+
 @media (max-width: 767px) {
   .registro-guardado {
     padding: 1.5rem 1rem;
     width: 100%;
     box-sizing: border-box;
+  }
+
+  /* Panel de configuración en móviles */
+  #panelConfiguracion {
+    padding: 1rem !important;
+    margin: 0 auto 1rem auto !important;
+    border-radius: 8px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  #panelConfiguracion h3 {
+    font-size: 1rem !important;
+    margin-bottom: 0.8rem !important;
+  }
+
+  #panelConfiguracion .grid-inputs {
+    grid-template-columns: 1fr !important;
+    gap: 0.6rem !important;
+    margin-bottom: 0.8rem !important;
+  }
+
+  #panelConfiguracion label {
+    font-size: 0.85rem !important;
+    margin-bottom: 0.3rem !important;
+  }
+
+  #panelConfiguracion input,
+  #panelConfiguracion select {
+    padding: 0.6rem !important;
+    font-size: 16px !important; /* Evita zoom en iOS */
+  }
+
+  #panelConfiguracion .botones-panel {
+    flex-direction: column !important;
+    gap: 0.6rem !important;
+  }
+
+  #guardarConfigBtn,
+  #cancelarConfigBtn {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0.9rem 1rem !important;
+    font-size: 0.95rem !important;
+  }
+
+  #estadoBloqueo {
+    padding: 0.8rem !important;
+    margin-top: 0.8rem !important;
+  }
+
+  #estadoBloqueo p {
+    font-size: 0.9rem !important;
   }
 
   #registroCounts {
@@ -620,6 +880,26 @@ button[type="submit"]:hover {
     justify-content: center;
   }
 
+  /* Contenedor de botones responsive */
+  .registro-guardado div[style*="text-align: center"] {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 1rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  /* Botones de acción responsive */
+  #limpiarTodosBtn,
+  #configurarSorteoBtn {
+    width: 100% !important;
+    max-width: 280px !important;
+    margin: 0 !important;
+    padding: 1rem 1.5rem !important;
+    font-size: 1rem !important;
+    border-radius: 12px !important;
+  }
+
   .registro-search-wrapper {
     display: flex;
     flex-direction: column;
@@ -627,17 +907,25 @@ button[type="submit"]:hover {
     gap: 0.5rem;
   }
 
-  #registroSearchBar,
-  #registroSearchBtn {
-    width: 90%;
+  .registro-search-wrapper .input-container {
+    width: 100%;
     max-width: 300px;
-    margin: 0 auto;
-    display: block;
-    box-sizing: border-box;
+  }
+
+  #busquedaNumeroInput {
+    width: 100%;
+    font-size: 16px;
+  }
+
+  #busquedaNumeroBtn {
+    width: 100%;
+    max-width: 300px;
   }
 
   #registroSearchBar {
     margin-bottom: 0.5rem;
+    display: block;
+    box-sizing: border-box;
   }
 
   .registro-list {
@@ -721,11 +1009,24 @@ button[type="submit"]:hover {
 
   .search-wrapper {
     padding: 0 0.5rem;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .input-container {
+    width: 100%;
+    max-width: 300px;
   }
 
   #searchInput {
-    width: 180px;
+    width: 100%;
     font-size: 16px;
+  }
+
+  #searchBtn {
+    margin-top: 0.5rem;
+    width: 100%;
+    max-width: 300px;
   }
 
   /* Números aún más pequeños en pantallas muy pequeñas */
@@ -749,6 +1050,51 @@ button[type="submit"]:hover {
     gap: 1rem !important;
   }
 
+  /* Panel de configuración en pantallas muy pequeñas */
+  #panelConfiguracion {
+    padding: 0.8rem !important;
+    margin: 0 auto 1rem auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  #panelConfiguracion h3 {
+    font-size: 0.9rem !important;
+    margin-bottom: 0.6rem !important;
+  }
+
+  #panelConfiguracion .grid-inputs {
+    gap: 0.5rem !important;
+    margin-bottom: 0.6rem !important;
+  }
+
+  #panelConfiguracion label {
+    font-size: 0.8rem !important;
+    margin-bottom: 0.2rem !important;
+  }
+
+  #panelConfiguracion input,
+  #panelConfiguracion select {
+    padding: 0.5rem !important;
+    font-size: 14px !important;
+  }
+
+  #guardarConfigBtn,
+  #cancelarConfigBtn {
+    padding: 0.8rem 0.8rem !important;
+    font-size: 0.85rem !important;
+  }
+
+  #estadoBloqueo {
+    padding: 0.6rem !important;
+  }
+
+  #estadoBloqueo p {
+    font-size: 0.8rem !important;
+  }
+
   /* NO aplicar cambios a la sección de números - mantener tamaño original */
   /* .numbers-section {
     padding: 0.5rem 0.25rem !important;
@@ -767,13 +1113,39 @@ button[type="submit"]:hover {
     height: 30px !important;
   } */
 
+  /* Botones de acción en pantallas muy pequeñas */
+  #limpiarTodosBtn,
+  #configurarSorteoBtn {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0.8rem 1rem !important;
+    font-size: 0.9rem !important;
+    margin: 0 !important;
+  }
+
+  .registro-guardado div[style*="text-align: center"] {
+    padding: 0 0.5rem !important;
+    gap: 0.8rem !important;
+  }
+
   .search-wrapper {
     padding: 0 0.25rem !important;
+    flex-direction: column !important;
+  }
+
+  .input-container {
+    width: 100% !important;
   }
 
   #searchInput {
-    width: 150px !important;
+    width: 100% !important;
     font-size: 14px !important;
+  }
+
+  #searchBtn {
+    width: 100% !important;
+    font-size: 14px !important;
+    margin-top: 0.5rem !important;
   }
 
   /* Búsqueda de números extremadamente compacta */
@@ -951,62 +1323,72 @@ button[type="submit"]:hover {
 .busqueda-numeros .registro-search-wrapper {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 0.5rem;
   align-items: center;
   justify-content: center;
 }
 
 .busqueda-numeros .input-container {
   position: relative;
-  flex: 1;
+  display: flex;
+  align-items: center;
   min-width: 200px;
-  max-width: 300px;
+  max-width: 350px;
 }
 
 .busqueda-numeros #busquedaNumeroInput {
   width: 100%;
-  padding: 12px 40px 12px 12px;
-  font-size: 16px;
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 0.6rem 2.5rem 0.6rem 1rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  background-color: #ffffff;
+  color: #000000;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  outline: none;
+}
+
+.busqueda-numeros #busquedaNumeroInput:focus {
+  border-color: #000000;
 }
 
 .busqueda-numeros #clearBusquedaBtn {
   position: absolute;
   right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
+  padding: 4px 8px;
+  background: #e74c3c;
+  color: white;
   border: none;
-  color: #999;
-  cursor: pointer;
-  padding: 4px;
   border-radius: 50%;
-  display: none;
-  font-size: 16px;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
   width: 24px;
   height: 24px;
+  display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .busqueda-numeros #clearBusquedaBtn:hover {
-  background-color: #f8f9fa;
-  color: #dc3545;
+  background: #c0392b;
 }
 
 .busqueda-numeros #busquedaNumeroBtn {
-  padding: 12px 24px;
-  background: linear-gradient(135deg, #007bff, #0056b3);
+  padding: 0.6rem 1.5rem;
+  background: #007bff;
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: bold;
   cursor: pointer;
-  font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0,123,255,0.3);
-  transition: all 0.3s ease;
-  white-space: nowrap;
+  transition: background 0.2s;
+}
+
+.busqueda-numeros #busquedaNumeroBtn:hover {
+  background: #0056b3;
 }
 
 .busqueda-numeros #resultadoBusqueda {
@@ -1019,30 +1401,27 @@ button[type="submit"]:hover {
   overflow-x: auto;
 }
 
-/* Mostrar botón de limpiar cuando hay texto */
-.busqueda-numeros #busquedaNumeroInput:not(:placeholder-shown) ~ #clearBusquedaBtn {
-  display: flex !important;
-}
-
 /* =============== MEDIA QUERIES PARA BÚSQUEDA =============== */
 @media (max-width: 768px) {
   .busqueda-numeros .registro-search-wrapper {
     flex-direction: column;
-    align-items: stretch;
+    align-items: center;
   }
   
   .busqueda-numeros .input-container {
-    min-width: unset;
-    max-width: unset;
     width: 100%;
-    margin-bottom: 8px;
+    max-width: 300px;
+    margin-bottom: 0.5rem;
   }
   
-  .busqueda-numeros .registro-search-wrapper button {
+  .busqueda-numeros #busquedaNumeroInput {
     width: 100%;
-    justify-content: center;
-    display: flex;
-    align-items: center;
+    font-size: 16px;
+  }
+  
+  .busqueda-numeros #busquedaNumeroBtn {
+    width: 100%;
+    max-width: 300px;
   }
 }
 
