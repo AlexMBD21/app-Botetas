@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Rifa por Influencer</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <h1>El Compa Herna 🎁</h1>
+    <div class="connection-indicator" id="connectionIndicator">
+      <div class="connection-light" id="connectionLight"></div>
+      <span class="connection-text" id="connectionText">Conectando...</span>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="numbers-section glass">
+      <h2>Selecciona tus números</h2>
+
+      <div class="search-wrapper">
+        <div class="input-container">
+          <input type="text" id="searchInput" placeholder="Busca tu número" maxlength="4" />
+          <button id="clearSearch" type="button" title="Limpiar búsqueda">✖</button>
+        </div>
+        <button id="searchBtn" type="button">Buscar</button>
+      </div>
+
+      <!-- Loading indicator para los números -->
+      <div id="numbersLoadingSpinner" class="numbers-loading">
+        <div class="loading-spinner-container">
+          <div class="loading-spinner"></div>
+          <p>Cargando números...</p>
+          <p class="loading-subtext">Generando 10,000 números disponibles</p>
+        </div>
+      </div>
+
+      <div id="numberGrid" class="scroll-grid" style="display: none;"></div>
+
+      <p id="selectedCount" class="selected-count-text">Has seleccionado 0 números.</p>
+    </section>
+
+    <section class="form-section glass">
+      <h2>Registra tus números</h2>
+      <form id="registrationForm">
+        <label for="name">Nombre</label>
+        <input type="text" id="name" placeholder="Tu nombre completo" 
+               pattern="[A-Za-zÀ-ÿ\u00f1\u00d1\s]+" 
+               title="Solo se permiten letras y espacios" 
+               minlength="2" 
+               maxlength="50" 
+               required />
+
+        <label for="phone">Teléfono</label>
+        <input type="tel" id="phone" placeholder="Ej: 3001234567" 
+               pattern="[0-9]{10}" 
+               title="Debe tener exactamente 10 dígitos (solo números)" 
+               minlength="10" 
+               maxlength="10" 
+               required />
+
+        <div id="selectedNumbers"></div>
+        <p id="totalDisplay">Total a pagar: $0</p>
+        <button type="submit">Registrar</button>
+      </form>
+      <div id="confirmation"></div>
+    </section>
+
+    <section class="registro-guardado glass" style="margin-top: 2rem;">
+      <h2>Registros Realizados</h2>
+     <div id="registroCounts" style="text-align:right; font-weight:bold; margin-bottom: 1rem;">
+     <span style="color: rgb(170, 170, 180);">Confirmados: <span id="confirmadosCount">0 </span></span> |
+     <span style="color: rgb(170, 170, 180);">Pendientes: <span id="pendientesCount">0 </span></span>
+     </div>
+
+      <!-- Botón para limpiar todos los registros -->
+      <div style="text-align: center; margin-bottom: 1rem;">
+        <button id="limpiarTodosBtn" style="background: #dc3545; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: background 0.2s; margin-right: 0.5rem;">
+          🗑️ Limpiar Registros
+        </button>
+        <button id="configurarSorteoBtn" style="background: #2b2d3d; color: rgb(255, 255, 255); border: none; padding: 0.8rem 1.5rem; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: background 0.2s;">
+          ⚙️ Configurar Sorteo
+        </button>
+      </div>
+
+      <!-- Panel de configuración del sorteo (oculto por defecto) -->
+      <div id="panelConfiguracion" style="display: none;">
+        <h3>⚙️ Configuración del Sorteo</h3>
+        
+        <div class="grid-inputs">
+          <div>
+            <label for="valorBoletaInput">💰 Valor de la Boleta (COP):</label>
+            <input type="number" id="valorBoletaInput" min="1000" step="500" placeholder="4000" value="4000">
+          </div>
+          <div>
+            <label for="fechaInicioEventoInput">📅 Fecha de Inicio del Evento:</label>
+            <input type="date" id="fechaInicioEventoInput">
+          </div>
+        </div>
+        
+        <div class="grid-inputs">
+          <div>
+            <label for="fechaSorteoInput">🎯 Fecha del Sorteo:</label>
+            <input type="date" id="fechaSorteoInput">
+          </div>
+          <div>
+            <label for="horaSorteoInput">🕐 Hora del Sorteo:</label>
+            <input type="time" id="horaSorteoInput">
+          </div>
+        </div>
+        
+        <div style="margin-bottom: 1rem;">
+          <label for="horasAntesBloqueo">Horas antes del sorteo para cerrar registros:</label>
+          <select id="horasAntesBloqueo">
+            <option value="1">1 hora antes</option>
+            <option value="2" selected>2 horas antes</option>
+            <option value="3">3 horas antes</option>
+            <option value="6">6 horas antes</option>
+            <option value="12">12 horas antes</option>
+            <option value="24">24 horas antes</option>
+          </select>
+        </div>
+        
+        <div style="margin-bottom: 1rem;">
+          <label for="tiempoTemporizadorInput">⏰ Tiempo del temporizador para confirmar pago (minutos):</label>
+          <select id="tiempoTemporizadorInput">
+            <option value="15">15 minutos</option>
+            <option value="20">20 minutos</option>
+            <option value="30" selected>30 minutos</option>
+            <option value="45">45 minutos</option>
+            <option value="60">1 hora</option>
+            <option value="90">1.5 horas</option>
+            <option value="120">2 horas</option>
+          </select>
+        </div>
+        
+        <div class="botones-panel">
+          <button id="guardarConfigBtn">
+            💾 Guardar Configuración
+          </button>
+          <button id="cancelarConfigBtn">
+            ❌ Cancelar
+          </button>
+        </div>
+        
+        <div id="estadoBloqueo">
+          <p>Estado actual: <span id="estadoRegistros">Calculando...</span></p>
+        </div>
+      </div>
+
+      <!-- Loading indicator para la lista de registros -->
+      <div id="registrosLoadingSpinner" class="registros-loading" style="display: none;">
+        <div class="loading-spinner-container">
+          <div class="loading-spinner"></div>
+          <p>Cargando registros...</p>
+          <p class="loading-subtext">Obteniendo información actualizada</p>
+        </div>
+      </div>
+
+      <div id="loadingSpinner" style="display:none; text-align:center; padding:10px;">
+        <span style="font-size:2em;">⏳</span> <span>Cargando registros...</span>
+      </div>
+      <div class="registro-list" id="registro-list"></div>
+    </section>
+
+    <!-- Contenedor separado para búsqueda de números -->
+    <section class="busqueda-numeros glass" style="margin-top: 2rem;">
+      <h2>Buscar Número en Registros</h2>
+      <div class="registro-search-wrapper">
+        <div class="input-container">
+          <input type="text" id="busquedaNumeroInput" placeholder="Número de rifa o teléfono" maxlength="15" />
+          <button id="clearBusquedaBtn" type="button" title="Limpiar búsqueda">✖</button>
+        </div>
+        <button id="busquedaNumeroBtn" type="button">Buscar</button>
+      </div>
+      
+      <div id="resultadoBusqueda">
+        <p style="color: #6c757d; text-align: center; margin: 0;">Ingresa un número para comenzar la búsqueda</p>
+      </div>
+    </section>
+
+
+
+
+  <!---  ocultamineto de registros realizado --->
+    <script>
+      // Oculta las secciones por defecto
+      document.addEventListener('DOMContentLoaded', function() {
+        var regSection = document.querySelector('.registro-guardado');
+        var busquedaSection = document.querySelector('.busqueda-numeros');
+        
+        if (regSection) regSection.style.display = 'none';
+        if (busquedaSection) busquedaSection.style.display = 'none';
+        
+        // Verifica el parámetro token en la URL
+        var params = new URLSearchParams(window.location.search);
+        var token = params.get('token');
+        if (token && window.firebase && window.firebase.database) {
+          // Busca el usuario en la base de datos
+          window.firebase.database().ref('usuarios/' + token).once('value').then(function(snapshot) {
+            if (snapshot.exists()) {
+              if (regSection) regSection.style.display = '';
+              if (busquedaSection) busquedaSection.style.display = '';
+            } else {
+              if (regSection) regSection.style.display = 'none';
+              if (busquedaSection) busquedaSection.style.display = 'none';
+              alert('ID de usuario no válido. No tienes acceso a los registros.');
+            }
+          });
+        } else {
+          if (regSection) regSection.style.display = 'none';
+          if (busquedaSection) busquedaSection.style.display = 'none';
+        }
+      });
+    </script>
+
+    
+    </section>
+  </main>
+
+<!-- Botón flotante de información/tutorial -->
+<div class="support-float" id="supportFloat">
+  <div class="support-icon" onclick="openSupportModal()">
+    <span class="support-emoji">�</span>
+    <div class="support-pulse"></div>
+  </div>
+  <div class="support-tooltip">¿Cómo usar?</div>
+</div>
+
+<!-- Modal de información/tutorial -->
+<div class="support-modal" id="supportModal">
+  <div class="support-modal-content">
+    <div class="support-header">
+      <h3>¿Cómo participar en la rifa?</h3>
+      <button class="close-modal" onclick="closeSupportModal()">✖</button>
+    </div>
+    <div class="support-body">
+      <div class="color-meanings">
+        <h4>📋 Significado de los colores:</h4>
+        <div class="color-legend">
+          <div class="color-item" onclick="showColorTooltip('green', this)">
+            <span class="color-circle green"></span>
+            <div class="color-text">
+              <span class="color-name">Verde</span>
+              <span class="color-description">Disponible</span>
+            </div>
+          </div>
+          <div class="color-item" onclick="showColorTooltip('gray', this)">
+            <span class="color-circle gray"></span>
+            <div class="color-text">
+              <span class="color-name">Gris</span>
+              <span class="color-description">En proceso de pago</span>
+            </div>
+          </div>
+          <div class="color-item" onclick="showColorTooltip('red', this)">
+            <span class="color-circle red"></span>
+            <div class="color-text">
+              <span class="color-name">Rojo</span>
+              <span class="color-description">Vendido</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Tooltip para explicaciones de colores -->
+      <div id="colorTooltip" class="color-tooltip" style="display: none;">
+        <div class="tooltip-content">
+          <button class="tooltip-close" onclick="hideColorTooltip()">✖</button>
+          <div id="tooltipMessage" class="tooltip-message"></div>
+        </div>
+      </div>
+      
+      <p><strong>Sigue estos pasos para participar:</strong></p>
+      <div class="support-options">
+        <div class="support-option step">
+          <span class="support-icon-text"> 1️</span>
+          <div>
+            <strong>Selecciona tus números</strong>
+            <div class="step-media">
+              <img src="assets/paso_1.gif" alt="Cómo seleccionar números" class="step-gif" />
+            </div>
+          </div>
+        </div>
+        <div class="support-option step">
+          <span class="support-icon-text">2️</span>
+          <div>
+            <strong>Completa el formulario</strong>
+            <div class="step-media">
+              <img src="assets/paso_2.gif" alt="Cómo completar el formulario" class="step-gif" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="support-hours">
+        <p><strong>💳 Métodos de pago:</strong></p>
+        <p>• Bancolombia: 1234-5678-9012</p>
+        <p>• Nequi: 321 456 7890</p>
+        <p><strong>¡Importante:</strong> Incluye tu número de celular en el mensaje de pago para identificarte rápidamente.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  // Función para mostrar tooltip de colores
+  function showColorTooltip(colorType, element) {
+    const tooltip = document.getElementById('colorTooltip');
+    const message = document.getElementById('tooltipMessage');
+    
+    const messages = {
+      green: {
+        title: '🟢 Números Disponibles',
+        text: 'Estos números están libres y puedes seleccionarlos. Haz clic en cualquier número verde para agregarlo a tu selección.',
+        icon: '✅'
+      },
+      gray: {
+        title: '⚫ En Proceso de Pago',
+        text: 'Alguien ya seleccionó estos números y tiene 30 minutos para completar el pago. Si no pagan a tiempo, volverán a estar disponibles.',
+        icon: '⏳'
+      },
+      red: {
+        title: '🔴 Números Vendidos',
+        text: 'Estos números ya fueron pagados y confirmados. No están disponibles para selección.',
+        icon: '🔒'
+      }
+    };
+    
+    const colorInfo = messages[colorType];
+    if (colorInfo) {
+      message.innerHTML = `
+        <div class="tooltip-header">
+          <span class="tooltip-icon">${colorInfo.icon}</span>
+          <h4>${colorInfo.title}</h4>
+        </div>
+        <p>${colorInfo.text}</p>
+      `;
+      
+      tooltip.style.display = 'block';
+      setTimeout(() => {
+        tooltip.classList.add('show');
+      }, 10);
+    }
+  }
+  
+  // Función para ocultar tooltip
+  function hideColorTooltip() {
+    const tooltip = document.getElementById('colorTooltip');
+    tooltip.classList.remove('show');
+    setTimeout(() => {
+      tooltip.style.display = 'none';
+    }, 300);
+  }
+
+  function openSupportModal() {
+    const modal = document.getElementById('supportModal');
+    const supportFloat = document.getElementById('supportFloat');
+    if (modal) {
+      // Guardar posición de scroll actual
+      const scrollY = window.scrollY;
+      document.body.style.top = `-${scrollY}px`;
+      
+      // Aplicar clase para bloquear scroll
+      document.body.classList.add('modal-open');
+      
+      // Ocultar el botón flotante
+      if (supportFloat) {
+        supportFloat.classList.add('hidden');
+      }
+      
+      // Mostrar modal
+      modal.style.display = 'flex';
+    }
+  }
+
+  function closeSupportModal() {
+    const modal = document.getElementById('supportModal');
+    const supportFloat = document.getElementById('supportFloat');
+    if (modal) {
+      // Ocultar modal
+      modal.style.display = 'none';
+      
+      // Mostrar el botón flotante nuevamente
+      if (supportFloat) {
+        supportFloat.classList.remove('hidden');
+      }
+      
+      // Restaurar scroll
+      const scrollY = document.body.style.top;
+      document.body.classList.remove('modal-open');
+      document.body.style.top = '';
+      
+      // Restaurar posición de scroll
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+      }
+    }
+  }
+
+  // Cerrar modal al hacer clic fuera de él
+  window.addEventListener('click', function(event) {
+    const modal = document.getElementById('supportModal');
+    const modalContent = document.querySelector('.support-modal-content');
+    
+    // Solo cerrar si se hace clic en el fondo del modal, no en el contenido
+    if (event.target === modal && !modalContent.contains(event.target)) {
+      closeSupportModal();
+    }
+  });
+
+  // Prevenir que los clics en el contenido del modal cierren el modal
+  document.addEventListener('click', function(event) {
+    const modalContent = document.querySelector('.support-modal-content');
+    if (modalContent && modalContent.contains(event.target)) {
+      event.stopPropagation();
+    }
+  });
+
+  // Cerrar modal con tecla Escape
+  document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+      closeSupportModal();
+    }
+  });
+</script>
+
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-database-compat.js"></script>
+  <script src="firebaseConfig.js"></script>
+  <script src="realTime.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
