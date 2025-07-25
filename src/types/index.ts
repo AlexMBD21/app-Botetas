@@ -22,7 +22,7 @@ export interface ConfiguracionSorteo {
 
 export interface EstadoNumero {
   [numero: number]: {
-    status: 'available' | 'selected' | 'unavailable';
+    status: 'available' | 'selected' | 'unavailable' | 'pending' | 'confirmed';
     registroId?: string;
   };
 }

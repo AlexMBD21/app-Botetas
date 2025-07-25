@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { EstadoNumero } from '../types';
 
 interface NumbersSectionProps {
@@ -23,8 +23,8 @@ export default function NumbersSection({
   const [searchNumber, setSearchNumber] = useState('');
   const [filteredNumbers, setFilteredNumbers] = useState<number[]>([]);
 
-  // Generar números del 1 al 10000
-  const allNumbers = Array.from({ length: 10000 }, (_, i) => i + 1);
+  // Generar números del 0 al 9999 (como en el original)
+  const allNumbers = Array.from({ length: 10000 }, (_, i) => i);
 
   useEffect(() => {
     if (searchNumber.trim() === '') {
@@ -38,29 +38,59 @@ export default function NumbersSection({
     }
   }, [searchNumber, allNumbers]);
 
+  // Verificación de bloqueo de registros (lógica del script original)
+  const verificarBloqueoRegistros = useCallback(() => {
+    if (registrosBloquados) {
+      alert('🚫 SELECCIÓN BLOQUEADA\n\nNo se pueden seleccionar números porque los registros han sido cerrados.\n\nLa fecha límite del sorteo ha sido alcanzada.');
+      return true;
+    }
+    return false;
+  }, [registrosBloquados]);
+
+  // Función para manejar click en número (lógica exacta del script original)
   const handleNumberClick = (number: number) => {
-    if (registrosBloquados) return;
+    // VERIFICAR BLOQUEO DE REGISTROS ANTES DE PERMITIR SELECCIÓN
+    if (verificarBloqueoRegistros()) {
+      return;
+    }
+
+    const estadoActual = numberStatus[number]?.status || 'available';
     
-    const status = numberStatus[number]?.status || 'available';
-    
-    if (status === 'unavailable') return;
-    
+    // No permitir selección si está pending o confirmed
+    if (estadoActual === 'pending' || estadoActual === 'confirmed' || estadoActual === 'unavailable') {
+      return;
+    }
+
     if (selectedNumbers.has(number)) {
       removeSelectedNumber(number);
     } else {
-      if (status === 'available') {
-        addSelectedNumber(number);
-      }
+      addSelectedNumber(number);
     }
   };
 
+  // Función para obtener clase del botón (lógica exacta del script original)
   const getButtonClass = (number: number) => {
-    const status = numberStatus[number]?.status || 'available';
-    const isSelected = selectedNumbers.has(number);
+    const estado = numberStatus[number]?.status || 'available';
     
-    if (isSelected) return 'number-btn selected';
-    if (status === 'unavailable') return 'number-btn unavailable';
-    return 'number-btn available';
+    // Si está seleccionado, mostrar como selected
+    if (selectedNumbers.has(number)) {
+      return 'number-btn selected';
+    }
+    
+    // Asignar clase según estado
+    if (estado === 'confirmed' || estado === 'unavailable') {
+      return 'number-btn unavailable';
+    } else if (estado === 'pending') {
+      return 'number-btn pending';
+    } else {
+      return 'number-btn available';
+    }
+  };
+
+  // Función para determinar si el botón debe estar deshabilitado
+  const isButtonDisabled = (number: number) => {
+    const estado = numberStatus[number]?.status || 'available';
+    return registrosBloquados || estado === 'confirmed' || estado === 'pending' || estado === 'unavailable';
   };
 
   const clearSearch = () => {
@@ -70,7 +100,7 @@ export default function NumbersSection({
   const searchSpecificNumber = () => {
     if (searchNumber.trim()) {
       const num = parseInt(searchNumber);
-      if (num >= 1 && num <= 10000) {
+      if (num >= 0 && num <= 9999) {
         const element = document.querySelector(`[data-number="${num}"]`);
         if (element) {
           element.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -129,7 +159,7 @@ export default function NumbersSection({
             className={getButtonClass(number)}
             data-number={number}
             onClick={() => handleNumberClick(number)}
-            disabled={registrosBloquados || numberStatus[number]?.status === 'unavailable'}
+            disabled={isButtonDisabled(number)}
           >
             {number.toString().padStart(4, '0')}
           </button>
@@ -137,7 +167,7 @@ export default function NumbersSection({
       </div>
 
       <p id="selectedCount" className="selected-count-text">
-        Has seleccionado {selectedNumbers.size} números.
+        Has seleccionado {selectedNumbers.size} número{selectedNumbers.size !== 1 ? 's' : ''}.
       </p>
     </section>
   );
