@@ -1977,6 +1977,21 @@ button[type="submit"]:hover {
   isolation: isolate;
 }
 
+/* Ocultar botón flotante cuando el modal esté abierto */
+.support-float.hidden {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+/* Ocultar botón flotante cuando el body tenga modal-open */
+body.modal-open .support-float {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
 .support-icon {
   width: 60px;
   height: 60px;
@@ -2054,7 +2069,7 @@ button[type="submit"]:hover {
   display: none;
   align-items: center;
   justify-content: center;
-  z-index: 2000;
+  z-index: 100000;
   padding: 1rem;
   backdrop-filter: blur(3px);
   will-change: transform;
