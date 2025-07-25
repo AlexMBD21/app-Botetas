@@ -7,6 +7,11 @@
   padding: 0;
 }
 
+/* Optimización para scroll suave */
+html {
+  scroll-behavior: smooth;
+}
+
 /* =============== BASE =============== */
 html, body {
   font-family: 'Segoe UI', sans-serif;
@@ -17,6 +22,15 @@ html, body {
   align-items: center;
   width: 100%;
   overflow-x: hidden;
+}
+
+/* Clase para bloquear scroll cuando modal está abierto */
+body.modal-open {
+  overflow: hidden !important;
+  position: fixed !important;
+  width: 100% !important;
+  top: 0 !important;
+  left: 0 !important;
 }
 
 header {
@@ -125,13 +139,16 @@ header {
 /* =============== FORMULARIO VIDRIO =============== */
 .glass {
   background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(15px);
+  backdrop-filter: blur(10px);
   padding: 1rem;
   border-radius: 15px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+  will-change: transform;
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
 }
 
 /* =============== FORMULARIO DE REGISTRO =============== */
@@ -1945,14 +1962,19 @@ button[type="submit"]:hover {
 
 /* Botón flotante de soporte */
 .support-float {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 1000;
+  position: fixed !important;
+  bottom: 20px !important;
+  right: 20px !important;
+  z-index: 99999 !important;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
+  will-change: transform;
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+  pointer-events: auto;
+  isolation: isolate;
 }
 
 .support-icon {
@@ -1968,6 +1990,8 @@ button[type="submit"]:hover {
   transition: all 0.3s ease;
   box-shadow: 0 4px 20px rgba(255, 193, 7, 0.4);
   animation: float 3s ease-in-out infinite;
+  z-index: inherit;
+  will-change: transform;
 }
 
 .support-icon:hover {
@@ -2032,18 +2056,47 @@ button[type="submit"]:hover {
   justify-content: center;
   z-index: 2000;
   padding: 1rem;
-  backdrop-filter: blur(5px);
+  backdrop-filter: blur(3px);
+  will-change: transform;
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
 }
 
 .support-modal-content {
   background: linear-gradient(135deg, #1a1d29, #252837);
   border-radius: 20px;
-  max-width: 500px;
+  max-width: 600px;
   width: 100%;
-  max-height: 90vh;
+  max-height: 85vh;
   overflow-y: auto;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  will-change: transform;
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Estilos personalizados para la barra de scroll del modal */
+.support-modal-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.support-modal-content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+.support-modal-content::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.support-modal-content::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #764ba2, #667eea);
 }
 
 .support-header {
@@ -2082,20 +2135,20 @@ button[type="submit"]:hover {
 }
 
 .support-body {
-  padding: 1.5rem;
+  padding: 1rem 1.5rem;
 }
 
 .support-body p {
   color: #fff;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   font-size: 1rem;
 }
 
 .support-options {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  margin-bottom: 2rem;
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
 }
 
 .support-option {
@@ -2364,17 +2417,18 @@ button[type="submit"]:hover {
   padding: 1rem;
   margin-top: 1rem;
   border: 2px solid rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(15px);
+  backdrop-filter: blur(10px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
   color: #333;
-  transform: translateY(-20px);
+  transform: translateY(-20px) translate3d(0, 0, 0);
   opacity: 0;
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   overflow: hidden;
+  will-change: transform, opacity;
 }
 
 .color-tooltip.show {
-  transform: translateY(0);
+  transform: translateY(0) translate3d(0, 0, 0);
   opacity: 1;
 }
 
@@ -2469,11 +2523,57 @@ button[type="submit"]:hover {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   cursor: default;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem;
 }
 
 .support-option.step:hover {
   background: rgba(255, 255, 255, 0.15);
   transform: none;
+}
+
+.support-option.step:hover .support-icon-text {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  transform: scale(1.05);
+}
+
+/* Estilos para multimedia en los pasos */
+.step-media {
+  margin-top: 0.5rem;
+  text-align: center;
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.3rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.step-gif,
+.step-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease;
+}
+
+.step-gif:hover,
+.step-image:hover {
+  transform: scale(1.02);
+}
+
+/* Tamaños específicos para diferentes tipos de media */
+.step-gif {
+  max-height: 120px;
+  width: auto;
+}
+
+.step-image {
+  max-height: 100px;
+  width: auto;
 }
 
 .support-option.whatsapp:hover {
@@ -2492,20 +2592,36 @@ button[type="submit"]:hover {
 }
 
 .support-icon-text {
-  font-size: 1.5rem;
-  min-width: 40px;
+  font-size: 1.2rem;
+  min-width: 45px;
+  height: 45px;
   text-align: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  margin-right: 1rem;
+  flex-shrink: 0;
 }
 
 .support-option div {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.5rem;
+  flex: 1;
 }
 
 .support-option strong {
-  font-size: 1rem;
+  font-size: 1.1rem;
   color: #17a2b8;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
 }
 
 .support-option span {
@@ -2513,16 +2629,60 @@ button[type="submit"]:hover {
   color: #aaa;
 }
 
+/* Estilos para elementos multimedia en los pasos */
+.step-media {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  will-change: transform;
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+}
+
+.step-gif,
+.step-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease;
+  will-change: transform;
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+}
+
+.step-gif:hover,
+.step-image:hover {
+  transform: scale(1.02) translate3d(0, 0, 0);
+}
+
+.step-gif {
+  max-height: 200px;
+  object-fit: cover;
+}
+
+.step-image {
+  max-height: 150px;
+  object-fit: contain;
+}
+
 .support-hours {
   background: rgba(23, 162, 184, 0.1);
-  padding: 1rem;
+  padding: 0.8rem;
   border-radius: 12px;
   border-left: 4px solid #17a2b8;
+  margin-top: 0.5rem;
 }
 
 .support-hours p {
-  margin: 0.25rem 0;
-  font-size: 0.875rem;
+  margin: 0.15rem 0;
+  font-size: 0.85rem;
   color: #fff;
 }
 
@@ -2533,8 +2693,10 @@ button[type="submit"]:hover {
 /* Responsive para móviles */
 @media (max-width: 600px) {
   .support-float {
-    bottom: 15px; /* Esquina inferior derecha */
-    right: 10px;
+    bottom: 15px !important;
+    right: 10px !important;
+    position: fixed !important;
+    z-index: 99999 !important;
   }
   
   .support-icon {
@@ -2602,8 +2764,24 @@ button[type="submit"]:hover {
   }
   
   .support-icon-text {
-    font-size: 1.2rem; /* Iconos más pequeños */
+    font-size: 1rem;
     min-width: 35px;
+    height: 35px;
+    border-radius: 10px;
+    margin-right: 0.8rem;
+  }
+  
+  .support-option.step {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.8rem;
+    padding: 1rem 0.75rem;
+  }
+  
+  .support-option.step .support-icon-text {
+    margin-right: 0;
+    margin-bottom: 0.5rem;
   }
   
   .support-option strong {
@@ -2612,6 +2790,20 @@ button[type="submit"]:hover {
   
   .support-option span {
     font-size: 0.8rem; /* Texto secundario más pequeño */
+  }
+  
+  /* Responsive para multimedia en pasos */
+  .step-media {
+    margin-top: 0.5rem;
+    padding: 0.3rem;
+  }
+  
+  .step-gif {
+    max-height: 150px;
+  }
+  
+  .step-image {
+    max-height: 120px;
   }
   
   .support-hours {
@@ -2624,4 +2816,13 @@ button[type="submit"]:hover {
     font-size: 0.8rem; /* Texto horarios más pequeño */
     margin: 0.2rem 0;
   }
+}
+
+/* Regla de emergencia para asegurar posición fija del botón flotante */
+#supportFloat {
+  position: fixed !important;
+  bottom: 20px !important;
+  right: 20px !important;
+  z-index: 999999 !important;
+  display: flex !important;
 }
