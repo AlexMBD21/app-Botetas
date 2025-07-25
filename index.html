@@ -355,6 +355,7 @@
 
   function openSupportModal() {
     const modal = document.getElementById('supportModal');
+    const supportFloat = document.getElementById('supportFloat');
     if (modal) {
       // Guardar posición de scroll actual
       const scrollY = window.scrollY;
@@ -363,6 +364,11 @@
       // Aplicar clase para bloquear scroll
       document.body.classList.add('modal-open');
       
+      // Ocultar el botón flotante
+      if (supportFloat) {
+        supportFloat.classList.add('hidden');
+      }
+      
       // Mostrar modal
       modal.style.display = 'flex';
     }
@@ -370,9 +376,15 @@
 
   function closeSupportModal() {
     const modal = document.getElementById('supportModal');
+    const supportFloat = document.getElementById('supportFloat');
     if (modal) {
       // Ocultar modal
       modal.style.display = 'none';
+      
+      // Mostrar el botón flotante nuevamente
+      if (supportFloat) {
+        supportFloat.classList.remove('hidden');
+      }
       
       // Restaurar scroll
       const scrollY = document.body.style.top;
