@@ -219,62 +219,90 @@
     </section>
   </main>
 
- <!-- Burbuja informativa de colores (diseño original) -->
-<div class="color-info-bubble" id="colorInfoBubble">
-  <button class="close-bubble" onclick="closeColorInfo()">✖</button>
-  <h4>Significado de colores:</h4>
-  <ul>
-    <li><span class="circle green"></span> Disponible</li>
-    <li><span class="circle red"></span> No disponible</li>
-    <li><span class="circle blue"></span> Pendiente de pago</li>
-  </ul>
-</div>
-
-<!-- Botón flotante de soporte técnico -->
+<!-- Botón flotante de información/tutorial -->
 <div class="support-float" id="supportFloat">
   <div class="support-icon" onclick="openSupportModal()">
-    <span class="support-emoji">🛠️</span>
+    <span class="support-emoji">�</span>
     <div class="support-pulse"></div>
   </div>
-  <div class="support-tooltip">Soporte Técnico</div>
+  <div class="support-tooltip">¿Cómo usar?</div>
 </div>
 
-<!-- Modal de soporte técnico -->
+<!-- Modal de información/tutorial -->
 <div class="support-modal" id="supportModal">
   <div class="support-modal-content">
     <div class="support-header">
-      <h3>🛠️ Soporte Técnico</h3>
+      <h3>� ¿Cómo participar en la rifa?</h3>
       <button class="close-modal" onclick="closeSupportModal()">✖</button>
     </div>
     <div class="support-body">
-      <p>¿Necesitas ayuda? Contáctanos a través de:</p>
+      <div class="color-meanings">
+        <h4>📋 Significado de los colores:</h4>
+        <div class="color-legend">
+          <div class="color-item" onclick="showColorTooltip('green', this)">
+            <span class="color-circle green"></span>
+            <div class="color-text">
+              <span class="color-name">Verde</span>
+              <span class="color-description">Disponible</span>
+            </div>
+          </div>
+          <div class="color-item" onclick="showColorTooltip('gray', this)">
+            <span class="color-circle gray"></span>
+            <div class="color-text">
+              <span class="color-name">Gris</span>
+              <span class="color-description">En proceso de pago</span>
+            </div>
+          </div>
+          <div class="color-item" onclick="showColorTooltip('red', this)">
+            <span class="color-circle red"></span>
+            <div class="color-text">
+              <span class="color-name">Rojo</span>
+              <span class="color-description">Vendido</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Tooltip para explicaciones de colores -->
+      <div id="colorTooltip" class="color-tooltip" style="display: none;">
+        <div class="tooltip-content">
+          <button class="tooltip-close" onclick="hideColorTooltip()">✖</button>
+          <div id="tooltipMessage" class="tooltip-message"></div>
+        </div>
+      </div>
+      
+      <p><strong>Sigue estos pasos para participar:</strong></p>
       <div class="support-options">
-        <a href="https://wa.me/573001234567?text=Hola,%20necesito%20ayuda%20con%20la%20aplicación%20de%20rifas" target="_blank" class="support-option whatsapp">
-          <span class="support-icon-text">📱</span>
+        <div class="support-option step">
+          <span class="support-icon-text">1️⃣</span>
           <div>
-            <strong>WhatsApp</strong>
-            <span>Respuesta inmediata</span>
+            <strong>Selecciona tus números</strong>
           </div>
-        </a>
-        <a href="mailto:soporte@elcompaherna.com?subject=Soporte%20Técnico%20-%20App%20Rifas&body=Hola,%20necesito%20ayuda%20con:" class="support-option email">
-          <span class="support-icon-text">📧</span>
+        </div>
+        <div class="support-option step">
+          <span class="support-icon-text">2️⃣</span>
           <div>
-            <strong>Email</strong>
-            <span>soporte@elcompaherna.com</span>
+            <strong>Completa el formulario</strong>
           </div>
-        </a>
-        <div class="support-option phone" onclick="callSupport()">
-          <span class="support-icon-text">📞</span>
+        </div>
+        <div class="support-option step">
+          <span class="support-icon-text">3️⃣</span>
           <div>
-            <strong>Teléfono</strong>
-            <span>+57 300 123 4567</span>
+            <strong>Realiza el pago</strong>
+          </div>
+        </div>
+        <div class="support-option step">
+          <span class="support-icon-text">4️⃣</span>
+          <div>
+            <strong>Confirmación automática</strong>
           </div>
         </div>
       </div>
       <div class="support-hours">
-        <p><strong>Horarios de atención:</strong></p>
-        <p>Lunes a Viernes: 8:00 AM - 6:00 PM</p>
-        <p>Sábados: 9:00 AM - 2:00 PM</p>
+        <p><strong>💳 Métodos de pago:</strong></p>
+        <p>• Bancolombia: 1234-5678-9012</p>
+        <p>• Nequi: 321 456 7890</p>
+        <p><strong>¡Importante:</strong> Incluye tu número de celular en el mensaje de pago para identificarte rápidamente.</p>
       </div>
     </div>
   </div>
@@ -282,9 +310,53 @@
 
 
 <script>
-  function closeColorInfo() {
-    const bubble = document.getElementById('colorInfoBubble');
-    if (bubble) bubble.style.display = 'none';
+  // Función para mostrar tooltip de colores
+  function showColorTooltip(colorType, element) {
+    const tooltip = document.getElementById('colorTooltip');
+    const message = document.getElementById('tooltipMessage');
+    
+    const messages = {
+      green: {
+        title: '🟢 Números Disponibles',
+        text: 'Estos números están libres y puedes seleccionarlos. Haz clic en cualquier número verde para agregarlo a tu selección.',
+        icon: '✅'
+      },
+      gray: {
+        title: '⚫ En Proceso de Pago',
+        text: 'Alguien ya seleccionó estos números y tiene 30 minutos para completar el pago. Si no pagan a tiempo, volverán a estar disponibles.',
+        icon: '⏳'
+      },
+      red: {
+        title: '🔴 Números Vendidos',
+        text: 'Estos números ya fueron pagados y confirmados. No están disponibles para selección.',
+        icon: '🔒'
+      }
+    };
+    
+    const colorInfo = messages[colorType];
+    if (colorInfo) {
+      message.innerHTML = `
+        <div class="tooltip-header">
+          <span class="tooltip-icon">${colorInfo.icon}</span>
+          <h4>${colorInfo.title}</h4>
+        </div>
+        <p>${colorInfo.text}</p>
+      `;
+      
+      tooltip.style.display = 'block';
+      setTimeout(() => {
+        tooltip.classList.add('show');
+      }, 10);
+    }
+  }
+  
+  // Función para ocultar tooltip
+  function hideColorTooltip() {
+    const tooltip = document.getElementById('colorTooltip');
+    tooltip.classList.remove('show');
+    setTimeout(() => {
+      tooltip.style.display = 'none';
+    }, 300);
   }
 
   function openSupportModal() {
@@ -300,20 +372,6 @@
     if (modal) {
       modal.style.display = 'none';
       document.body.style.overflow = 'auto'; // Restaurar scroll del body
-    }
-  }
-
-  function callSupport() {
-    if (window.navigator && window.navigator.userAgent.indexOf('Mobile') > -1) {
-      // En móvil, intentar hacer la llamada
-      window.location.href = 'tel:+573001234567';
-    } else {
-      // En escritorio, copiar número al portapapeles
-      navigator.clipboard.writeText('+57 300 123 4567').then(() => {
-        alert('Número copiado al portapapeles: +57 300 123 4567');
-      }).catch(() => {
-        alert('Número de soporte: +57 300 123 4567');
-      });
     }
   }
 
