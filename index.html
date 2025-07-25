@@ -274,27 +274,21 @@
       <p><strong>Sigue estos pasos para participar:</strong></p>
       <div class="support-options">
         <div class="support-option step">
-          <span class="support-icon-text">1️⃣</span>
+          <span class="support-icon-text"> 1️</span>
           <div>
             <strong>Selecciona tus números</strong>
+            <div class="step-media">
+              <img src="assets/paso_1.gif" alt="Cómo seleccionar números" class="step-gif" />
+            </div>
           </div>
         </div>
         <div class="support-option step">
-          <span class="support-icon-text">2️⃣</span>
+          <span class="support-icon-text">2️</span>
           <div>
             <strong>Completa el formulario</strong>
-          </div>
-        </div>
-        <div class="support-option step">
-          <span class="support-icon-text">3️⃣</span>
-          <div>
-            <strong>Realiza el pago</strong>
-          </div>
-        </div>
-        <div class="support-option step">
-          <span class="support-icon-text">4️⃣</span>
-          <div>
-            <strong>Confirmación automática</strong>
+            <div class="step-media">
+              <img src="assets/paso_2.gif" alt="Cómo completar el formulario" class="step-gif" />
+            </div>
           </div>
         </div>
       </div>
@@ -362,24 +356,52 @@
   function openSupportModal() {
     const modal = document.getElementById('supportModal');
     if (modal) {
+      // Guardar posición de scroll actual
+      const scrollY = window.scrollY;
+      document.body.style.top = `-${scrollY}px`;
+      
+      // Aplicar clase para bloquear scroll
+      document.body.classList.add('modal-open');
+      
+      // Mostrar modal
       modal.style.display = 'flex';
-      document.body.style.overflow = 'hidden'; // Prevenir scroll del body
     }
   }
 
   function closeSupportModal() {
     const modal = document.getElementById('supportModal');
     if (modal) {
+      // Ocultar modal
       modal.style.display = 'none';
-      document.body.style.overflow = 'auto'; // Restaurar scroll del body
+      
+      // Restaurar scroll
+      const scrollY = document.body.style.top;
+      document.body.classList.remove('modal-open');
+      document.body.style.top = '';
+      
+      // Restaurar posición de scroll
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+      }
     }
   }
 
   // Cerrar modal al hacer clic fuera de él
   window.addEventListener('click', function(event) {
     const modal = document.getElementById('supportModal');
-    if (event.target === modal) {
+    const modalContent = document.querySelector('.support-modal-content');
+    
+    // Solo cerrar si se hace clic en el fondo del modal, no en el contenido
+    if (event.target === modal && !modalContent.contains(event.target)) {
       closeSupportModal();
+    }
+  });
+
+  // Prevenir que los clics en el contenido del modal cierren el modal
+  document.addEventListener('click', function(event) {
+    const modalContent = document.querySelector('.support-modal-content');
+    if (modalContent && modalContent.contains(event.target)) {
+      event.stopPropagation();
     }
   });
 
