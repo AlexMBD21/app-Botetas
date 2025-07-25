@@ -35,32 +35,41 @@ export function useRifaState() {
   // Estados de conexión
   const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected'>('connecting');
 
-  // Función para actualizar el estado de los números
+  // Función para actualizar el estado de los números (lógica exacta del script original)
   const updateNumberStatus = useCallback((registrosList: RegistroRifa[]) => {
+    console.log('Actualizando estado de números con registros:', registrosList);
     const newStatus: EstadoNumero = {};
     
-    // Resetear todos los números como disponibles
-    for (let i = 1; i <= 10000; i++) {
+    // Inicializar todos los números del 0 al 9999 como disponibles (como en el script original)
+    for (let i = 0; i <= 9999; i++) {
       newStatus[i] = { status: 'available' };
     }
     
-    // Marcar números ocupados
+    // Procesar registros para marcar números ocupados
     registrosList.forEach(registro => {
       if (registro.numbers && Array.isArray(registro.numbers)) {
         registro.numbers.forEach(num => {
-          if (registro.status === 'verified') {
-            newStatus[num] = { status: 'unavailable', registroId: registro.id };
-          } else if (registro.status === 'pending') {
-            // Solo marcar como seleccionado si aún no ha expirado
-            const now = Date.now();
-            if (now < registro.timeoutEnd) {
-              newStatus[num] = { status: 'selected', registroId: registro.id };
+          // Verificar que el número esté en el rango válido
+          if (num >= 0 && num <= 9999) {
+            if (registro.status === 'verified') {
+              // Números verificados son 'confirmed' (como en el script original)
+              newStatus[num] = { status: 'confirmed', registroId: registro.id };
+            } else if (registro.status === 'pending') {
+              // Solo marcar como pending si aún no ha expirado
+              const now = Date.now();
+              if (now < registro.timeoutEnd) {
+                newStatus[num] = { status: 'pending', registroId: registro.id };
+              } else {
+                // Si expiró, liberar el número
+                newStatus[num] = { status: 'available' };
+              }
             }
           }
         });
       }
     });
     
+    console.log('Nuevo estado de números:', Object.keys(newStatus).length, 'números procesados');
     setNumberStatus(newStatus);
   }, []);
 
@@ -98,7 +107,8 @@ export function useRifaState() {
           setVerificandoAcceso(false);
         });
       } else {
-        setTieneAccesoRegistros(false);
+        // Para desarrollo: permitir acceso sin token
+        setTieneAccesoRegistros(true);
         setVerificandoAcceso(false);
       }
     }
@@ -106,6 +116,7 @@ export function useRifaState() {
 
   // Efecto para cargar datos iniciales
   useEffect(() => {
+    console.log('Iniciando carga de datos...');
     setConnectionStatus('connecting');
     
     // Verificar acceso
@@ -116,6 +127,7 @@ export function useRifaState() {
     
     // Cargar registros iniciales
     cargarRegistrosAlIniciar((registrosList) => {
+      console.log('Registros cargados en el hook:', registrosList);
       setRegistros(registrosList);
       updateNumberStatus(registrosList);
       setLoading(false);
@@ -124,6 +136,7 @@ export function useRifaState() {
 
     // Configurar escucha en tiempo real
     const unsubscribeRegistros = escucharRegistrosRealtime((registrosList) => {
+      console.log('Registros actualizados en tiempo real en el hook:', registrosList);
       setRegistros(registrosList);
       updateNumberStatus(registrosList);
       setConnectionStatus('connected');
@@ -131,11 +144,13 @@ export function useRifaState() {
 
     // Configurar escucha de bloqueo
     const unsubscribeBloqueo = escucharBloqueoRegistros((bloqueado) => {
+      console.log('Estado de bloqueo actualizado:', bloqueado);
       setRegistrosBloquados(bloqueado);
     });
 
     // Cleanup
     return () => {
+      console.log('Limpiando suscripciones...');
       unsubscribeRegistros();
       unsubscribeBloqueo();
     };

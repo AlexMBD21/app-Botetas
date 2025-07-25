@@ -6,18 +6,30 @@ import { RegistroRifa, ConfiguracionSorteo } from '../types';
 
 // Guardar un registro en Firebase
 export function guardarRegistroFirebase(registro: RegistroRifa) {
+  console.log('Guardando registro en Firebase:', registro);
   const newRef = push(ref(db, 'registros'));
   registro.id = newRef.key;
-  return set(newRef, registro);
+  return set(newRef, registro).then(() => {
+    console.log('Registro guardado exitosamente:', registro.id);
+    return registro;
+  }).catch((error) => {
+    console.error('Error al guardar registro:', error);
+    throw error;
+  });
 }
 
 // Obtener todos los registros de Firebase
 export function obtenerRegistrosFirebase(callback: (registros: RegistroRifa[]) => void) {
+  console.log('Obteniendo registros de Firebase...');
   const registrosRef = ref(db, 'registros');
   get(registrosRef).then((snapshot) => {
     const data = snapshot.val() || {};
     const registros = Object.values(data) as RegistroRifa[];
+    console.log('Registros obtenidos:', registros.length);
     callback(registros);
+  }).catch((error) => {
+    console.error('Error al obtener registros:', error);
+    callback([]);
   });
 }
 
@@ -64,24 +76,37 @@ export function escucharBloqueoRegistros(callback: (bloqueado: boolean) => void)
 
 // Escuchar registros en tiempo real
 export function escucharRegistrosRealtime(callback: (registros: RegistroRifa[]) => void) {
+  console.log('Configurando escucha de registros en tiempo real...');
   const registrosRef = ref(db, 'registros');
-  onValue(registrosRef, (snapshot) => {
+  
+  const unsubscribe = onValue(registrosRef, (snapshot) => {
     const data = snapshot.val() || {};
     const registros = Object.values(data) as RegistroRifa[];
+    console.log('Registros actualizados en tiempo real:', registros.length);
     callback(registros);
+  }, (error) => {
+    console.error('Error en la escucha de registros:', error);
   });
   
   // Retornar función para cancelar la escucha
-  return () => off(registrosRef);
+  return () => {
+    console.log('Cancelando escucha de registros...');
+    unsubscribe();
+  };
 }
 
 // Cargar registros al iniciar
 export function cargarRegistrosAlIniciar(callback: (registros: RegistroRifa[]) => void) {
+  console.log('Cargando registros al iniciar...');
   const registrosRef = ref(db, 'registros');
   get(registrosRef).then((snapshot) => {
     const data = snapshot.val() || {};
     const registros = Object.values(data) as RegistroRifa[];
+    console.log('Registros cargados al iniciar:', registros.length);
     callback(registros);
+  }).catch((error) => {
+    console.error('Error al cargar registros al iniciar:', error);
+    callback([]);
   });
 }
 

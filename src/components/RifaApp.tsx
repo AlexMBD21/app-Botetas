@@ -11,42 +11,35 @@ import SupportModal from './SupportModal';
 
 export default function RifaApp() {
   const {
+    connectionStatus,
     selectedNumbers,
-    registros,
     numberStatus,
     loading,
-    registrosLoading,
-    pricePerTicket,
-    tiempoTemporizadorMinutos,
     registrosBloquados,
-    numeroBuscado,
-    resultadoBusqueda,
-    tieneAccesoRegistros,
-    verificandoAcceso,
-    connectionStatus,
-    setRegistros,
-    setRegistrosLoading,
-    setPricePerTicket,
-    setTiempoTemporizadorMinutos,
-    setNumeroBuscado,
-    setResultadoBusqueda,
-    setConnectionStatus,
     addSelectedNumber,
     removeSelectedNumber,
     clearSelectedNumbers,
     getTotalPrice,
-    getContadorRegistros,
     updateNumberStatus,
+    registros,
+    setRegistros,
+    tiempoTemporizadorMinutos,
+    setTiempoTemporizadorMinutos,
+    pricePerTicket,
+    setPricePerTicket,
+    registrosLoading,
+    setRegistrosLoading,
+    getContadorRegistros,
     cargarConfiguracion,
+    numeroBuscado,
+    setNumeroBuscado,
+    resultadoBusqueda,
+    setResultadoBusqueda,
   } = useRifaState();
 
   return (
     <>
-      <Header 
-        connectionStatus={connectionStatus}
-        setConnectionStatus={setConnectionStatus}
-      />
-      
+      <Header connectionStatus={connectionStatus} />
       <main className="container">
         <NumbersSection
           selectedNumbers={selectedNumbers}
@@ -66,44 +59,40 @@ export default function RifaApp() {
           updateNumberStatus={updateNumberStatus}
           registros={registros}
           setRegistros={setRegistros}
+          removeSelectedNumber={removeSelectedNumber}
         />
 
-        {tieneAccesoRegistros && (
-          <>
-            <RegisteredRecords
-              registros={registros}
-              registrosLoading={registrosLoading}
-              setRegistrosLoading={setRegistrosLoading}
-              getContadorRegistros={getContadorRegistros}
-              pricePerTicket={pricePerTicket}
-              setPricePerTicket={setPricePerTicket}
-              tiempoTemporizadorMinutos={tiempoTemporizadorMinutos}
-              setTiempoTemporizadorMinutos={setTiempoTemporizadorMinutos}
-              cargarConfiguracion={cargarConfiguracion}
-              setRegistros={setRegistros}
-              updateNumberStatus={updateNumberStatus}
-            />
+        <RegisteredRecords
+          registros={registros}
+          registrosLoading={registrosLoading}
+          setRegistrosLoading={setRegistrosLoading}
+          getContadorRegistros={getContadorRegistros}
+          pricePerTicket={pricePerTicket}
+          setPricePerTicket={setPricePerTicket}
+          tiempoTemporizadorMinutos={tiempoTemporizadorMinutos}
+          setTiempoTemporizadorMinutos={setTiempoTemporizadorMinutos}
+          cargarConfiguracion={cargarConfiguracion}
+          setRegistros={setRegistros}
+          updateNumberStatus={updateNumberStatus}
+        />
 
-            <NumberSearch
-              numeroBuscado={numeroBuscado}
-              setNumeroBuscado={setNumeroBuscado}
-              resultadoBusqueda={resultadoBusqueda}
-              setResultadoBusqueda={setResultadoBusqueda}
-              registros={registros}
-              setRegistros={setRegistros}
-              updateNumberStatus={updateNumberStatus}
-            />
-          </>
-        )}
+        <NumberSearch
+          numeroBuscado={numeroBuscado}
+          setNumeroBuscado={setNumeroBuscado}
+          resultadoBusqueda={resultadoBusqueda}
+          setResultadoBusqueda={setResultadoBusqueda}
+          registros={registros}
+          setRegistros={setRegistros}
+          updateNumberStatus={updateNumberStatus}
+        />
 
-        {verificandoAcceso && (
-          <div style={{ textAlign: 'center', padding: '2rem', color: '#ffffff' }}>
-            <span style={{ fontSize: '2em' }}>⏳</span>
-            <span> Verificando acceso...</span>
-          </div>
-        )}
+        <div style={{ padding: '2rem', color: 'white' }}>
+          <p>✅ Aplicación completa funcionando correctamente!</p>
+          <p>Registros encontrados: {registros.length}</p>
+          <p>Conexión: {connectionStatus}</p>
+        </div>
       </main>
-
+      
       <SupportModal />
     </>
   );

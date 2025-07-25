@@ -529,6 +529,12 @@ button[type="submit"]:hover {
   color: white;
 }
 
+.pending {
+  background-color: #ffc107;
+  color: #212529;
+  cursor: not-allowed;
+}
+
 .unavailable {
   background-color: #dc3545;
   color: white;
