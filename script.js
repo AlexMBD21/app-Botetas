@@ -39,6 +39,9 @@ let numeroBuscado = '';
 let connectionLight;
 let connectionText;
 
+// Variable global para llevar registro de temporizadores activos
+let temporizadoresActivos = new Map();
+
 // Función para mostrar notificaciones tipo toast
 function mostrarNotificacion(mensaje, tipo = 'success', duracion = 4000) {
   // Crear elemento de notificación
@@ -648,6 +651,11 @@ function crearTemporizadorVisual(timestampLimite, onExpire, contenedor, registro
       temporizador.style.color = '#dc3545';
       temporizador.style.fontWeight = 'bold';
       
+      // Remover de temporizadores activos
+      if (registroId && temporizadoresActivos.has(registroId)) {
+        temporizadoresActivos.delete(registroId);
+      }
+      
       // Ejecutar callback de expiración
       if (typeof onExpire === 'function') {
         console.log('Ejecutando callback de expiración para registro:', registroId);
@@ -662,7 +670,99 @@ function crearTemporizadorVisual(timestampLimite, onExpire, contenedor, registro
     temporizador.textContent = `⏳ ${h}:${m}:${s}`;
   }, 1000);
 
+  // Registrar el temporizador activo
+  if (registroId) {
+    temporizadoresActivos.set(registroId, { interval, temporizador });
+  }
+
   return { temporizador, interval };
+}
+
+// Función para limpiar temporizador específico
+function limpiarTemporizador(registroId) {
+  if (temporizadoresActivos.has(registroId)) {
+    const { interval } = temporizadoresActivos.get(registroId);
+    clearInterval(interval);
+    temporizadoresActivos.delete(registroId);
+    console.log('Temporizador limpiado para registro:', registroId);
+  }
+}
+
+// Función global para eliminar registros expirados
+function eliminarRegistroExpirado(registroId) {
+  console.log('🕐 Eliminando registro expirado con ID:', registroId);
+  
+  // Limpiar temporizador inmediatamente
+  limpiarTemporizador(registroId);
+  
+  // Buscar el elemento del registro en el DOM
+  const elementoRegistro = document.querySelector(`[data-registro-id="${registroId}"]`);
+  if (!elementoRegistro) {
+    console.log('Elemento del registro no encontrado en el DOM');
+    return;
+  }
+  
+  // Obtener información del registro desde Firebase antes de eliminarlo
+  if (typeof db !== 'undefined') {
+    db.ref('registros/' + registroId).once('value', snapshot => {
+      const registro = snapshot.val();
+      if (registro) {
+        // Verificar que el registro aún esté pendiente
+        if (registro.estado === 'confirmed') {
+          console.log('El registro ya fue confirmado, no se eliminará:', registro.name);
+          return;
+        }
+        
+        console.log('Registro encontrado en Firebase, procediendo a eliminar:', registro.name);
+        
+        // Liberar números
+        if (Array.isArray(registro.numbers)) {
+          registro.numbers.forEach(num => {
+            numberStatus[num] = 'available';
+            const btn = document.querySelector(`button[data-number='${num}']`);
+            if (btn) {
+              btn.className = 'number-btn available';
+              btn.disabled = false;
+              console.log('Número liberado:', num);
+            }
+          });
+        }
+        
+        // Eliminar de Firebase
+        if (typeof eliminarRegistroFirebase !== 'undefined') {
+          console.log('Eliminando de Firebase:', registroId);
+          eliminarRegistroFirebase(registroId);
+        }
+        
+        // Eliminar del DOM
+        if (elementoRegistro.parentNode) {
+          elementoRegistro.parentNode.removeChild(elementoRegistro);
+          console.log('Elemento eliminado del DOM');
+        }
+        
+        // Actualizar contador de pendientes
+        const pendientesElement = document.getElementById('pendientesCount');
+        if (pendientesElement) {
+          const currentCount = parseInt(pendientesElement.textContent) || 0;
+          pendientesElement.textContent = Math.max(0, currentCount - 1);
+          console.log('Contador de pendientes actualizado:', currentCount - 1);
+        }
+        
+        // Mostrar notificación
+        mostrarNotificacion(`Registro de ${registro.name} eliminado por tiempo expirado`, 'info', 5000);
+      } else {
+        console.log('Registro no encontrado en Firebase, probablemente ya fue eliminado');
+        // Si no existe en Firebase pero sí en DOM, eliminarlo del DOM
+        if (elementoRegistro.parentNode) {
+          elementoRegistro.parentNode.removeChild(elementoRegistro);
+        }
+      }
+    }).catch(error => {
+      console.error('Error al obtener registro de Firebase:', error);
+    });
+  } else {
+    console.error('Firebase no está disponible');
+  }
 }
 
 // Función para renderizar registro (parte corregida del temporizador)
@@ -707,6 +807,11 @@ function renderRegistro(registro, highlightNum = '', esRecargaCompleta = false) 
   // Función para eliminar registro completamente
   function eliminarRegistroCompleto() {
     console.log('Eliminando registro completo:', name, id);
+    
+    // Limpiar temporizador si existe
+    if (id) {
+      limpiarTemporizador(id);
+    }
     
     // Liberar números
     if (Array.isArray(numbers)) {
@@ -810,6 +915,11 @@ function renderRegistro(registro, highlightNum = '', esRecargaCompleta = false) 
         temporizadorControl.temporizador.style.fontWeight = 'bold';
       }
       
+      // Limpiar temporizador del registro global
+      if (id) {
+        limpiarTemporizador(id);
+      }
+      
       // Actualizar contadores
       const pendientesElement = document.getElementById('pendientesCount');
       const confirmadosElement = document.getElementById('confirmadosCount');
@@ -832,14 +942,8 @@ function renderRegistro(registro, highlightNum = '', esRecargaCompleta = false) 
       temporizadorControl = crearTemporizadorVisual(expiraEn, () => {
         console.log('🕐 Temporizador EXPIRADO para:', name, 'ID:', id);
         
-        // Verificar que el registro aún existe y está pendiente
-        const elementoActual = document.querySelector(`[data-registro-id="${id}"]`);
-        if (elementoActual) {
-          console.log('Eliminando registro expirado:', name);
-          eliminarRegistroCompleto();
-        } else {
-          console.log('El registro ya fue eliminado previamente');
-        }
+        // Usar la función global para eliminar el registro expirado
+        eliminarRegistroExpirado(id);
       }, item, id);
     } else {
       console.log('No se creó temporizador para:', name, 'Razón:', !expiraEn ? 'Sin expiraEn' : 'Ya expirado');
