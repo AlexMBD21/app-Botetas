@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "El Compa Herna 🎁 - Rifa por Influencer",
+  title: "El Compae Hernan 🎁",
   description: "Sistema de rifas online con números del 1 al 10,000",
 };
 
