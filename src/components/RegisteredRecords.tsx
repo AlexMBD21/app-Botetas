@@ -630,19 +630,18 @@ export default function RegisteredRecords({
                   background: 'rgba(255, 193, 7, 0.15)',
                   border: '2px solid #ffc107',
                   borderRadius: '12px',
-                  padding: '1rem',
-                  marginBottom: '1rem',
-                  textAlign: 'center'
+                  padding: '0.4rem',
+                  textAlign: 'center',
                 }}
               >
                 <div style={{
                   fontSize: '1.4rem',
                   fontWeight: 'bold',
-                  color: '#856404',
-                  marginBottom: '0.5rem'
+                  color: '#853e04ff',
                 }}>
                   ⏰ {getTiempoRestante(registro.timeoutEnd)}
                 </div>
+                
               </div>
             )}
 
@@ -679,7 +678,7 @@ export default function RegisteredRecords({
                     e.currentTarget.style.boxShadow = '0 3px 6px rgba(40, 167, 69, 0.3)';
                   }}
                 >
-                  ✅ Confirmar Pago
+                   Confirmar Pago
                 </button>
               )}
               <button 
@@ -706,7 +705,7 @@ export default function RegisteredRecords({
                   e.currentTarget.style.boxShadow = '0 3px 6px rgba(220, 53, 69, 0.3)';
                 }}
               >
-                🗑️ Eliminar
+                 Eliminar
               </button>
             </div>
           </div>
