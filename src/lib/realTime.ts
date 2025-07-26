@@ -38,6 +38,11 @@ export function eliminarRegistroFirebase(id: string) {
   return remove(ref(db, `registros/${id}`));
 }
 
+// Actualizar estado de un registro específico
+export function actualizarEstadoRegistro(id: string, status: 'pending' | 'verified') {
+  return set(ref(db, `registros/${id}/status`), status);
+}
+
 // Eliminar todos los registros de Firebase
 export function eliminarTodosLosRegistrosFirebase() {
   return remove(ref(db, 'registros'));

@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   eliminarTodosLosRegistrosFirebase, 
   eliminarRegistroFirebase,
   guardarConfiguracionSorteoFirebase,
-  obtenerConfiguracionSorteo
+  obtenerConfiguracionSorteo,
+  actualizarEstadoRegistro
 } from '../lib/realTime';
 import { RegistroRifa } from '../types';
 
@@ -45,6 +46,108 @@ export default function RegisteredRecords({
     horasAntesBloqueo: 2,
     tiempoTemporizador: tiempoTemporizadorMinutos,
   });
+
+  // Mapa para controlar temporizadores activos
+  const [temporizadoresActivos, setTemporizadoresActivos] = useState<Map<string, NodeJS.Timeout>>(new Map());
+  
+  // Estado para actualizar temporizadores visuales cada segundo
+  const [tiempoActual, setTiempoActual] = useState(Date.now());
+  
+  // Estado para detectar si es móvil
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Actualizar tiempo actual cada segundo para sincronizar temporizadores
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTiempoActual(Date.now());
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Detectar si es móvil
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const checkMobile = () => {
+        setIsMobile(window.innerWidth < 768);
+      };
+      
+      checkMobile();
+      window.addEventListener('resize', checkMobile);
+      
+      return () => window.removeEventListener('resize', checkMobile);
+    }
+  }, []);
+
+  // Función para eliminar registro expirado automáticamente
+  const eliminarRegistroExpirado = useCallback(async (registroId: string) => {
+    console.log('🕐 Eliminando registro expirado con ID:', registroId);
+    
+    try {
+      // Limpiar temporizador
+      const timer = temporizadoresActivos.get(registroId);
+      if (timer) {
+        clearTimeout(timer);
+        setTemporizadoresActivos(prev => {
+          const newMap = new Map(prev);
+          newMap.delete(registroId);
+          return newMap;
+        });
+      }
+
+      // Eliminar de Firebase
+      await eliminarRegistroFirebase(registroId);
+      
+      // Actualizar estado local
+      setRegistros(registros.filter(r => r.id !== registroId));
+      updateNumberStatus(registros.filter(r => r.id !== registroId));
+      
+      console.log('✅ Registro expirado eliminado exitosamente');
+    } catch (error) {
+      console.error('❌ Error al eliminar registro expirado:', error);
+    }
+  }, [registros, temporizadoresActivos, setRegistros, updateNumberStatus]);
+
+  // Efecto para crear/limpiar temporizadores cuando cambian los registros
+  useEffect(() => {
+    registros.forEach(registro => {
+      if (registro.status === 'pending' && registro.id && !temporizadoresActivos.has(registro.id)) {
+        const ahora = Date.now();
+        const tiempoRestante = registro.timeoutEnd - ahora;
+        
+        if (tiempoRestante > 0) {
+          console.log('⏰ Creando temporizador para:', registro.name, 'Tiempo restante:', Math.floor(tiempoRestante / 1000), 'segundos');
+          
+          const timer = setTimeout(() => {
+            eliminarRegistroExpirado(registro.id!);
+          }, tiempoRestante);
+          
+          setTemporizadoresActivos(prev => new Map(prev).set(registro.id!, timer));
+        } else {
+          // Si ya expiró, eliminarlo inmediatamente
+          eliminarRegistroExpirado(registro.id);
+        }
+      }
+    });
+
+    // Limpiar temporizadores de registros que ya no existen o fueron confirmados
+    temporizadoresActivos.forEach((timer, registroId) => {
+      const registro = registros.find(r => r.id === registroId);
+      if (!registro || registro.status !== 'pending') {
+        clearTimeout(timer);
+        setTemporizadoresActivos(prev => {
+          const newMap = new Map(prev);
+          newMap.delete(registroId);
+          return newMap;
+        });
+      }
+    });
+
+    // Cleanup cuando el componente se desmonta
+    return () => {
+      temporizadoresActivos.forEach(timer => clearTimeout(timer));
+    };
+  }, [registros, temporizadoresActivos, eliminarRegistroExpirado]);
 
   const { confirmados, pendientes } = getContadorRegistros();
 
@@ -116,13 +219,37 @@ export default function RegisteredRecords({
   };
 
   const confirmarPago = async (registroId: string) => {
-    // Implementar lógica de confirmación de pago
-    const registroIndex = registros.findIndex(r => r.id === registroId);
-    if (registroIndex !== -1) {
-      const nuevosRegistros = [...registros];
-      nuevosRegistros[registroIndex].status = 'verified';
-      setRegistros(nuevosRegistros);
-      updateNumberStatus(nuevosRegistros);
+    try {
+      console.log('🔄 Confirmando pago para registro:', registroId);
+      
+      // Limpiar temporizador activo
+      const timer = temporizadoresActivos.get(registroId);
+      if (timer) {
+        clearTimeout(timer);
+        setTemporizadoresActivos(prev => {
+          const newMap = new Map(prev);
+          newMap.delete(registroId);
+          return newMap;
+        });
+      }
+
+      // Actualizar status en Firebase
+      await actualizarEstadoRegistro(registroId, 'verified');
+      
+      // Actualizar estado local
+      const registroIndex = registros.findIndex(r => r.id === registroId);
+      if (registroIndex !== -1) {
+        const nuevosRegistros = [...registros];
+        nuevosRegistros[registroIndex].status = 'verified';
+        setRegistros(nuevosRegistros);
+        updateNumberStatus(nuevosRegistros);
+        
+        console.log('✅ Pago confirmado exitosamente');
+        alert('Pago confirmado. Los números ahora están registrados definitivamente.');
+      }
+    } catch (error) {
+      console.error('❌ Error al confirmar pago:', error);
+      alert('Error al confirmar el pago. Inténtalo de nuevo.');
     }
   };
 
@@ -146,15 +273,27 @@ export default function RegisteredRecords({
   };
 
   const getTiempoRestante = (timeoutEnd: number) => {
-    const ahora = Date.now();
-    const restante = timeoutEnd - ahora;
+    const restante = timeoutEnd - tiempoActual;
     
     if (restante <= 0) return 'Expirado';
     
-    const minutos = Math.floor(restante / (1000 * 60));
+    const horas = Math.floor(restante / (1000 * 60 * 60));
+    const minutos = Math.floor((restante % (1000 * 60 * 60)) / (1000 * 60));
     const segundos = Math.floor((restante % (1000 * 60)) / 1000);
     
+    if (horas > 0) {
+      return `${horas}:${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
+    }
     return `${minutos}:${segundos.toString().padStart(2, '0')}`;
+  };
+
+  // Función para calcular el valor total a pagar
+  const calcularValorTotal = (cantidadNumeros: number) => {
+    return (cantidadNumeros * pricePerTicket).toLocaleString('es-CO', {
+      style: 'currency',
+      currency: 'COP',
+      minimumFractionDigits: 0
+    });
   };
 
   if (registrosLoading) {
@@ -173,7 +312,13 @@ export default function RegisteredRecords({
   }
 
   return (
-    <section className="registro-guardado glass" style={{ marginTop: '2rem' }}>
+    <section className="registro-guardado glass" style={{ 
+      marginTop: '2rem',
+      height: 'auto',
+      minHeight: 'auto',
+      maxHeight: 'none',
+      overflow: 'visible'
+    }}>
       <h2>Registros Realizados</h2>
       <div id="registroCounts" style={{ textAlign: 'right', fontWeight: 'bold', marginBottom: '1rem' }}>
         <span style={{ color: 'rgb(170, 170, 180)' }}>
@@ -315,53 +460,253 @@ export default function RegisteredRecords({
         </div>
       )}
 
-      <div className="registro-list" id="registro-list">
-        {registros.map((registro) => (
-          <div key={registro.id} className="registro-item">
-            <div>
-              <strong>{registro.name}</strong> - {registro.phone}
+      <div className="registro-list" id="registro-list" style={{
+        marginTop: '1rem',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1rem',
+        maxHeight: 'none',
+        height: 'auto',
+        overflow: 'visible'
+      }}>
+        {[...registros]
+          .sort((a, b) => {
+            // Ordenar por timestamp descendente (más nuevos primero)
+            const timestampA = a.timestamp || 0;
+            const timestampB = b.timestamp || 0;
+            return timestampB - timestampA;
+          })
+          .map((registro) => (
+          <div 
+            key={registro.id} 
+            className={`registro-item ${registro.status}`}
+            style={{
+              background: registro.status === 'pending' 
+                ? 'linear-gradient(135deg, #fff3cd, #ffeaa7)' 
+                : 'linear-gradient(135deg, #d4edda, #c3e6cb)',
+              border: `2px solid ${registro.status === 'pending' ? '#ffc107' : '#28a745'}`,
+              borderRadius: '12px',
+              padding: '1rem',
+              marginBottom: '1rem',
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+              position: 'relative',
+              overflow: 'visible', // Cambió de hidden a visible
+              height: 'auto',
+              minHeight: 'auto'
+            }}
+          >
+            {/* Badge de estado - responsive */}
+            <div 
+              style={{
+                position: 'absolute',
+                top: '0.5rem',
+                right: '0.5rem',
+                background: registro.status === 'pending' ? '#ffc107' : '#28a745',
+                color: 'white',
+                padding: '0.25rem 0.5rem',
+                borderRadius: '12px',
+                fontSize: '0.7rem',
+                fontWeight: 'bold',
+                textTransform: 'uppercase',
+                zIndex: 10
+              }}
+            >
+              {registro.status === 'pending' ? '⏳ Pendiente' : '✅ Confirmado'}
             </div>
-            <div>
-              Números: {registro.numbers.map(n => n.toString().padStart(4, '0')).join(', ')}
+
+            {/* Información del usuario - Grid responsive */}
+            <div style={{ 
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: '1rem',
+              marginTop: '1.5rem',
+              marginBottom: '1rem'
+            }}>
+              {/* Columna 1: Datos del usuario */}
+              <div>
+                <div style={{ 
+                  fontSize: '1.1rem', 
+                  fontWeight: 'bold', 
+                  color: '#2c3e50',
+                  marginBottom: '0.5rem',
+                  wordBreak: 'break-word'
+                }}>
+                  👤 {registro.name}
+                </div>
+                <div style={{ 
+                  fontSize: '0.9rem', 
+                  color: '#6c757d',
+                  marginBottom: '0.5rem',
+                  wordBreak: 'break-all'
+                }}>
+                  📞 {registro.phone}
+                </div>
+                <div style={{ 
+                  fontSize: '0.85rem', 
+                  color: '#495057',
+                  wordBreak: 'break-word'
+                }}>
+                  📅 {formatearTiempo(registro.timestamp)}
+                </div>
+              </div>
+
+              {/* Columna 2: Información financiera */}
+              <div>
+                <div style={{ 
+                  background: 'rgba(0, 123, 255, 0.1)',
+                  border: '1px solid #007bff',
+                  borderRadius: '8px',
+                  padding: '0.75rem',
+                  textAlign: 'center'
+                }}>
+                  <div style={{ 
+                    fontSize: '0.8rem', 
+                    color: '#495057',
+                    marginBottom: '0.25rem'
+                  }}>
+                    💰 Valor a pagar
+                  </div>
+                  <div style={{ 
+                    fontSize: '1.2rem', 
+                    fontWeight: 'bold',
+                    color: '#007bff'
+                  }}>
+                    {calcularValorTotal(registro.numbers.length)}
+                  </div>
+                  <div style={{ 
+                    fontSize: '0.75rem', 
+                    color: '#6c757d',
+                    marginTop: '0.25rem'
+                  }}>
+                    {registro.numbers.length} número{registro.numbers.length > 1 ? 's' : ''}
+                  </div>
+                </div>
+              </div>
             </div>
-            <div>
-              Registrado: {formatearTiempo(registro.timestamp)}
+
+            {/* Números seleccionados - Responsive grid */}
+            <div style={{ marginBottom: '1rem' }}>
+              <div style={{ 
+                fontSize: '0.85rem', 
+                color: '#495057', 
+                marginBottom: '0.5rem',
+                fontWeight: '500'
+              }}>
+                🎯 Números seleccionados:
+              </div>
+              <div style={{ 
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(60px, 1fr))',
+                gap: '0.25rem',
+                maxHeight: 'none', /* Removido límite de altura */
+                overflowY: 'visible' /* Cambió de auto a visible */
+              }}>
+                {registro.numbers.map(n => (
+                  <span 
+                    key={n}
+                    style={{
+                      background: registro.status === 'pending' ? '#fff' : '#f8f9fa',
+                      border: `1px solid ${registro.status === 'pending' ? '#ffc107' : '#28a745'}`,
+                      color: registro.status === 'pending' ? '#856404' : '#155724',
+                      padding: '0.5rem 0.25rem',
+                      borderRadius: '6px',
+                      fontSize: '0.8rem',
+                      fontWeight: 'bold',
+                      textAlign: 'center',
+                      minWidth: '50px'
+                    }}
+                  >
+                    {n.toString().padStart(4, '0')}
+                  </span>
+                ))}
+              </div>
             </div>
+
+            {/* Temporizador para registros pendientes - Más prominente en móvil */}
             {registro.status === 'pending' && (
-              <div className="temporizador">
-                Tiempo restante: {getTiempoRestante(registro.timeoutEnd)}
+              <div 
+                className="temporizador"
+                style={{
+                  background: 'rgba(255, 193, 7, 0.15)',
+                  border: '2px solid #ffc107',
+                  borderRadius: '12px',
+                  padding: '1rem',
+                  marginBottom: '1rem',
+                  textAlign: 'center'
+                }}
+              >
+                <div style={{
+                  fontSize: '1.4rem',
+                  fontWeight: 'bold',
+                  color: '#856404',
+                  marginBottom: '0.5rem'
+                }}>
+                  ⏰ {getTiempoRestante(registro.timeoutEnd)}
+                </div>
               </div>
             )}
-            <div style={{ marginTop: '0.5rem' }}>
+
+            {/* Botones de acción - Stack en móvil */}
+            <div style={{ 
+              display: 'flex', 
+              flexDirection: isMobile ? 'column' : 'row',
+              gap: '0.5rem',
+              justifyContent: 'flex-end'
+            }}>
               {registro.status === 'pending' && (
                 <button 
                   className="btn-verificar"
                   onClick={() => confirmarPago(registro.id!)}
                   style={{
-                    background: '#28a745',
+                    background: 'linear-gradient(135deg, #28a745, #20c997)',
                     color: 'white',
                     border: 'none',
-                    padding: '0.4rem 0.8rem',
-                    borderRadius: '4px',
+                    padding: '0.8rem 1.5rem',
+                    borderRadius: '10px',
+                    fontWeight: 'bold',
                     cursor: 'pointer',
-                    marginRight: '0.5rem'
+                    fontSize: '0.9rem',
+                    transition: 'all 0.2s',
+                    boxShadow: '0 3px 6px rgba(40, 167, 69, 0.3)',
+                    width: isMobile ? '100%' : 'auto'
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 5px 10px rgba(40, 167, 69, 0.4)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 3px 6px rgba(40, 167, 69, 0.3)';
                   }}
                 >
-                  Confirmar Pago
+                  ✅ Confirmar Pago
                 </button>
               )}
               <button 
                 onClick={() => eliminarRegistro(registro.id!)}
                 style={{
-                  background: '#dc3545',
+                  background: 'linear-gradient(135deg, #dc3545, #c82333)',
                   color: 'white',
                   border: 'none',
-                  padding: '0.4rem 0.8rem',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
+                  padding: '0.8rem 1.5rem',
+                  borderRadius: '10px',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  fontSize: '0.9rem',
+                  transition: 'all 0.2s',
+                  boxShadow: '0 3px 6px rgba(220, 53, 69, 0.3)',
+                  width: isMobile ? '100%' : 'auto'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 5px 10px rgba(220, 53, 69, 0.4)';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 3px 6px rgba(220, 53, 69, 0.3)';
                 }}
               >
-                Eliminar
+                🗑️ Eliminar
               </button>
             </div>
           </div>

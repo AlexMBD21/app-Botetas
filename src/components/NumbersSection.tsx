@@ -23,10 +23,16 @@ export default function NumbersSection({
   const [searchNumber, setSearchNumber] = useState('');
   const [filteredNumbers, setFilteredNumbers] = useState<number[]>([]);
 
-  // Generar números del 0 al 9999 (como en el original)
-  const allNumbers = Array.from({ length: 10000 }, (_, i) => i);
-
+  // Inicializar números al montar el componente
   useEffect(() => {
+    const allNumbers = Array.from({ length: 10000 }, (_, i) => i);
+    setFilteredNumbers(allNumbers);
+  }, []);
+
+  // Filtrar números cuando cambie la búsqueda
+  useEffect(() => {
+    const allNumbers = Array.from({ length: 10000 }, (_, i) => i);
+    
     if (searchNumber.trim() === '') {
       setFilteredNumbers(allNumbers);
     } else {
@@ -36,7 +42,7 @@ export default function NumbersSection({
       );
       setFilteredNumbers(filtered);
     }
-  }, [searchNumber, allNumbers]);
+  }, [searchNumber]);
 
   // Verificación de bloqueo de registros (lógica del script original)
   const verificarBloqueoRegistros = useCallback(() => {
