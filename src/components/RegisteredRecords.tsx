@@ -1,4 +1,5 @@
-'use client';
+
+"use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
@@ -150,6 +151,13 @@ export default function RegisteredRecords({
   }, [registros, temporizadoresActivos, eliminarRegistroExpirado]);
 
   const { confirmados, pendientes } = getContadorRegistros();
+  // Calcular la cantidad total de números confirmados y pendientes
+  const totalConfirmados = registros
+    .filter(r => r.status === 'verified')
+    .reduce((acc, r) => acc + r.numbers.length, 0);
+  const totalPendientes = registros
+    .filter(r => r.status === 'pending')
+    .reduce((acc, r) => acc + r.numbers.length, 0);
 
   const limpiarTodosLosRegistros = async () => {
     if (confirm('¿Estás seguro de que quieres eliminar TODOS los registros? Esta acción no se puede deshacer.')) {
@@ -312,20 +320,14 @@ export default function RegisteredRecords({
   }
 
   return (
-    <section className="registro-guardado glass" style={{ 
-      marginTop: '2rem',
-      height: 'auto',
-      minHeight: 'auto',
-      maxHeight: 'none',
-      overflow: 'visible'
-    }}>
+    <section className="registro-guardado glass" style={{ marginTop: '2rem' }}>
       <h2>Registros Realizados</h2>
       <div id="registroCounts" style={{ textAlign: 'right', fontWeight: 'bold', marginBottom: '1rem' }}>
         <span style={{ color: 'rgb(170, 170, 180)' }}>
-          Confirmados: <span id="confirmadosCount">{confirmados}</span>
+          Confirmados: <span id="confirmadosCount">{totalConfirmados}</span>
         </span> |{' '}
         <span style={{ color: 'rgb(170, 170, 180)' }}>
-          Pendientes: <span id="pendientesCount">{pendientes}</span>
+          Pendientes: <span id="pendientesCount">{totalPendientes}</span>
         </span>
       </div>
 
@@ -460,229 +462,254 @@ export default function RegisteredRecords({
         </div>
       )}
 
-      <div className="registro-list" id="registro-list" style={{
-        marginTop: '1rem',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '1rem',
-        maxHeight: 'none',
-        height: 'auto',
-        overflow: 'visible'
-      }}>
-        {[...registros]
-          .sort((a, b) => {
-            // Ordenar por timestamp descendente (más nuevos primero)
-            const timestampA = a.timestamp || 0;
-            const timestampB = b.timestamp || 0;
-            return timestampB - timestampA;
-          })
-          .map((registro) => (
-          <div 
-            key={registro.id} 
-            className={`registro-item ${registro.status}`}
-            style={{
-              background: registro.status === 'pending' 
-                ? 'linear-gradient(135deg, #fff3cd, #ffeaa7)' 
-                : 'linear-gradient(135deg, #d4edda, #c3e6cb)',
-              border: `2px solid ${registro.status === 'pending' ? '#ffc107' : '#28a745'}`,
-              borderRadius: '10px',
-              padding: '0.5rem',
-              marginBottom: '0.5rem',
-              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-              position: 'relative',
-              overflow: 'visible',
-              height: 'auto',
-              minHeight: 'auto',
-              maxWidth: '95%', // Cambiado para usar casi todo el ancho disponible
-              width: '95%', // Asegurar que use el ancho especificado
-              margin: '0 auto 0.5rem auto' // Centrar horizontalmente
-            }}
-          >
-            {/* Badge de estado - responsive */}
-            <div 
-              style={{
-                position: 'absolute',
-                top: '0.2rem',
-                right: '0.2rem',
-                background: registro.status === 'pending' ? '#ffc107' : '#28a745',
-                color: 'white',
-                padding: '0.2rem 0.4rem', // Restaurado el padding original
-                borderRadius: '6px',
-                fontSize: '0.6rem', // Aumentado un poco el tamaño de fuente
-                fontWeight: 'bold',
-                textTransform: 'uppercase',
-                zIndex: 10,
-                maxWidth: '85px', // Aumentado el ancho máximo
-                textAlign: 'center'
-              }}
-            >
-              {registro.status === 'pending' ? ' Pendiente' : ' Confirmado'} {/* Texto completo de nuevo */}
-            </div>
+      {/* Mensaje de scroll eliminado */}
+      <div className="registro-scroll-area" style={{height: '420px', overflowY: 'auto', width: '100%'}}>
+        <div className="registro-list" id="registro-list">
+          {[...registros]
+            .sort((a, b) => {
+              // Ordenar por timestamp descendente (más nuevos primero)
+              const timestampA = a.timestamp || 0;
+              const timestampB = b.timestamp || 0;
+              return timestampB - timestampA;
+            })
+            .map((registro) => (
+              <div 
+                key={registro.id} 
+                className={`registro-item ${registro.status}`}
+                style={{
+                  background: registro.status === 'pending' 
+                    ? 'linear-gradient(135deg, #fff3cd, #ffeaa7)' 
+                    : 'linear-gradient(135deg, #d4edda, #c3e6cb)',
+                  border: `2px solid ${registro.status === 'pending' ? '#ffc107' : '#28a745'}`,
+                  borderRadius: '10px',
+                  padding: '0.5rem',
+                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                  position: 'relative',
+                  maxWidth: '95%',
+                  width: '95%',
+                  margin: '0 auto',
+                }}
+              >
+                {/* Badge de estado - responsive */}
+                <div 
+                  style={{
+                    position: 'absolute',
+                    top: '0.2rem',
+                    right: '0.2rem',
+                    background: registro.status === 'pending' ? '#ffc107' : '#28a745',
+                    color: 'white',
+                    padding: '0.2rem 0.4rem',
+                    borderRadius: '6px',
+                    fontSize: '0.6rem',
+                    fontWeight: 'bold',
+                    textTransform: 'uppercase',
+                    zIndex: 10,
+                    maxWidth: '85px',
+                    textAlign: 'center'
+                  }}
+                >
+                  {registro.status === 'pending' ? ' Pendiente' : ' Confirmado'}
+                </div>
 
-            {/* Información del usuario con valor a pagar en la esquina */}
-            <div style={{ 
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'flex-start',
-              marginTop: '0.4rem',
-              marginBottom: '0.3rem',
-              marginRight: '6rem' // Aumentado significativamente para dar más espacio al badge
-            }}>
-              {/* Datos del usuario */}
-              <div>
+                {/* Información del usuario con valor a pagar en la esquina */}
                 <div style={{ 
-                  fontSize: '0.85rem', 
-                  fontWeight: 'bold', 
-                  color: '#2c3e50',
-                  marginBottom: '0.1rem',
-                  wordBreak: 'break-word'
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-start',
+                  marginTop: '0.4rem',
+                  marginBottom: '0.3rem',
+                  marginRight: '6rem'
                 }}>
-                  👤 {registro.name}
-                </div>
-                <div style={{ 
-                  fontSize: '0.7rem', 
-                  color: '#6c757d',
-                  marginBottom: '0.1rem',
-                  wordBreak: 'break-all'
-                }}>
-                  📞 {registro.phone}
-                </div>
-                <div style={{ 
-                  fontSize: '0.65rem', 
-                  color: '#495057',
-                  wordBreak: 'break-word'
-                }}>
-                  📅 {formatearTiempo(registro.timestamp)}
-                </div>
-              </div>
-
-              {/* Valor a pagar en la esquina superior derecha */}
-              <div style={{ 
-                background: 'rgba(0, 123, 255, 0.1)',
-                border: '1px solid #007bff',
-                borderRadius: '6px',
-                padding: '0.4rem',
-                textAlign: 'center',
-                minWidth: '80px',
-                flexShrink: 0
-              }}>
-                <div style={{ 
-                  fontSize: '0.6rem', 
-                  color: '#495057',
-                  marginBottom: '0.1rem'
-                }}>
-                  💰 Valor a pagar
-                </div>
-                <div style={{ 
-                  fontSize: '0.9rem', 
-                  fontWeight: 'bold',
-                  color: '#007bff'
-                }}>
-                  {calcularValorTotal(registro.numbers.length)}
-                </div>
-                <div style={{ 
-                  fontSize: '0.6rem', 
-                  color: '#6c757d',
-                  marginTop: '0.1rem'
-                }}>
-                  {registro.numbers.length} número{registro.numbers.length > 1 ? 's' : ''}
-                </div>
-              </div>
-            </div>
-
-            {/* Números seleccionados - Responsive grid */}
-            <div style={{ marginBottom: '0.3rem' }}>
-              <div style={{ 
-                fontSize: '0.65rem', 
-                color: '#495057', 
-                marginBottom: '0.15rem',
-                fontWeight: '500'
-              }}>
-                🎯 Números seleccionados:
-              </div>
-              <div style={{ 
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(32px, 1fr))',
-                gap: '0.1rem',
-                maxHeight: 'none',
-                overflowY: 'visible'
-              }}>
-                {registro.numbers.map(n => (
-                  <span 
-                    key={n}
-                    style={{
-                      background: registro.status === 'pending' ? '#fff' : '#f8f9fa',
-                      border: `1px solid ${registro.status === 'pending' ? '#ffc107' : '#28a745'}`,
-                      color: registro.status === 'pending' ? '#856404' : '#155724',
-                      padding: '0.15rem 0.05rem',
-                      borderRadius: '2px',
-                      fontSize: '0.6rem',
-                      fontWeight: 'bold',
-                      textAlign: 'center',
-                      minWidth: '30px'
-                    }}
-                  >
-                    {n.toString().padStart(4, '0')}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Temporizador y botones de acción - Alineados en misma línea base */}
-            <div style={{ 
-              display: 'flex', 
-              flexDirection: isMobile ? 'column' : 'row',
-              gap: '0.5rem',
-              justifyContent: 'center',
-              alignItems: isMobile ? 'stretch' : 'flex-end',
-              marginTop: '0.2rem',
-              minHeight: '40px' // Altura mínima para mantener consistencia
-            }}>
-              {/* Contenedor para temporizador y confirmar pago - con ancho fijo */}
-              <div style={{
-                display: 'flex',
-                flexDirection: isMobile ? 'column' : 'row',
-                gap: '0.5rem',
-                alignItems: isMobile ? 'stretch' : 'flex-end',
-                width: isMobile ? '100%' : '220px', // Ancho fijo para consistencia
-                justifyContent: registro.status === 'pending' ? 'flex-start' : 'flex-end'
-              }}>
-                {/* Temporizador para registros pendientes */}
-                {registro.status === 'pending' && (
-                  <div 
-                    className="temporizador"
-                    style={{
-                      background: 'rgba(255, 193, 7, 0.15)',
-                      border: '2px solid #ffc107',
-                      borderRadius: '6px',
-                      padding: '0.4rem 0.8rem',
-                      textAlign: 'center',
-                      width: isMobile ? '100%' : '105px',
-                      marginBottom: isMobile ? '0.25rem' : '0',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      boxSizing: 'border-box',
-                      whiteSpace: 'nowrap'
-                    }}
-                  >
-                    <div style={{
-                      fontSize: '0.8rem',
-                      fontWeight: 'bold',
-                      color: '#853e04ff',
+                  {/* Datos del usuario */}
+                  <div>
+                    <div style={{ 
+                      fontSize: '0.85rem', 
+                      fontWeight: 'bold', 
+                      color: '#2c3e50',
+                      marginBottom: '0.1rem',
+                      wordBreak: 'break-word'
                     }}>
-                      ⏰ {getTiempoRestante(registro.timeoutEnd)}
+                      👤 {registro.name}
+                    </div>
+                    <div style={{ 
+                      fontSize: '0.7rem', 
+                      color: '#6c757d',
+                      marginBottom: '0.1rem',
+                      wordBreak: 'break-all'
+                    }}>
+                      📞 {registro.phone}
+                    </div>
+                    <div style={{ 
+                      fontSize: '0.65rem', 
+                      color: '#495057',
+                      wordBreak: 'break-word'
+                    }}>
+                      📅 {formatearTiempo(registro.timestamp)}
                     </div>
                   </div>
-                )}
 
-                {/* Botón Confirmar Pago */}
-                {registro.status === 'pending' && (
+                  {/* Valor a pagar en la esquina superior derecha */}
+                  <div style={{ 
+                    background: 'rgba(0, 123, 255, 0.1)',
+                    border: '1px solid #007bff',
+                    borderRadius: '6px',
+                    padding: '0.4rem',
+                    textAlign: 'center',
+                    minWidth: '80px',
+                    flexShrink: 0
+                  }}>
+                    <div style={{ 
+                      fontSize: '0.6rem', 
+                      color: '#495057',
+                      marginBottom: '0.1rem'
+                    }}>
+                      💰 Valor a pagar
+                    </div>
+                    <div style={{ 
+                      fontSize: '0.9rem', 
+                      fontWeight: 'bold',
+                      color: '#007bff'
+                    }}>
+                      {calcularValorTotal(registro.numbers.length)}
+                    </div>
+                    <div style={{ 
+                      fontSize: '0.6rem', 
+                      color: '#6c757d',
+                      marginTop: '0.1rem'
+                    }}>
+                      {registro.numbers.length} número{registro.numbers.length > 1 ? 's' : ''}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Números seleccionados - Responsive grid */}
+                <div style={{ marginBottom: '0.3rem' }}>
+                  <div style={{ 
+                    fontSize: '0.65rem', 
+                    color: '#495057', 
+                    marginBottom: '0.15rem',
+                    fontWeight: '500'
+                  }}>
+                    🎯 Números seleccionados:
+                  </div>
+                  <div style={{ 
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(32px, 1fr))',
+                    gap: '0.1rem',
+                    maxHeight: 'none',
+                    overflowY: 'visible'
+                  }}>
+                    {registro.numbers.map(n => (
+                      <span 
+                        key={n}
+                        style={{
+                          background: registro.status === 'pending' ? '#fff' : '#f8f9fa',
+                          border: `1px solid ${registro.status === 'pending' ? '#ffc107' : '#28a745'}`,
+                          color: registro.status === 'pending' ? '#856404' : '#155724',
+                          padding: '0.15rem 0.05rem',
+                          borderRadius: '2px',
+                          fontSize: '0.6rem',
+                          fontWeight: 'bold',
+                          textAlign: 'center',
+                          minWidth: '30px'
+                        }}
+                      >
+                        {n.toString().padStart(4, '0')}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Temporizador y botones de acción - Alineados en misma línea base */}
+                <div style={{ 
+                  display: 'flex', 
+                  flexDirection: isMobile ? 'column' : 'row',
+                  gap: '0.5rem',
+                  justifyContent: 'center',
+                  alignItems: isMobile ? 'stretch' : 'flex-end',
+                  marginTop: '0.2rem',
+                  minHeight: '40px'
+                }}>
+                  {/* Contenedor para temporizador y confirmar pago - con ancho fijo */}
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: isMobile ? 'column' : 'row',
+                    gap: '0.5rem',
+                    alignItems: isMobile ? 'stretch' : 'flex-end',
+                    width: isMobile ? '100%' : '220px',
+                    justifyContent: registro.status === 'pending' ? 'flex-start' : 'flex-end'
+                  }}>
+                    {/* Temporizador para registros pendientes */}
+                    {registro.status === 'pending' && (
+                      <div 
+                        className="temporizador"
+                        style={{
+                          background: 'rgba(255, 193, 7, 0.15)',
+                          border: '2px solid #ffc107',
+                          borderRadius: '6px',
+                          padding: '0.4rem 0.8rem',
+                          textAlign: 'center',
+                          width: isMobile ? '100%' : '105px',
+                          marginBottom: isMobile ? '0.25rem' : '0',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          boxSizing: 'border-box',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        <div style={{
+                          fontSize: '0.8rem',
+                          fontWeight: 'bold',
+                          color: '#853e04ff',
+                        }}>
+                          ⏰ {getTiempoRestante(registro.timeoutEnd)}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Botón Confirmar Pago */}
+                    {registro.status === 'pending' && (
+                      <button 
+                        className="btn-verificar"
+                        onClick={() => confirmarPago(registro.id!)}
+                        style={{
+                          background: 'linear-gradient(135deg, #28a745, #20c997)',
+                          color: 'white',
+                          border: 'none',
+                          padding: '0.5rem 0.9rem',
+                          borderRadius: '6px',
+                          fontWeight: 'bold',
+                          cursor: 'pointer',
+                          fontSize: '0.75rem',
+                          transition: 'all 0.2s',
+                          boxShadow: '0 2px 4px rgba(40, 167, 69, 0.3)',
+                          width: isMobile ? '100%' : 'auto',
+                          whiteSpace: 'nowrap',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          minWidth: '110px'
+                        }}
+                        onMouseOver={(e) => {
+                          e.currentTarget.style.transform = 'translateY(-1px)';
+                          e.currentTarget.style.boxShadow = '0 3px 6px rgba(40, 167, 69, 0.4)';
+                        }}
+                        onMouseOut={(e) => {
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = '0 2px 4px rgba(40, 167, 69, 0.3)';
+                        }}
+                      >
+                         Confirmar Pago
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Botón Eliminar */}
                   <button 
-                    className="btn-verificar"
-                    onClick={() => confirmarPago(registro.id!)}
+                    onClick={() => eliminarRegistro(registro.id!)}
                     style={{
-                      background: 'linear-gradient(135deg, #28a745, #20c997)',
+                      background: 'linear-gradient(135deg, #dc3545, #c82333)',
                       color: 'white',
                       border: 'none',
                       padding: '0.5rem 0.9rem',
@@ -691,63 +718,29 @@ export default function RegisteredRecords({
                       cursor: 'pointer',
                       fontSize: '0.75rem',
                       transition: 'all 0.2s',
-                      boxShadow: '0 2px 4px rgba(40, 167, 69, 0.3)',
+                      boxShadow: '0 2px 4px rgba(220, 53, 69, 0.3)',
                       width: isMobile ? '100%' : 'auto',
                       whiteSpace: 'nowrap',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      minWidth: '110px'
+                      minWidth: '90px'
                     }}
                     onMouseOver={(e) => {
                       e.currentTarget.style.transform = 'translateY(-1px)';
-                      e.currentTarget.style.boxShadow = '0 3px 6px rgba(40, 167, 69, 0.4)';
+                      e.currentTarget.style.boxShadow = '0 3px 6px rgba(220, 53, 69, 0.4)';
                     }}
                     onMouseOut={(e) => {
                       e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = '0 2px 4px rgba(40, 167, 69, 0.3)';
+                      e.currentTarget.style.boxShadow = '0 2px 4px rgba(220, 53, 69, 0.3)';
                     }}
                   >
-                     Confirmar Pago
+                     Eliminar
                   </button>
-                )}
+                </div>
               </div>
-
-              {/* Botón Eliminar */}
-              <button 
-                onClick={() => eliminarRegistro(registro.id!)}
-                style={{
-                  background: 'linear-gradient(135deg, #dc3545, #c82333)',
-                  color: 'white',
-                  border: 'none',
-                  padding: '0.5rem 0.9rem',
-                  borderRadius: '6px',
-                  fontWeight: 'bold',
-                  cursor: 'pointer',
-                  fontSize: '0.75rem',
-                  transition: 'all 0.2s',
-                  boxShadow: '0 2px 4px rgba(220, 53, 69, 0.3)',
-                  width: isMobile ? '100%' : 'auto',
-                  whiteSpace: 'nowrap',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  minWidth: '90px'
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-1px)';
-                  e.currentTarget.style.boxShadow = '0 3px 6px rgba(220, 53, 69, 0.4)';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 2px 4px rgba(220, 53, 69, 0.3)';
-                }}
-              >
-                 Eliminar
-              </button>
-            </div>
-          </div>
-        ))}
+            ))}
+        </div>
       </div>
     </section>
   );
