@@ -233,19 +233,19 @@ export default function RegisteredRecords({
         });
       }
 
-      // Actualizar status en Firebase
+      // Actualizar status en Firebase a 'verified' (que corresponde a confirmed en los números)
       await actualizarEstadoRegistro(registroId, 'verified');
       
       // Actualizar estado local
       const registroIndex = registros.findIndex(r => r.id === registroId);
       if (registroIndex !== -1) {
         const nuevosRegistros = [...registros];
-        nuevosRegistros[registroIndex].status = 'verified';
+        nuevosRegistros[registroIndex].status = 'verified'; // 'verified' en registro = 'confirmed' en números
         setRegistros(nuevosRegistros);
         updateNumberStatus(nuevosRegistros);
         
         console.log('✅ Pago confirmado exitosamente');
-        alert('Pago confirmado. Los números ahora están registrados definitivamente.');
+        alert('Pago confirmado. Los números ahora están registrados definitivamente y no disponibles para otros.');
       }
     } catch (error) {
       console.error('❌ Error al confirmar pago:', error);
@@ -493,7 +493,8 @@ export default function RegisteredRecords({
               overflow: 'visible',
               height: 'auto',
               minHeight: 'auto',
-              maxWidth: '650px', // Aumentado de 600px a 650px para más espacio
+              maxWidth: '95%', // Cambiado para usar casi todo el ancho disponible
+              width: '95%', // Asegurar que use el ancho especificado
               margin: '0 auto 0.5rem auto' // Centrar horizontalmente
             }}
           >
@@ -525,7 +526,7 @@ export default function RegisteredRecords({
               alignItems: 'flex-start',
               marginTop: '0.4rem',
               marginBottom: '0.3rem',
-              marginRight: '3.5rem'
+              marginRight: '6rem' // Aumentado significativamente para dar más espacio al badge
             }}>
               {/* Datos del usuario */}
               <div>

@@ -41,28 +41,52 @@ export default function RegistrationFormFixed({
   const [formData, setFormData] = useState<FormData>({ name: '', phone: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notification, setNotification] = useState<Notification>({ message: '', type: 'success', visible: false });
+  const [phoneWarning, setPhoneWarning] = useState<string>(''); // Estado para mostrar advertencia de teléfono
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
     setFormData(prev => ({ ...prev, [id]: value }));
+    
+    // REMOVIDO: Verificación de teléfono en tiempo real para evitar mostrar mensaje automáticamente
+    // Solo limpiar warning cuando se modifica el teléfono
+    if (id === 'phone') {
+      setPhoneWarning('');
+    }
   };
 
   // Función para mostrar notificación usando React state
   const mostrarNotificacion = useCallback((mensaje: string, tipo: 'success' | 'error' = 'success') => {
     setNotification({ message: mensaje, type: tipo, visible: true });
     
-    // Auto-hide después de 4 segundos
-    setTimeout(() => {
-      setNotification(prev => ({ ...prev, visible: false }));
-    }, 4000);
+    // NO auto-hide - solo se cierra con el botón
   }, []);
 
   const hideNotification = () => {
     setNotification(prev => ({ ...prev, visible: false }));
   };
 
+  // REMOVIDO: Efecto para revisar la advertencia cuando cambien los registros
+  // Para evitar que aparezca el mensaje automáticamente mientras el usuario escribe
+  // useEffect(() => {
+  //   if (formData.phone.length === 10) {
+  //     const telefonoExistente = registros.find(registro => 
+  //       registro.phone === formData.phone && 
+  //       (registro.status === 'pending' || registro.status === 'verified')
+  //     );
+  //     
+  //     if (telefonoExistente) {
+  //       setPhoneWarning(`⚠️ Este teléfono ya está registrado`);
+  //     } else {
+  //       setPhoneWarning('');
+  //     }
+  //   }
+  // }, [registros, formData.phone]); // Se ejecuta cuando cambian los registros o el teléfono
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Ocultar cualquier notificación anterior
+    setNotification(prev => ({ ...prev, visible: false }));
     
     if (selectedNumbers.size === 0) {
       mostrarNotificacion('Debes seleccionar al menos un número.', 'error');
@@ -76,6 +100,20 @@ export default function RegistrationFormFixed({
 
     if (!formData.phone.trim() || !/^[0-9]{10}$/.test(formData.phone)) {
       mostrarNotificacion('El teléfono debe tener exactamente 10 dígitos.', 'error');
+      return;
+    }
+
+    // NUEVA VALIDACIÓN: Verificar si el teléfono ya está registrado
+    const telefonoExistente = registros.find(registro => 
+      registro.phone === formData.phone.trim() && 
+      (registro.status === 'pending' || registro.status === 'verified')
+    );
+    
+    if (telefonoExistente) {
+      mostrarNotificacion(
+        `Este número de teléfono ya está registrado`, 
+        'error'
+      );
       return;
     }
 
@@ -104,7 +142,7 @@ export default function RegistrationFormFixed({
       clearSelectedNumbers();
 
       // Mostrar notificación de éxito
-      mostrarNotificacion(`Registro realizado. Tienes ${tiempoTemporizadorMinutos} minutos para realizar el pago. ¡Mucha suerte!✨`, 'success');
+      mostrarNotificacion(`Tienes ${tiempoTemporizadorMinutos} minutos para realizar el pago, recuerda poner tu número de celular en el mensaje de pago para encontrarte rápidamente. ¡Mucha suerte! ✨`, 'success');
 
     } catch (error) {
       console.error('Error al guardar registro:', error);
@@ -147,7 +185,27 @@ export default function RegistrationFormFixed({
           value={formData.phone}
           onChange={handleInputChange}
           required
+          style={{
+            borderColor: phoneWarning ? '#dc3545' : undefined
+          }}
         />
+        
+        {/* Mostrar advertencia de teléfono duplicado */}
+        {phoneWarning && (
+          <div style={{
+            color: '#dc3545',
+            fontSize: '0.8rem',
+            marginTop: '0.25rem',
+            marginBottom: '0.5rem',
+            padding: '0.5rem',
+            backgroundColor: 'rgba(220, 53, 69, 0.1)',
+            border: '1px solid rgba(220, 53, 69, 0.3)',
+            borderRadius: '4px',
+            fontWeight: 'bold'
+          }}>
+            {phoneWarning}
+          </div>
+        )}
 
         <div id="selectedNumbers">
           {selectedNumbers.size > 0 && (
@@ -178,9 +236,15 @@ export default function RegistrationFormFixed({
         
         <button
           type="submit"
-          disabled={isSubmitting || selectedNumbers.size === 0 || registrosBloquados}
+          disabled={isSubmitting || registrosBloquados || (phoneWarning !== '' && selectedNumbers.size > 0)}
+          style={{
+            opacity: (phoneWarning !== '' && selectedNumbers.size > 0) ? 0.5 : undefined,
+            cursor: (phoneWarning !== '' && selectedNumbers.size > 0) ? 'not-allowed' : undefined
+          }}
         >
-          {isSubmitting ? 'Registrando...' : 'Registrar'}
+          {isSubmitting ? 'Registrando...' : 
+           (phoneWarning !== '' && selectedNumbers.size > 0) ? 'Teléfono ya registrado' : 
+           'Registrar'}
         </button>
       </form>
 
@@ -195,7 +259,7 @@ export default function RegistrationFormFixed({
                 <div className="notification-subtitle">{notification.message}</div>
                 <div className="payment-info">
                   <div className="payment-section">
-                    <div className="payment-header">💳 Cuenta Bancolombia</div>
+                    <div className="payment-header">💳 Bancolombia</div>
                     <div className="payment-number">1234-5678-9012</div>
                   </div>
                   <div className="payment-section">
@@ -207,7 +271,7 @@ export default function RegistrationFormFixed({
             </div>
           ) : (
             <div className="notification-content-error">
-              <span className="notification-icon-error">❌</span>
+              <span className="notification-icon-error">✖</span>
               <div className="notification-text-error">
                 <div className="notification-message">{notification.message}</div>
               </div>

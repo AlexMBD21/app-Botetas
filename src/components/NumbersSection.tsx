@@ -29,20 +29,20 @@ export default function NumbersSection({
     setFilteredNumbers(allNumbers);
   }, []);
 
-  // Filtrar números cuando cambie la búsqueda
-  useEffect(() => {
-    const allNumbers = Array.from({ length: 10000 }, (_, i) => i);
+  // Filtrar números cuando cambie la búsqueda - REMOVIDO para que no busque automáticamente
+  // useEffect(() => {
+  //   const allNumbers = Array.from({ length: 10000 }, (_, i) => i);
     
-    if (searchNumber.trim() === '') {
-      setFilteredNumbers(allNumbers);
-    } else {
-      const search = searchNumber.toLowerCase();
-      const filtered = allNumbers.filter(num => 
-        num.toString().padStart(4, '0').includes(search)
-      );
-      setFilteredNumbers(filtered);
-    }
-  }, [searchNumber]);
+  //   if (searchNumber.trim() === '') {
+  //     setFilteredNumbers(allNumbers);
+  //   } else {
+  //     const search = searchNumber.toLowerCase();
+  //     const filtered = allNumbers.filter(num => 
+  //       num.toString().padStart(4, '0').includes(search)
+  //     );
+  //     setFilteredNumbers(filtered);
+  //   }
+  // }, [searchNumber]);
 
   // Verificación de bloqueo de registros (lógica del script original)
   const verificarBloqueoRegistros = useCallback(() => {
@@ -101,16 +101,33 @@ export default function NumbersSection({
 
   const clearSearch = () => {
     setSearchNumber('');
+    // Restaurar todos los números cuando se limpia la búsqueda
+    const allNumbers = Array.from({ length: 10000 }, (_, i) => i);
+    setFilteredNumbers(allNumbers);
   };
 
   const searchSpecificNumber = () => {
-    if (searchNumber.trim()) {
-      const num = parseInt(searchNumber);
-      if (num >= 0 && num <= 9999) {
-        const element = document.querySelector(`[data-number="${num}"]`);
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
+    const allNumbers = Array.from({ length: 10000 }, (_, i) => i);
+    
+    if (searchNumber.trim() === '') {
+      // Si no hay texto, mostrar todos los números
+      setFilteredNumbers(allNumbers);
+    } else {
+      // Buscar números que contengan el texto ingresado
+      const search = searchNumber.toLowerCase();
+      const filtered = allNumbers.filter(num => 
+        num.toString().padStart(4, '0').includes(search)
+      );
+      setFilteredNumbers(filtered);
+      
+      // Si se encontró al menos un resultado, hacer scroll al primero
+      if (filtered.length > 0) {
+        setTimeout(() => {
+          const element = document.querySelector(`[data-number="${filtered[0]}"]`);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 100);
       }
     }
   };
@@ -157,6 +174,35 @@ export default function NumbersSection({
   return (
     <section className="numbers-section glass">
       <h2>Selecciona tus números</h2>
+
+      <div className="search-wrapper">
+        <div className="input-container">
+          <input 
+            type="text" 
+            id="searchInput" 
+            placeholder="Busca tu número" 
+            maxLength={4}
+            value={searchNumber}
+            onChange={(e) => setSearchNumber(e.target.value)}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                searchSpecificNumber();
+              }
+            }}
+          />
+          <button 
+            id="clearSearch" 
+            type="button" 
+            title="Limpiar búsqueda"
+            onClick={clearSearch}
+          >
+            ✖
+          </button>
+        </div>
+        <button id="searchBtn" type="button" onClick={searchSpecificNumber}>
+          Buscar
+        </button>
+      </div>
 
       <div id="numberGrid" className="scroll-grid">
         {filteredNumbers.map(number => (
