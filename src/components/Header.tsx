@@ -23,7 +23,7 @@ export default function Header({ connectionStatus }: HeaderProps) {
 
   return (
     <header>
-      <h1>El Compa Herna 🎁</h1>
+      <h1>El Compae Hernan 🎁</h1>
       <div className="connection-indicator" id="connectionIndicator">
         <div className={`connection-light ${connectionStatus}`} id="connectionLight"></div>
         <span className="connection-text" id="connectionText">{getConnectionText()}</span>
