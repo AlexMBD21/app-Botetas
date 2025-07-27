@@ -485,64 +485,69 @@ export default function RegisteredRecords({
                 ? 'linear-gradient(135deg, #fff3cd, #ffeaa7)' 
                 : 'linear-gradient(135deg, #d4edda, #c3e6cb)',
               border: `2px solid ${registro.status === 'pending' ? '#ffc107' : '#28a745'}`,
-              borderRadius: '12px',
-              padding: '1rem',
-              marginBottom: '1rem',
-              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+              borderRadius: '10px',
+              padding: '0.5rem',
+              marginBottom: '0.5rem',
+              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
               position: 'relative',
-              overflow: 'visible', // Cambió de hidden a visible
+              overflow: 'visible',
               height: 'auto',
-              minHeight: 'auto'
+              minHeight: 'auto',
+              maxWidth: '650px', // Aumentado de 600px a 650px para más espacio
+              margin: '0 auto 0.5rem auto' // Centrar horizontalmente
             }}
           >
             {/* Badge de estado - responsive */}
             <div 
               style={{
                 position: 'absolute',
-                top: '0.5rem',
-                right: '0.5rem',
+                top: '0.2rem',
+                right: '0.2rem',
                 background: registro.status === 'pending' ? '#ffc107' : '#28a745',
                 color: 'white',
-                padding: '0.25rem 0.5rem',
-                borderRadius: '12px',
-                fontSize: '0.7rem',
+                padding: '0.2rem 0.4rem', // Restaurado el padding original
+                borderRadius: '6px',
+                fontSize: '0.6rem', // Aumentado un poco el tamaño de fuente
                 fontWeight: 'bold',
                 textTransform: 'uppercase',
-                zIndex: 10
+                zIndex: 10,
+                maxWidth: '85px', // Aumentado el ancho máximo
+                textAlign: 'center'
               }}
             >
-              {registro.status === 'pending' ? '⏳ Pendiente' : '✅ Confirmado'}
+              {registro.status === 'pending' ? ' Pendiente' : ' Confirmado'} {/* Texto completo de nuevo */}
             </div>
 
-            {/* Información del usuario - Grid responsive */}
+            {/* Información del usuario con valor a pagar en la esquina */}
             <div style={{ 
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-              gap: '1rem',
-              marginTop: '1.5rem',
-              marginBottom: '1rem'
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-start',
+              marginTop: '0.4rem',
+              marginBottom: '0.3rem',
+              marginRight: '3.5rem'
             }}>
-              {/* Columna 1: Datos del usuario */}
+              {/* Datos del usuario */}
               <div>
                 <div style={{ 
-                  fontSize: '1.1rem', 
+                  fontSize: '0.85rem', 
                   fontWeight: 'bold', 
                   color: '#2c3e50',
-                  marginBottom: '0.5rem',
+                  marginBottom: '0.1rem',
                   wordBreak: 'break-word'
                 }}>
                   👤 {registro.name}
                 </div>
                 <div style={{ 
-                  fontSize: '0.9rem', 
+                  fontSize: '0.7rem', 
                   color: '#6c757d',
-                  marginBottom: '0.5rem',
+                  marginBottom: '0.1rem',
                   wordBreak: 'break-all'
                 }}>
                   📞 {registro.phone}
                 </div>
                 <div style={{ 
-                  fontSize: '0.85rem', 
+                  fontSize: '0.65rem', 
                   color: '#495057',
                   wordBreak: 'break-word'
                 }}>
@@ -550,56 +555,56 @@ export default function RegisteredRecords({
                 </div>
               </div>
 
-              {/* Columna 2: Información financiera */}
-              <div>
+              {/* Valor a pagar en la esquina superior derecha */}
+              <div style={{ 
+                background: 'rgba(0, 123, 255, 0.1)',
+                border: '1px solid #007bff',
+                borderRadius: '6px',
+                padding: '0.4rem',
+                textAlign: 'center',
+                minWidth: '80px',
+                flexShrink: 0
+              }}>
                 <div style={{ 
-                  background: 'rgba(0, 123, 255, 0.1)',
-                  border: '1px solid #007bff',
-                  borderRadius: '8px',
-                  padding: '0.75rem',
-                  textAlign: 'center'
+                  fontSize: '0.6rem', 
+                  color: '#495057',
+                  marginBottom: '0.1rem'
                 }}>
-                  <div style={{ 
-                    fontSize: '0.8rem', 
-                    color: '#495057',
-                    marginBottom: '0.25rem'
-                  }}>
-                    💰 Valor a pagar
-                  </div>
-                  <div style={{ 
-                    fontSize: '1.2rem', 
-                    fontWeight: 'bold',
-                    color: '#007bff'
-                  }}>
-                    {calcularValorTotal(registro.numbers.length)}
-                  </div>
-                  <div style={{ 
-                    fontSize: '0.75rem', 
-                    color: '#6c757d',
-                    marginTop: '0.25rem'
-                  }}>
-                    {registro.numbers.length} número{registro.numbers.length > 1 ? 's' : ''}
-                  </div>
+                  💰 Valor a pagar
+                </div>
+                <div style={{ 
+                  fontSize: '0.9rem', 
+                  fontWeight: 'bold',
+                  color: '#007bff'
+                }}>
+                  {calcularValorTotal(registro.numbers.length)}
+                </div>
+                <div style={{ 
+                  fontSize: '0.6rem', 
+                  color: '#6c757d',
+                  marginTop: '0.1rem'
+                }}>
+                  {registro.numbers.length} número{registro.numbers.length > 1 ? 's' : ''}
                 </div>
               </div>
             </div>
 
             {/* Números seleccionados - Responsive grid */}
-            <div style={{ marginBottom: '1rem' }}>
+            <div style={{ marginBottom: '0.3rem' }}>
               <div style={{ 
-                fontSize: '0.85rem', 
+                fontSize: '0.65rem', 
                 color: '#495057', 
-                marginBottom: '0.5rem',
+                marginBottom: '0.15rem',
                 fontWeight: '500'
               }}>
                 🎯 Números seleccionados:
               </div>
               <div style={{ 
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(60px, 1fr))',
-                gap: '0.25rem',
-                maxHeight: 'none', /* Removido límite de altura */
-                overflowY: 'visible' /* Cambió de auto a visible */
+                gridTemplateColumns: 'repeat(auto-fit, minmax(32px, 1fr))',
+                gap: '0.1rem',
+                maxHeight: 'none',
+                overflowY: 'visible'
               }}>
                 {registro.numbers.map(n => (
                   <span 
@@ -608,12 +613,12 @@ export default function RegisteredRecords({
                       background: registro.status === 'pending' ? '#fff' : '#f8f9fa',
                       border: `1px solid ${registro.status === 'pending' ? '#ffc107' : '#28a745'}`,
                       color: registro.status === 'pending' ? '#856404' : '#155724',
-                      padding: '0.5rem 0.25rem',
-                      borderRadius: '6px',
-                      fontSize: '0.8rem',
+                      padding: '0.15rem 0.05rem',
+                      borderRadius: '2px',
+                      fontSize: '0.6rem',
                       fontWeight: 'bold',
                       textAlign: 'center',
-                      minWidth: '50px'
+                      minWidth: '30px'
                     }}
                   >
                     {n.toString().padStart(4, '0')}
@@ -622,87 +627,119 @@ export default function RegisteredRecords({
               </div>
             </div>
 
-            {/* Temporizador para registros pendientes - Más prominente en móvil */}
-            {registro.status === 'pending' && (
-              <div 
-                className="temporizador"
-                style={{
-                  background: 'rgba(255, 193, 7, 0.15)',
-                  border: '2px solid #ffc107',
-                  borderRadius: '12px',
-                  padding: '0.4rem',
-                  textAlign: 'center',
-                }}
-              >
-                <div style={{
-                  fontSize: '1.4rem',
-                  fontWeight: 'bold',
-                  color: '#853e04ff',
-                }}>
-                  ⏰ {getTiempoRestante(registro.timeoutEnd)}
-                </div>
-                
-              </div>
-            )}
-
-            {/* Botones de acción - Stack en móvil */}
+            {/* Temporizador y botones de acción - Alineados en misma línea base */}
             <div style={{ 
               display: 'flex', 
               flexDirection: isMobile ? 'column' : 'row',
               gap: '0.5rem',
-              justifyContent: 'flex-end'
+              justifyContent: 'center',
+              alignItems: isMobile ? 'stretch' : 'flex-end',
+              marginTop: '0.2rem',
+              minHeight: '40px' // Altura mínima para mantener consistencia
             }}>
-              {registro.status === 'pending' && (
-                <button 
-                  className="btn-verificar"
-                  onClick={() => confirmarPago(registro.id!)}
-                  style={{
-                    background: 'linear-gradient(135deg, #28a745, #20c997)',
-                    color: 'white',
-                    border: 'none',
-                    padding: '0.8rem 1.5rem',
-                    borderRadius: '10px',
-                    fontWeight: 'bold',
-                    cursor: 'pointer',
-                    fontSize: '0.9rem',
-                    transition: 'all 0.2s',
-                    boxShadow: '0 3px 6px rgba(40, 167, 69, 0.3)',
-                    width: isMobile ? '100%' : 'auto'
-                  }}
-                  onMouseOver={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.boxShadow = '0 5px 10px rgba(40, 167, 69, 0.4)';
-                  }}
-                  onMouseOut={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 3px 6px rgba(40, 167, 69, 0.3)';
-                  }}
-                >
-                   Confirmar Pago
-                </button>
-              )}
+              {/* Contenedor para temporizador y confirmar pago - con ancho fijo */}
+              <div style={{
+                display: 'flex',
+                flexDirection: isMobile ? 'column' : 'row',
+                gap: '0.5rem',
+                alignItems: isMobile ? 'stretch' : 'flex-end',
+                width: isMobile ? '100%' : '220px', // Ancho fijo para consistencia
+                justifyContent: registro.status === 'pending' ? 'flex-start' : 'flex-end'
+              }}>
+                {/* Temporizador para registros pendientes */}
+                {registro.status === 'pending' && (
+                  <div 
+                    className="temporizador"
+                    style={{
+                      background: 'rgba(255, 193, 7, 0.15)',
+                      border: '2px solid #ffc107',
+                      borderRadius: '6px',
+                      padding: '0.4rem 0.8rem',
+                      textAlign: 'center',
+                      width: isMobile ? '100%' : '105px',
+                      marginBottom: isMobile ? '0.25rem' : '0',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxSizing: 'border-box',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    <div style={{
+                      fontSize: '0.8rem',
+                      fontWeight: 'bold',
+                      color: '#853e04ff',
+                    }}>
+                      ⏰ {getTiempoRestante(registro.timeoutEnd)}
+                    </div>
+                  </div>
+                )}
+
+                {/* Botón Confirmar Pago */}
+                {registro.status === 'pending' && (
+                  <button 
+                    className="btn-verificar"
+                    onClick={() => confirmarPago(registro.id!)}
+                    style={{
+                      background: 'linear-gradient(135deg, #28a745, #20c997)',
+                      color: 'white',
+                      border: 'none',
+                      padding: '0.5rem 0.9rem',
+                      borderRadius: '6px',
+                      fontWeight: 'bold',
+                      cursor: 'pointer',
+                      fontSize: '0.75rem',
+                      transition: 'all 0.2s',
+                      boxShadow: '0 2px 4px rgba(40, 167, 69, 0.3)',
+                      width: isMobile ? '100%' : 'auto',
+                      whiteSpace: 'nowrap',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      minWidth: '110px'
+                    }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-1px)';
+                      e.currentTarget.style.boxShadow = '0 3px 6px rgba(40, 167, 69, 0.4)';
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 2px 4px rgba(40, 167, 69, 0.3)';
+                    }}
+                  >
+                     Confirmar Pago
+                  </button>
+                )}
+              </div>
+
+              {/* Botón Eliminar */}
               <button 
                 onClick={() => eliminarRegistro(registro.id!)}
                 style={{
                   background: 'linear-gradient(135deg, #dc3545, #c82333)',
                   color: 'white',
                   border: 'none',
-                  padding: '0.8rem 1.5rem',
-                  borderRadius: '10px',
+                  padding: '0.5rem 0.9rem',
+                  borderRadius: '6px',
                   fontWeight: 'bold',
                   cursor: 'pointer',
-                  fontSize: '0.9rem',
+                  fontSize: '0.75rem',
                   transition: 'all 0.2s',
-                  boxShadow: '0 3px 6px rgba(220, 53, 69, 0.3)',
-                  width: isMobile ? '100%' : 'auto'
+                  boxShadow: '0 2px 4px rgba(220, 53, 69, 0.3)',
+                  width: isMobile ? '100%' : 'auto',
+                  whiteSpace: 'nowrap',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  minWidth: '90px'
                 }}
                 onMouseOver={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 5px 10px rgba(220, 53, 69, 0.4)';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                  e.currentTarget.style.boxShadow = '0 3px 6px rgba(220, 53, 69, 0.4)';
                 }}
                 onMouseOut={(e) => {
                   e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 3px 6px rgba(220, 53, 69, 0.3)';
+                  e.currentTarget.style.boxShadow = '0 2px 4px rgba(220, 53, 69, 0.3)';
                 }}
               >
                  Eliminar

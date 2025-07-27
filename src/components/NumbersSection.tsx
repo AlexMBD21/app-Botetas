@@ -119,22 +119,7 @@ export default function NumbersSection({
     return (
       <section className="numbers-section glass">
         <h2>Selecciona tus números</h2>
-        <div id="numbersLoadingSpinner" className="numbers-loading">
-          <div className="loading-spinner-container">
-            <div className="loading-spinner"></div>
-            <p>Cargando números...</p>
-            <p className="loading-subtext">Generando 10,000 números disponibles</p>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  return (
-    <section className="numbers-section glass">
-      <h2>Selecciona tus números</h2>
-
-      <div className="search-wrapper">
+        <div className="search-wrapper">
         <div className="input-container">
           <input 
             type="text" 
@@ -157,6 +142,21 @@ export default function NumbersSection({
           Buscar
         </button>
       </div>
+
+        <div id="numbersLoadingSpinner" className="numbers-loading">
+          <div className="loading-spinner-container">
+            <div className="loading-spinner"></div>
+            <p>Cargando números...</p>
+            <p className="loading-subtext">Generando 10,000 números</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="numbers-section glass">
+      <h2>Selecciona tus números</h2>
 
       <div id="numberGrid" className="scroll-grid">
         {filteredNumbers.map(number => (

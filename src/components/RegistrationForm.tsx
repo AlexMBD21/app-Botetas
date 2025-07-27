@@ -118,37 +118,7 @@ export default function RegistrationFormFixed({
     <section className="form-section glass">
       <h2>Registra tus números</h2>
       
-      {notification.visible && (
-        <div className={`form-notification ${notification.type}`}>
-          {notification.type === 'success' ? (
-            <div className="notification-content">
-              <button className="notification-close" onClick={hideNotification}>✖</button>
-              <span className="notification-icon">❤️</span>
-              <div className="notification-text">
-                <div className="notification-title">Registro realizado</div>
-                <div className="notification-subtitle">{notification.message}</div>
-                <div className="payment-info">
-                  <div className="payment-section">
-                    <div className="payment-header">💳 Cuenta Bancolombia</div>
-                    <div className="payment-number">1234-5678-9012</div>
-                  </div>
-                  <div className="payment-section">
-                    <div className="payment-header">📱 Nequi</div>
-                    <div className="payment-number">321 456 7890</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="notification-content-error">
-              <span className="notification-icon-error">❌</span>
-              <div className="notification-text-error">
-                <div className="notification-message">{notification.message}</div>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
+     
 
       <form id="registrationForm" onSubmit={handleSubmit}>
         <label htmlFor="name">Nombre</label>
@@ -213,6 +183,38 @@ export default function RegistrationFormFixed({
           {isSubmitting ? 'Registrando...' : 'Registrar'}
         </button>
       </form>
+
+       {notification.visible && (
+        <div className={`form-notification ${notification.type}`}>
+          {notification.type === 'success' ? (
+            <div className="notification-content">
+              <button className="notification-close" onClick={hideNotification}>✖</button>
+              <span className="notification-icon">❤️</span>
+              <div className="notification-text">
+                <div className="notification-title">Registro realizado</div>
+                <div className="notification-subtitle">{notification.message}</div>
+                <div className="payment-info">
+                  <div className="payment-section">
+                    <div className="payment-header">💳 Cuenta Bancolombia</div>
+                    <div className="payment-number">1234-5678-9012</div>
+                  </div>
+                  <div className="payment-section">
+                    <div className="payment-header">📱 Nequi</div>
+                    <div className="payment-number">321 456 7890</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="notification-content-error">
+              <span className="notification-icon-error">❌</span>
+              <div className="notification-text-error">
+                <div className="notification-message">{notification.message}</div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </section>
   );
 }
