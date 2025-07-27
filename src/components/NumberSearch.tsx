@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import RegistroVisualItem from './RegistroVisualItem';
 import { eliminarRegistroFirebase, actualizarEstadoRegistro } from '../lib/realTime';
 import { RegistroRifa, ResultadoBusqueda } from '../types';
 
@@ -12,6 +13,7 @@ interface NumberSearchProps {
   registros: RegistroRifa[];
   setRegistros: (registros: RegistroRifa[]) => void;
   updateNumberStatus: (registros: RegistroRifa[]) => void;
+  pricePerTicket: number;
 }
 
 export default function NumberSearch({
@@ -22,6 +24,7 @@ export default function NumberSearch({
   registros,
   setRegistros,
   updateNumberStatus,
+  pricePerTicket,
 }: NumberSearchProps) {
   const [isSearching, setIsSearching] = useState(false);
 
@@ -37,43 +40,54 @@ export default function NumberSearch({
 
     setIsSearching(true);
 
-    // Simular delay de búsqueda
     setTimeout(() => {
       const busqueda = numeroBuscado.toLowerCase().trim();
-      const registrosEncontrados: RegistroRifa[] = [];
+      let registrosEncontrados: RegistroRifa[] = [];
+      let mensaje = '';
 
-      // Buscar por número de rifa
-      const numeroRifa = parseInt(busqueda);
-      if (!isNaN(numeroRifa) && numeroRifa >= 1 && numeroRifa <= 10000) {
-        registros.forEach(registro => {
-          if (registro.numbers.includes(numeroRifa)) {
-            registrosEncontrados.push(registro);
-          }
-        });
+      // Buscar por número de rifa (4 cifras)
+      if (/^\d{4}$/.test(busqueda)) {
+        const numeroRifa = parseInt(busqueda);
+        // Ganador
+        const ganador = registros.find(registro => registro.numbers.includes(numeroRifa));
+        // Segundo premio (número invertido)
+        const invertido = parseInt(busqueda.split('').reverse().join(''));
+        const segundoPremio = registros.find(registro => registro.numbers.includes(invertido));
+        registrosEncontrados = [];
+        if (ganador) registrosEncontrados.push(ganador);
+        if (segundoPremio && (!ganador || ganador.id !== segundoPremio.id)) registrosEncontrados.push(segundoPremio);
+        if (registrosEncontrados.length === 0) {
+          mensaje = 'No se encontró ganador ni segundo premio para ese número.';
+        } else {
+          mensaje = `Resultado para el número ${busqueda}:\n`;
+          if (ganador) mensaje += `Ganador: ${ganador.name} (${ganador.phone})\n`;
+          if (segundoPremio && (!ganador || ganador.id !== segundoPremio.id)) mensaje += `Segundo premio (invertido): ${segundoPremio.name} (${segundoPremio.phone})`;
+        }
       }
-
       // Buscar por teléfono
-      registros.forEach(registro => {
-        if (registro.phone.includes(busqueda) && !registrosEncontrados.find(r => r.id === registro.id)) {
-          registrosEncontrados.push(registro);
+      else if (/^\d{7,}$/.test(busqueda)) {
+        const porTelefono = registros.filter(registro => registro.phone.includes(busqueda));
+        registrosEncontrados = porTelefono;
+        if (porTelefono.length === 1) {
+          mensaje = `Registro encontrado para el número de celular: ${porTelefono[0].phone}`;
+        } else if (porTelefono.length > 1) {
+          mensaje = `Se encontraron ${porTelefono.length} registros para el número de celular.`;
+        } else {
+          mensaje = 'No se encontraron registros con ese celular';
         }
-      });
-
+      }
       // Buscar por nombre (parcial)
-      registros.forEach(registro => {
-        if (registro.name.toLowerCase().includes(busqueda) && !registrosEncontrados.find(r => r.id === registro.id)) {
-          registrosEncontrados.push(registro);
-        }
-      });
+      else {
+        const porNombre = registros.filter(registro => registro.name.toLowerCase().includes(busqueda));
+        registrosEncontrados = porNombre;
+        mensaje = porNombre.length > 0 ? `Se encontraron ${porNombre.length} registro(s) por nombre` : 'No se encontraron registros con ese nombre';
+      }
 
       setResultadoBusqueda({
         registros: registrosEncontrados,
         numeroEncontrado: registrosEncontrados.length > 0,
-        mensaje: registrosEncontrados.length > 0 
-          ? `Se encontraron ${registrosEncontrados.length} registro(s)`
-          : 'No se encontraron registros con ese criterio'
+        mensaje
       });
-
       setIsSearching(false);
     }, 500);
   };
@@ -185,100 +199,23 @@ export default function NumberSearch({
             <p style={{ textAlign: 'center', marginBottom: '1rem', fontWeight: 'bold' }}>
               {resultadoBusqueda.mensaje}
             </p>
-            
-            {resultadoBusqueda.registros.map((registro) => (
-              <div 
-                key={registro.id} 
-                style={{
-                  background: 'rgba(255, 255, 255, 0.1)',
-                  padding: '1rem',
-                  marginBottom: '1rem',
-                  borderRadius: '8px',
-                  border: '1px solid rgba(255, 255, 255, 0.2)'
+            {resultadoBusqueda.registros.map((registroItem) => (
+              <RegistroVisualItem
+                key={registroItem.id}
+                registro={registroItem}
+                isMobile={window.innerWidth < 768}
+                formatearTiempo={formatearTiempo}
+                getTiempoRestante={getTiempoRestante}
+                calcularValorTotal={(cantidadNumeros) => {
+                  const precio = typeof pricePerTicket === 'number' && !isNaN(pricePerTicket) ? pricePerTicket : 0;
+                  const total = cantidadNumeros * precio;
+                  return total >= 0
+                    ? total.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })
+                    : '$0';
                 }}
-              >
-                <div style={{ marginBottom: '0.5rem' }}>
-                  <strong style={{ color: '#fff' }}>{registro.name}</strong> - 
-                  <span style={{ color: '#ccc' }}> {registro.phone}</span>
-                </div>
-                
-                <div style={{ marginBottom: '0.5rem' }}>
-                  <span style={{ color: '#fff' }}>Números: </span>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '4px' }}>
-                    {registro.numbers.map(num => (
-                      <span 
-                        key={num}
-                        style={{
-                          background: registro.status === 'verified' ? '#28a745' : '#ffc107',
-                          color: registro.status === 'verified' ? 'white' : '#000',
-                          padding: '2px 6px',
-                          borderRadius: '4px',
-                          fontSize: '12px',
-                          fontWeight: 'bold'
-                        }}
-                      >
-                        {num.toString().padStart(4, '0')}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                
-                <div style={{ fontSize: '0.9em', color: '#ccc', marginBottom: '0.5rem' }}>
-                  Registrado: {formatearTiempo(registro.timestamp)}
-                </div>
-                
-                <div style={{ fontSize: '0.9em', color: '#ccc', marginBottom: '0.5rem' }}>
-                  Estado: 
-                  <span style={{ 
-                    color: registro.status === 'verified' ? '#28a745' : 
-                           registro.status === 'pending' ? '#ffc107' : '#dc3545',
-                    fontWeight: 'bold',
-                    marginLeft: '0.5rem'
-                  }}>
-                    {registro.status === 'verified' ? 'Confirmado' : 
-                     registro.status === 'pending' ? 'Pendiente' : 'Expirado'}
-                  </span>
-                </div>
-                
-                {registro.status === 'pending' && (
-                  <div style={{ fontSize: '0.9em', color: '#ffc107', marginBottom: '0.5rem' }}>
-                    Tiempo restante: {getTiempoRestante(registro.timeoutEnd)}
-                  </div>
-                )}
-                
-                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                  {registro.status === 'pending' && (
-                    <button 
-                      onClick={() => confirmarPagoDesdeResultado(registro.id!, registro.name)}
-                      style={{
-                        background: '#28a745',
-                        color: 'white',
-                        border: 'none',
-                        padding: '0.5rem 1rem',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        fontSize: '0.9em'
-                      }}
-                    >
-                      Confirmar Pago
-                    </button>
-                  )}
-                  <button 
-                    onClick={() => eliminarRegistroDesdeResultado(registro.id!, registro.name)}
-                    style={{
-                      background: '#dc3545',
-                      color: 'white',
-                      border: 'none',
-                      padding: '0.5rem 1rem',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      fontSize: '0.9em'
-                    }}
-                  >
-                    Eliminar
-                  </button>
-                </div>
-              </div>
+                confirmarPago={confirmarPagoDesdeResultado}
+                eliminarRegistro={eliminarRegistroDesdeResultado}
+              />
             ))}
           </div>
         )}

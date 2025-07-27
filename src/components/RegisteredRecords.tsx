@@ -48,6 +48,18 @@ export default function RegisteredRecords({
     tiempoTemporizador: tiempoTemporizadorMinutos,
   });
 
+  // Calcular horas restantes para cierre de la base de datos
+  const getHorasRestantesCierre = () => {
+    if (!configData.fechaSorteo || !configData.horaSorteo) return null;
+    const fechaHoraSorteo = new Date(`${configData.fechaSorteo}T${configData.horaSorteo}`);
+    if (isNaN(fechaHoraSorteo.getTime())) return null;
+    const cierre = new Date(fechaHoraSorteo.getTime() - configData.horasAntesBloqueo * 60 * 60 * 1000);
+    const ahora = new Date();
+    const diffMs = cierre.getTime() - ahora.getTime();
+    if (diffMs <= 0) return 0;
+    return Math.ceil(diffMs / (60 * 60 * 1000));
+  };
+
   // Mapa para controlar temporizadores activos
   const [temporizadoresActivos, setTemporizadoresActivos] = useState<Map<string, NodeJS.Timeout>>(new Map());
   
@@ -458,6 +470,52 @@ export default function RegisteredRecords({
             <button id="cancelarConfigBtn" onClick={() => setShowConfigPanel(false)}>
               ❌ Cancelar
             </button>
+          {/* Sección de estado de configuración */}
+          <div style={{
+            marginTop: '1.2rem',
+            padding: '0.7rem 1vw',
+            background: 'rgba(34, 40, 49, 0.45)',
+            borderRadius: '16px',
+            color: '#f5f6fa',
+            fontSize: '0.92rem',
+            boxShadow: '0 8px 32px rgba(34,40,49,0.18)',
+            width: '100%',
+            textAlign: 'left',
+            display: 'block',
+            marginBottom: '0.5rem',
+            backdropFilter: 'blur(14px)',
+            WebkitBackdropFilter: 'blur(14px)',
+            border: '1.5px solid rgba(44,62,80,0.22)',
+            transition: 'box-shadow 0.2s'
+          }}>
+            <div style={{ fontWeight: 'bold', marginBottom: '0.3rem', color: '#2b2d3d' }}>
+              <span style={{fontSize: '1rem', color: '#f5f6fa', letterSpacing: '0.5px'}}>📝 <span style={{color:'#f5f6fa'}}>Estado de la configuración actual</span></span>
+            </div>
+            <div>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                gap: '0.7rem',
+                marginTop: '0.1rem',
+                alignItems: 'center',
+                justifyContent: 'flex-start'
+              }}>
+                <div><span style={{ fontWeight: '600', color: '#fbc531' }}>💰 Boleta:</span><br/> <span style={{fontWeight: '500', color:'#f5f6fa'}}>{configData.valorBoleta} COP</span></div>
+                <div><span style={{ fontWeight: '600', color: '#00a8ff' }}>📅 Inicio:</span><br/> <span style={{fontWeight: '500', color:'#f5f6fa'}}>{configData.fechaInicioEvento || 'No definida'}</span></div>
+                <div><span style={{ fontWeight: '600', color: '#e84118' }}>🎯 Sorteo:</span><br/> <span style={{fontWeight: '500', color:'#f5f6fa'}}>{configData.fechaSorteo || 'No definida'}</span></div>
+                <div><span style={{ fontWeight: '600', color: '#9c88ff' }}>🕐 Hora:</span><br/> <span style={{fontWeight: '500', color:'#f5f6fa'}}>{configData.horaSorteo || 'No definida'}</span></div>
+                <div><span style={{ fontWeight: '600', color: '#fdcb6e' }}>⏳ Bloqueo:</span><br/> <span style={{fontWeight: '500', color:'#f5f6fa'}}>{configData.horasAntesBloqueo}h antes</span></div>
+                <div><span style={{ fontWeight: '600', color: '#4cd137' }}>⏰ Temporizador:</span><br/> <span style={{fontWeight: '500', color:'#f5f6fa'}}>{configData.tiempoTemporizador} min</span></div>
+                <div style={{gridColumn: '1/-1', marginTop: '0.3rem', fontWeight: '600', color: getHorasRestantesCierre() === null ? '#f78fb3' : getHorasRestantesCierre() === 0 ? '#e84118' : '#00a8ff', fontSize: '0.92em', background: 'rgba(34,40,49,0.32)', borderRadius: '8px', padding: '0.3em 0.7em', boxShadow: '0 1px 4px rgba(44,62,80,0.07)'}}>
+                  {getHorasRestantesCierre() === null
+                    ? '⏳ No se puede calcular el cierre (faltan datos)'
+                    : getHorasRestantesCierre() === 0
+                      ? '⚠️ La base de datos ya está cerrada para registros.'
+                      : `⏳ Faltan ${getHorasRestantesCierre()} hora(s) para cerrar la base de datos.`}
+                </div>
+              </div>
+            </div>
+          </div>
           </div>
         </div>
       )}
@@ -488,7 +546,9 @@ export default function RegisteredRecords({
                   maxWidth: '95%',
                   width: '95%',
                   margin: '0 auto',
+                  cursor: 'default',
                 }}
+                // Eliminado el cambio de cursor para pendientes
               >
                 {/* Badge de estado - responsive */}
                 <div 
