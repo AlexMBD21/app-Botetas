@@ -1,3 +1,89 @@
+/* Scroll interno para registros */
+.registro-list {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-height: 420px;
+  height: 420px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  width: 100%;
+  background: rgba(255,255,255,0.08);
+  border-radius: 18px;
+  box-shadow: 0 4px 24px 0 rgba(0,0,0,0.08);
+  backdrop-filter: blur(6px);
+  border: 1.5px solid rgba(180,180,200,0.18);
+  scrollbar-width: thin;
+  scrollbar-color: #888 #e0e0e0;
+}
+
+/* Scrollbar personalizado para la lista de registros */
+.registro-list::-webkit-scrollbar {
+  width: 8px;
+  background: #e0e0e0;
+  border-radius: 8px;
+}
+.registro-list::-webkit-scrollbar-track {
+  background: #e0e0e0;
+  border-radius: 8px;
+}
+.registro-list::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 8px;
+}
+.registro-list::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+/* Scroll style for numbers section and registered records */
+.scroll-grid {
+  overflow-y: scroll;
+  max-height: 420px;
+  scrollbar-width: thin;
+  scrollbar-color: #888 #e0e0e0;
+}
+
+.scroll-grid::-webkit-scrollbar {
+  width: 8px;
+  background: #e0e0e0;
+  border-radius: 8px;
+}
+
+.scroll-grid::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 8px;
+}
+
+.scroll-grid::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+/* Custom scrollbar for registro-list */
+.scrollable-list {
+  scrollbar-width: thin;
+  scrollbar-color: #888 #e0e0e0;
+  overflow: auto !important;
+  min-width: 0;
+  border: 2px solid #888;
+}
+
+.scrollable-list::-webkit-scrollbar {
+  width: 8px;
+  background: #e0e0e0;
+  border-radius: 8px;
+}
+
+.scrollable-list::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 8px;
+}
+
+.scrollable-list::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
 .page {
   --gray-rgb: 0, 0, 0;
   --gray-alpha-200: rgba(var(--gray-rgb), 0.08);
