@@ -702,6 +702,9 @@ button[type="submit"]:hover {
   height: auto !important; /* Altura automática basada en contenido */
   max-height: none !important; /* Sin límite máximo */
   overflow: visible !important; /* Contenido completamente visible */
+  max-width: 95%; /* Usar casi todo el ancho disponible */
+  width: 95%; /* Asegurar que use el ancho especificado */
+  margin: 0 auto 1rem auto; /* Centrar horizontalmente */
 }
 
 .registro-item .btn-verificar {
@@ -760,7 +763,7 @@ button[type="submit"]:hover {
     min-height: auto !important; /* Sin altura mínima forzada */
     max-height: none !important; /* Sin altura máxima */
     height: auto !important; /* Permite altura automática */
-    padding: 2rem 1.5rem;
+    padding: 2rem 0.5rem; /* Reducido el padding horizontal para dar más espacio a los registros */
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -1769,135 +1772,339 @@ button[type="submit"]:hover {
   }
 }
 
-/* =============== NOTIFICACIONES DEL FORMULARIO RESPONSIVE =============== */
+/* =============== NOTIFICACIONES DEL FORMULARIO =============== */
 
-/* Estilos responsive para la notificación del formulario */
+/* Estilos base para la notificación del formulario */
 .form-notification {
-  /* Los estilos base se aplican en JavaScript */
-  max-width: 100% !important;
-  box-sizing: border-box !important;
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+  padding: 20px 25px;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(40, 167, 69, 0.3);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  z-index: 1000;
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  animation: slideDownNotification 0.3s ease-out;
+  box-sizing: border-box;
+  margin-top: 20px;
+}
+
+@keyframes slideDownNotification {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.form-notification.success {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  box-shadow: 0 8px 32px rgba(40, 167, 69, 0.3);
+}
+
+.form-notification.error {
+  background: #dc3545;
+  box-shadow: 0 8px 32px rgba(220, 53, 69, 0.3);
+}
+
+.form-notification .notification-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  position: relative;
+}
+
+.form-notification .notification-icon {
+  font-size: 24px;
+  margin-top: 2px;
+  flex-shrink: 0;
+  animation: heartbeat 1.5s ease-in-out infinite;
+}
+
+@keyframes heartbeat {
+  0% {
+    transform: scale(1);
+  }
+  14% {
+    transform: scale(1.1);
+  }
+  28% {
+    transform: scale(1);
+  }
+  42% {
+    transform: scale(1.1);
+  }
+  70% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Animación para el emoji del teléfono */
+@keyframes phoneShake {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  10% {
+    transform: rotate(-5deg) scale(1.1);
+  }
+  20% {
+    transform: rotate(5deg) scale(1.1);
+  }
+  30% {
+    transform: rotate(-5deg) scale(1.1);
+  }
+  40% {
+    transform: rotate(5deg) scale(1.1);
+  }
+  50% {
+    transform: rotate(0deg) scale(1);
+  }
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+.form-notification .notification-text {
+  flex: 1;
+}
+
+.form-notification .notification-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: white;
+}
+
+.form-notification .notification-subtitle {
+  font-size: 14px;
+  line-height: 1.4;
+  margin-bottom: 15px;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.form-notification .payment-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  width: 100%;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.form-notification .payment-section {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 8px 15px;
+  border-radius: 12px;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  min-height: 60px;
+  height: 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.form-notification .payment-header {
+  font-size: 10px;
+  font-weight: 600;
+  opacity: 0.9;
+  margin-bottom: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.form-notification .payment-number {
+  font-size: 14px;
+  font-weight: bold;
+  font-family: 'Courier New', monospace;
+  color: white;
+  letter-spacing: 0.5px;
+  margin-top: 1px;
+  line-height: 1.0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1;
+  text-align: center;
+  word-break: break-all;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.form-notification .notification-close {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 28px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.9);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.form-notification .notification-close:hover {
+  background: white;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.form-notification .notification-content-error {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.form-notification .notification-icon-error {
+  font-size: 20px;
+  flex-shrink: 0;
+  color: white !important;
+  font-weight: bold;
+  animation: phoneShake 2s ease-in-out infinite;
+}
+
+.form-notification .notification-text-error {
+  flex: 1;
+}
+
+.form-notification .notification-message {
+  font-size: 14px;
+  line-height: 1.4;
+  margin: 0;
 }
 
 /* Responsive para pantallas pequeñas */
 @media (max-width: 600px) {
   .form-notification {
-    min-width: auto !important;
-    width: 100% !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-    padding: 16px 20px !important;
-    font-size: 14px !important;
+    width: 100%;
+    max-width: 100%;
+    padding: 16px 20px;
+    font-size: 13px;
+    margin-top: 15px;
   }
   
   .form-notification .notification-content {
-    flex-direction: column !important;
-    gap: 12px !important;
+    flex-direction: column;
+    gap: 12px;
   }
   
-  .form-notification .notification-text {
-    width: 100% !important;
+  .form-notification .notification-icon {
+    font-size: 20px;
+    align-self: flex-start;
   }
   
   .form-notification .notification-title {
-    font-size: 16px !important;
+    font-size: 16px;
+    margin-bottom: 6px;
   }
   
   .form-notification .notification-subtitle {
-    font-size: 13px !important;
-    line-height: 1.3 !important;
+    font-size: 13px;
+    margin-bottom: 12px;
   }
   
   .form-notification .payment-info {
-    grid-template-columns: 1fr !important;
-    gap: 8px !important;
-    margin-top: 8px !important;
-    padding-top: 8px !important;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-top: 15px;
+    padding-top: 15px;
+    padding-left: 0;
+    padding-right: 0;
   }
   
   .form-notification .payment-section {
-    padding: 6px 10px !important;
-  }
-  
-  .form-notification .payment-header {
-    font-size: 11px !important;
+    padding: 6px 12px;
+    min-height: 55px;
+    height: 55px;
   }
   
   .form-notification .payment-number {
-    font-size: 14px !important;
+    font-size: 13px;
+  }
+  
+  .form-notification .payment-header {
+    font-size: 11px;
+  }
+  
+  .form-notification .payment-number {
+    font-size: 16px;
   }
   
   .form-notification .notification-close {
-    top: -8px !important;
-    right: -8px !important;
-    width: 24px !important;
-    height: 24px !important;
-    font-size: 12px !important;
-  }
-}
-
-/* Responsive para pantallas medianas */
-@media (max-width: 767px) and (min-width: 601px) {
-  .form-notification {
-    min-width: 350px !important;
-    padding: 20px 24px !important;
-  }
-  
-  .form-notification .payment-info {
-    gap: 10px !important;
+    top: -8px;
+    right: -8px;
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
   }
 }
 
 /* Responsive para pantallas muy pequeñas */
 @media (max-width: 480px) {
   .form-notification {
-    padding: 12px 16px !important;
-    font-size: 13px !important;
-    margin-top: 15px !important;
-  }
-  
-  .form-notification .notification-content {
-    gap: 8px !important;
+    width: 100%;
+    max-width: 100%;
+    padding: 14px 16px;
+    font-size: 12px;
+    margin-top: 10px;
   }
   
   .form-notification .notification-title {
-    font-size: 15px !important;
+    font-size: 15px;
   }
   
   .form-notification .notification-subtitle {
-    font-size: 12px !important;
+    font-size: 12px;
   }
   
   .form-notification .payment-section {
-    padding: 4px 8px !important;
+    padding: 5px 10px;
+    min-height: 50px;
+    height: 50px;
   }
   
   .form-notification .payment-header {
-    font-size: 10px !important;
+    font-size: 9px;
+    margin-bottom: 1px;
+    letter-spacing: 0.3px;
   }
   
   .form-notification .payment-number {
-    font-size: 13px !important;
-  }
-}
-
-/* Responsive para pantallas extra pequeñas */
-@media (max-width: 320px) {
-  .form-notification {
-    padding: 10px 12px !important;
-    font-size: 12px !important;
-  }
-  
-  .form-notification .notification-title {
-    font-size: 14px !important;
-  }
-  
-  .form-notification .notification-subtitle {
-    font-size: 11px !important;
-  }
-  
-  .form-notification .payment-number {
-    font-size: 12px !important;
-    word-break: break-all !important;
+    font-size: 12px;
+    line-height: 0.9;
+    letter-spacing: 0.3px;
   }
 }
 

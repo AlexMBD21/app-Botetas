@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { eliminarRegistroFirebase } from '../lib/realTime';
+import { eliminarRegistroFirebase, actualizarEstadoRegistro } from '../lib/realTime';
 import { RegistroRifa, ResultadoBusqueda } from '../types';
 
 interface NumberSearchProps {
@@ -80,17 +80,25 @@ export default function NumberSearch({
 
   const confirmarPagoDesdeResultado = async (registroId: string, nombrePersona: string) => {
     if (confirm(`¿Confirmar pago para ${nombrePersona}?`)) {
-      const registroIndex = registros.findIndex(r => r.id === registroId);
-      if (registroIndex !== -1) {
-        const nuevosRegistros = [...registros];
-        nuevosRegistros[registroIndex].status = 'verified';
-        setRegistros(nuevosRegistros);
-        updateNumberStatus(nuevosRegistros);
+      try {
+        // Actualizar status en Firebase
+        await actualizarEstadoRegistro(registroId, 'verified');
         
-        // Actualizar resultado de búsqueda
-        buscarNumeroEnRegistros();
-        
-        alert('Pago confirmado exitosamente.');
+        const registroIndex = registros.findIndex(r => r.id === registroId);
+        if (registroIndex !== -1) {
+          const nuevosRegistros = [...registros];
+          nuevosRegistros[registroIndex].status = 'verified';
+          setRegistros(nuevosRegistros);
+          updateNumberStatus(nuevosRegistros);
+          
+          // Actualizar resultado de búsqueda
+          buscarNumeroEnRegistros();
+          
+          alert('Pago confirmado exitosamente.');
+        }
+      } catch (error) {
+        console.error('Error al confirmar pago:', error);
+        alert('Error al confirmar el pago. Inténtalo de nuevo.');
       }
     }
   };
