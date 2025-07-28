@@ -6,8 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "deploy:gh": "npm run build && npm run export && gh-pages-deploy"
+    "lint": "next lint"
   },
   "dependencies": {
     "firebase": "^12.0.0",
