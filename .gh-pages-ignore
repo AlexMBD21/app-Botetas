@@ -1,0 +1,12 @@
+# Archivos y carpetas a excluir de la publicación en gh-pages
+node_modules/
+.git/
+.gitignore
+next.config.ts
+package.json
+tsconfig.json
+README.md
+MIGRATION_README.md
+.eslint*
+public/
+!out/

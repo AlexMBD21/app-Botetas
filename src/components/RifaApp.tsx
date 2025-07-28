@@ -84,6 +84,7 @@ export default function RifaApp() {
           registros={registros}
           setRegistros={setRegistros}
           updateNumberStatus={updateNumberStatus}
+          pricePerTicket={pricePerTicket}
         />
 
         <div style={{ padding: '2rem', color: 'white' }}>
