@@ -1,0 +1,19 @@
+{
+  "name": "app-rifas",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "export": "next export",
+    "export-gh": "gh-pages-deploy.bat"
+  },
+  "dependencies": {
+    "next": "^15.4.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "typescript": "5.8.3"
+  }
+}
