@@ -9,11 +9,10 @@ const repoName = 'app-Botetas'; // Cambia esto si tu repo tiene otro nombre
 const nextConfig = {
   output: 'export',
   assetPrefix: isProd ? `/${repoName}/` : '',
+  basePath: isProd ? `/${repoName}` : '',
   images: {
     unoptimized: true,
   },
-  // Si usas rutas base personalizadas, activa esto:
-  // basePath: isProd ? `/${repoName}` : '',
 };
 
 export default nextConfig;
